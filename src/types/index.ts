@@ -126,6 +126,10 @@ export interface CreateMoviberRequest {
   name?: string;
   email?: string;
   cpf?: string;
+  responsibleName?: string;
+  cep?: string;
+  cellPhoneNumber?: string;
+  telephoneNumber?: string;
 }
 
 export interface CreateBaladaRequest {

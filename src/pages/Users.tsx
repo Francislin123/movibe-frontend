@@ -444,8 +444,11 @@ export default function Users() {
       .then((list) => {
         setUsers(list);
         // Mantém o usuário selecionado atualizado após reload
-        setSelected((prev) =>
-          prev ? (list.find((u) => u.id === prev.id) ?? null) : null,
+        setSelected(
+          (prev) =>
+            prev
+              ? (list.find((u) => u.id === prev.id) ?? null) // mantém selecionado após reload
+              : (list[0] ?? null), // seleciona o primeiro na carga inicial
         );
       })
       .catch((e: ApiError) => setError(e.message))
