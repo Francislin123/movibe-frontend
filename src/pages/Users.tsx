@@ -59,6 +59,90 @@ function Avatar({
   );
 }
 
+// ─── Instagram link helper ──────────────────────────────────────────────────
+
+/**
+ * Recebe qualquer formato de link Instagram e retorna
+ * { href: URL completa, handle: '@username' }
+ *
+ * Formatos aceitos:
+ *   francislin.reis
+ *   @francislin.reis
+ *   instagram.com/francislin.reis
+ *   https://www.instagram.com/francislin.reis
+ */
+function parseInstagram(raw: string): { href: string; handle: string } | null {
+  const clean = raw.trim();
+
+  // Já é uma URL do Instagram
+  const urlMatch = clean.match(
+    /(?:https?:\/\/)?(?:www\.)?instagram\.com\/([\w._]+)\/?/i,
+  );
+  if (urlMatch) {
+    return {
+      href: `https://www.instagram.com/${urlMatch[1]}/`,
+      handle: `@${urlMatch[1]}`,
+    };
+  }
+
+  // É um handle (@francislin.reis ou francislin.reis) — sem espaço, sem outro domínio
+  const isHandle =
+    /^@?[\w.]{1,30}$/.test(clean) && !clean.includes("." + "com");
+  if (isHandle) {
+    const username = clean.replace(/^@/, "");
+    return {
+      href: `https://www.instagram.com/${username}/`,
+      handle: `@${username}`,
+    };
+  }
+
+  return null;
+}
+
+function InstagramLink({ link }: { link: string }) {
+  const ig = parseInstagram(link);
+
+  if (!ig) {
+    // Fallback genérico para links que não são Instagram
+    const href = link.startsWith("http") ? link : `https://${link}`;
+    return (
+      <div className="col-span-2">
+        <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1">
+          Link
+        </span>
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-violet-600 hover:underline font-medium truncate block"
+        >
+          {link}
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="col-span-2">
+      <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1">
+        Instagram
+      </span>
+      <a
+        href={ig.href}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-400 text-white text-xs font-semibold shadow-sm hover:shadow-md hover:scale-105 transition-all duration-150"
+      >
+        {/* Instagram icon */}
+        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+        </svg>
+        {ig.handle}
+      </a>
+    </div>
+  );
+}
+
 // ─── User Card ────────────────────────────────────────────────────────────────
 
 function UserCard({
@@ -116,25 +200,7 @@ function UserCard({
             <Field label="Celular" value={user.cellPhoneNumber} />
             <Field label="Telefone" value={user.telephoneNumber} />
             <Field label="CEP" value={user.cep} />
-            {user.link && (
-              <div className="col-span-2">
-                <span className="text-xs text-gray-400 uppercase tracking-wide block">
-                  Link
-                </span>
-                <a
-                  href={
-                    user.link.startsWith("http")
-                      ? user.link
-                      : `https://${user.link}`
-                  }
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-violet-600 hover:underline font-medium truncate block"
-                >
-                  {user.link}
-                </a>
-              </div>
-            )}
+            {user.link && <InstagramLink link={user.link} />}
             {user.description && (
               <div className="col-span-2">
                 <span className="text-xs text-gray-400 uppercase tracking-wide block">
