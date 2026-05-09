@@ -1,0 +1,89 @@
+import { useEffect, useState } from 'react'
+import { getHealth, getBaladas, getEvents, getMovibers, getUsers, getRsvps } from '../services/api'
+import { StatCard, ErrorAlert } from '../components/ui'
+import type { HealthResponse } from '../types'
+
+export default function Dashboard() {
+  const [health, setHealth] = useState<HealthResponse | null>(null)
+  const [counts, setCounts] = useState({ baladas: 0, events: 0, movibers: 0, users: 0, rsvps: 0 })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    Promise.all([
+      getHealth(),
+      getBaladas(),
+      getEvents(),
+      getMovibers(),
+      getUsers(),
+      getRsvps(),
+    ])
+      .then(([h, baladas, events, movibers, users, rsvps]) => {
+        setHealth(h)
+        setCounts({
+          baladas: baladas.length,
+          events: events.length,
+          movibers: movibers.length,
+          users: users.length,
+          rsvps: rsvps.length,
+        })
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false))
+  }, [])
+
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-64 text-violet-500 gap-3">
+        <svg className="animate-spin w-6 h-6" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+        </svg>
+        <span className="text-sm font-medium">Carregando dados…</span>
+      </div>
+    )
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">Visão geral da plataforma Movibe</p>
+      </div>
+
+      {error && <ErrorAlert message={error} />}
+
+      {/* Health */}
+      {health && (
+        <div className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm">
+          <span className={`w-2.5 h-2.5 rounded-full ${health.status === 'UP' ? 'bg-emerald-500' : 'bg-red-500'} animate-pulse`} />
+          <div>
+            <p className="text-sm font-semibold text-gray-800">{health.service}</p>
+            <p className="text-xs text-gray-400">Status: <span className={health.status === 'UP' ? 'text-emerald-600 font-semibold' : 'text-red-600 font-semibold'}>{health.status}</span></p>
+          </div>
+          <span className="ml-auto text-xs text-gray-300 font-mono">localhost:8080</span>
+        </div>
+      )}
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        <StatCard label="Baladas" value={counts.baladas} color="blue" />
+        <StatCard label="Eventos" value={counts.events} color="amber" />
+        <StatCard label="Movibers" value={counts.movibers} color="violet" />
+        <StatCard label="Usuários" value={counts.users} color="emerald" />
+        <StatCard label="RSVPs" value={counts.rsvps} color="rose" />
+      </div>
+
+      {/* Quick-start hint */}
+      <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5">
+        <p className="text-sm font-semibold text-violet-700 mb-2">🚀 Como usar</p>
+        <ul className="text-sm text-violet-600 space-y-1 list-disc list-inside">
+          <li>Use o menu lateral para navegar entre as entidades</li>
+          <li>Cada seção exibe a listagem e um formulário de criação</li>
+          <li>Para criar um RSVP você precisa de um <strong>User ID</strong> e um <strong>Event ID</strong> válidos</li>
+          <li>Eventos PREMIUM_BALLAD requerem um Moviber com assinatura <strong>VIP_BALLADS_FOR_PROMOTERS</strong></li>
+        </ul>
+      </div>
+    </div>
+  )
+}
