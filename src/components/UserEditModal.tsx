@@ -21,6 +21,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
     description:    user.description    ?? '',
     link:           user.link           ?? '',
     image:          user.image          ?? '',
+    birthDate:      user.birthDate      ?? '',
   })
 
   // ── avatar state ─────────────────────────────────────────────────────────────
@@ -215,8 +216,17 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               </div>
 
               <div>
-                <Label>Link / Redes Sociais</Label>
-                <Input value={form.link} onChange={f('link')} placeholder="instagram.com/…" />
+                <Label>Instagram</Label>
+                <Input value={form.link} onChange={f('link')} placeholder="@username ou https://instagram.com/user" />
+              </div>
+
+              <div>
+                <Label>Data de Nascimento</Label>
+                <Input
+                  type="date"
+                  value={form.birthDate}
+                  onChange={f('birthDate')}
+                />
               </div>
 
               <div className="sm:col-span-2">

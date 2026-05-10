@@ -11,8 +11,15 @@ const INTENTION_LABEL: Record<RsvpIntention, string> = {
   OPEN:         '✨ Aberto',
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+function fmtDate(value: string) {
+  if (!value) return ''
+
+  const [datePart, timePart] = value.split('T')
+
+  const [year, month, day] = datePart.split('-')
+  const [hour, minute] = timePart.split(':')
+
+  return `${day}/${month}/${year} ${hour}:${minute}` 
 }
 
 export default function Rsvps() {

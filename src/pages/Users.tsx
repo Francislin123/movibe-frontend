@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { getUsers, createUser } from "../services/api";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { getUsers, searchUsers, createUser, updateAvatar } from "../services/api";
 import {
   Card,
   EmptyState,
@@ -47,17 +47,30 @@ function Avatar({
       <img
         src={user.image}
         alt={user.displayName}
-        className={`${dim} rounded-xl object-cover shrink-0 ring-2 ring-white shadow`}
+        className={`${dim} rounded-xl object-cover shrink-0 ring-2 ring-surface shadow-theme`}
       />
     );
   }
   return (
     <div
-      className={`${dim} rounded-xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white font-bold shrink-0 shadow`}
+      className={`${dim} rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-textInverse font-bold shrink-0 shadow-theme`}
     >
       {initials}
     </div>
   );
+}
+
+// ─── Birth date helper ────────────────────────────────────────────────────────
+
+function fmtBirthDate(value: string) {
+  if (!value) return ''
+
+  // Se está no formato ISO completo, pega apenas a data
+  const datePart = value.includes('T') ? value.split('T')[0] : value
+  
+  const [year, month, day] = datePart.split('-')
+  
+  return `${day}/${month}/${year}`
 }
 
 // ─── Instagram link helper ────────────────────────────────────────────────────
@@ -225,6 +238,17 @@ function UserDetail({
         <Field label="Telefone" value={user.telephoneNumber} />
         <Field label="CEP" value={user.cep} />
 
+        {user.birthDate && (
+          <div>
+            <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1.5">
+              Data de Nascimento
+            </span>
+            <p className="text-sm text-gray-700 font-medium">
+              {fmtBirthDate(user.birthDate)}
+            </p>
+          </div>
+        )}
+
         {user.link && (
           <div className="sm:col-span-2">
             <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1.5">
@@ -281,10 +305,38 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
   const [form, setForm] = useState<CreateUserRequest>({
     displayName: "",
     status: "ACTIVE",
+    link: "",
+    birthDate: "",
   });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // ── image upload state ───────────────────────────────────────────────────────
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // ── image file handler ────────────────────────────────────────────────────────
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validação básica
+    if (!file.type.startsWith('image/')) {
+      setFormError('Por favor, selecione um arquivo de imagem válido');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      setFormError('A imagem deve ter no máximo 5MB');
+      return;
+    }
+
+    setFormError(null);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -292,9 +344,18 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
     setFormError(null);
     setSuccess(null);
     try {
-      const created = await createUser(form);
+      // 1. Cria o usuário
+      let created = await createUser(form);
+      
+      // 2. Se escolheu imagem, faz o upload e captura o usuário atualizado
+      if (imageFile) {
+        created = await updateAvatar(created.id, imageFile);
+      }
+      
       setSuccess(`Usuário "${created.displayName}" criado!`);
-      setForm({ displayName: "", status: "ACTIVE" });
+      setForm({ displayName: "", status: "ACTIVE", link: "", birthDate: "" });
+      setImageFile(null);
+      setImagePreview(null);
       onCreated(created);
       setTimeout(() => {
         setSuccess(null);
@@ -353,6 +414,57 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
       {open && (
         <div className="border-t border-gray-100 px-5 py-5">
           <form onSubmit={handleSubmit}>
+            {/* Upload de imagem */}
+            <div className="mb-6">
+              <div className="flex items-center gap-5">
+                <div className="relative shrink-0">
+                  {imagePreview ? (
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-20 h-20 rounded-2xl object-cover ring-2 ring-violet-200 shadow"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow">
+                      +
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center shadow-md transition"
+                    title="Adicionar foto"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-gray-800">Foto de perfil</p>
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="mt-2 text-xs text-violet-600 hover:text-violet-800 font-medium transition"
+                  >
+                    {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto de perfil'}
+                  </button>
+                  {imageFile && (
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {(imageFile.size / 1024).toFixed(0)} KB · {imageFile.type}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 items-end">
               <div>
                 <Label>Nome de exibição *</Label>
@@ -408,6 +520,32 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                 />
               </div>
               <div>
+                <Label>Instagram</Label>
+                <Input
+                  value={form.link ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      link: e.target.value || undefined,
+                    }))
+                  }
+                  placeholder="@username ou https://instagram.com/user"
+                />
+              </div>
+              <div>
+                <Label>Data de Nascimento</Label>
+                <Input
+                  type="date"
+                  value={form.birthDate ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      birthDate: e.target.value || undefined,
+                    }))
+                  }
+                />
+              </div>
+              <div>
                 <SubmitButton loading={saving}>Criar usuário</SubmitButton>
               </div>
             </div>
@@ -429,6 +567,88 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
   );
 }
 
+// ─── Search Input Component ───────────────────────────────────────────────────
+
+function SearchInput({ 
+  onSearch, 
+  loading 
+}: { 
+  onSearch: (query: string) => void; 
+  loading: boolean; 
+}) {
+  const [query, setQuery] = useState("");
+
+  // Debounce de 500ms para evitar múltiplas requisições
+  const debouncedSearch = useCallback(
+    (() => {
+      let timeoutId: number;
+      return (searchQuery: string) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          onSearch(searchQuery);
+        }, 500);
+      };
+    })(),
+    [onSearch]
+  );
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    debouncedSearch(value);
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg
+          className="w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </div>
+      <input
+        type="text"
+        value={query}
+        onChange={handleChange}
+        placeholder="Buscar por nome, e-mail ou celular..."
+        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-150"
+      />
+      {loading && (
+        <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+          <svg
+            className="animate-spin w-4 h-4 text-violet-400"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"
+            />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Users() {
@@ -438,9 +658,14 @@ export default function Users() {
   const [selected, setSelected] = useState<UserResponse | null>(null);
   const [editingUser, setEditingUser] = useState<UserResponse | null>(null);
 
-  function load() {
+  function load(query?: string) {
     setLoading(true);
-    getUsers()
+    
+    const promise = query && query.trim() 
+      ? searchUsers(query.trim()) 
+      : getUsers();
+    
+    promise
       .then((list) => {
         setUsers(list);
         // Mantém o usuário selecionado atualizado após reload
@@ -455,7 +680,13 @@ export default function Users() {
       .finally(() => setLoading(false));
   }
 
-  useEffect(load, []);
+  function handleSearch(query: string) {
+    load(query);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
 
   function handleCreated(created: UserResponse) {
     setUsers((prev) =>
@@ -488,10 +719,15 @@ export default function Users() {
       {/* ── Create form (top, colapsável) ── */}
       <CreateForm onCreated={handleCreated} />
 
+      {/* ── Search input ── */}
+      <Card className="p-4">
+        <SearchInput onSearch={handleSearch} loading={loading} />
+      </Card>
+
       {/* ── List + Detail ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-start">
-        {/* Lista compacta — 2/5 */}
-        <div className="lg:col-span-2 space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Lista compacta — 1/3 */}
+        <div className="lg:col-span-1 space-y-2">
           {loading && (
             <div className="flex items-center justify-center py-14 text-violet-400 gap-3">
               <svg
@@ -530,8 +766,8 @@ export default function Users() {
           ))}
         </div>
 
-        {/* Painel de detalhes — 3/5 */}
-        <div className="lg:col-span-3 sticky top-4">
+        {/* Painel de detalhes — 2/3 */}
+        <div className="lg:col-span-2 sticky top-4">
           {selected ? (
             <UserDetail user={selected} onEdit={setEditingUser} />
           ) : (

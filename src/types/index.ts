@@ -1,7 +1,7 @@
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
 export type UserStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
-export type EventType = "STANDARD" | "PREMIUM_BALLAD";
+export type EventType = "STANDARD" | "PREMIUM_BALLAD" | "NETWORK" | "OPEN";
 export type PromoterSubscription = "NONE" | "VIP_BALLADS_FOR_PROMOTERS";
 export type RsvpIntention =
   | "ONLY_DRINKS"
@@ -33,6 +33,7 @@ export interface BaladaResponse {
   telephoneNumber: string | null;
   rules: string | null;
   link: string | null;
+  image: string | null;
   verified: boolean;
   hostedEventIds: string[];
   userIds: string[];
@@ -47,6 +48,7 @@ export interface EventResponse {
   cep: string | null;
   numb: string | null;
   desc: string | null;
+  image: string | null;
   startsAt: string;
   endsAt: string;
 }
@@ -62,6 +64,7 @@ export interface MoviberResponse {
   cep: string | null;
   cellPhoneNumber: string | null;
   telephoneNumber: string | null;
+  image: string | null;
   subscription: PromoterSubscription;
 }
 
@@ -79,6 +82,7 @@ export interface UserResponse {
   rules: string | null;
   image: string | null;
   link: string | null;
+  birthDate: string | null;
   status: UserStatus;
 }
 
@@ -101,6 +105,7 @@ export interface CreateUserRequest {
   telephoneNumber?: string;
   cep?: string;
   link?: string;
+  birthDate?: string;
 }
 
 export interface UpdateUserRequest {
@@ -117,6 +122,7 @@ export interface UpdateUserRequest {
   rules?: string;
   image?: string;
   link?: string;
+  birthDate?: string;
 }
 
 export interface CreateMoviberRequest {

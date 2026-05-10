@@ -20,7 +20,7 @@ export function Spinner({ size = 5 }: { size?: number }) {
 
 export function ErrorAlert({ message }: { message: string }) {
   return (
-    <div className="flex items-start gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
+    <div className="flex items-start gap-2 bg-error bg-opacity-10 border border-error text-error text-sm rounded-xl px-4 py-3">
       <svg className="w-4 h-4 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm0 6a1 1 0 10-2 0 1 1 0 002 0z" clipRule="evenodd" />
       </svg>
@@ -33,7 +33,7 @@ export function ErrorAlert({ message }: { message: string }) {
 
 export function EmptyState({ label }: { label: string }) {
   return (
-    <div className="text-center py-10 text-gray-400 text-sm">
+    <div className="text-center py-10 text-textTertiary text-sm">
       <svg className="w-10 h-10 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4" />
       </svg>
@@ -46,7 +46,12 @@ export function EmptyState({ label }: { label: string }) {
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 ${className}`}>
+    <div 
+      className={`bg-surface bg-opacity-80 backdrop-blur-xl rounded-2xl border border-surfaceBorder shadow-theme transition-all duration-300 hover:bg-surfaceHover ${className}`}
+      style={{
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06)'
+      }}
+    >
       {children}
     </div>
   )
@@ -58,8 +63,8 @@ export function Field({ label, value }: { label: string; value: ReactNode }) {
   if (!value) return null
   return (
     <div>
-      <span className="text-xs text-gray-400 uppercase tracking-wide block">{label}</span>
-      <span className="text-sm text-gray-800 font-medium">{value}</span>
+      <span className="text-xs text-textTertiary uppercase tracking-wide block">{label}</span>
+      <span className="text-sm text-textPrimary font-medium">{value}</span>
     </div>
   )
 }
@@ -67,9 +72,9 @@ export function Field({ label, value }: { label: string; value: ReactNode }) {
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
 const STATUS_COLOR: Record<UserStatus, string> = {
-  ACTIVE:    'bg-emerald-100 text-emerald-700',
-  INACTIVE:  'bg-gray-100    text-gray-600',
-  SUSPENDED: 'bg-red-100     text-red-700',
+  ACTIVE:    'bg-success bg-opacity-10 text-success',
+  INACTIVE:  'bg-textSecondary bg-opacity-10 text-textSecondary',
+  SUSPENDED: 'bg-error bg-opacity-10 text-error',
 }
 
 const STATUS_LABEL: Record<UserStatus, string> = {
@@ -87,8 +92,8 @@ export function UserStatusBadge({ status }: { status: UserStatus }) {
 }
 
 const SUB_COLOR: Record<PromoterSubscription, string> = {
-  NONE:                       'bg-gray-100  text-gray-600',
-  VIP_BALLADS_FOR_PROMOTERS:  'bg-violet-100 text-violet-700',
+  NONE:                       'bg-textSecondary bg-opacity-10 text-textSecondary',
+  VIP_BALLADS_FOR_PROMOTERS:  'bg-primary bg-opacity-10 text-primary',
 }
 
 const SUB_LABEL: Record<PromoterSubscription, string> = {
@@ -106,17 +111,25 @@ export function SubscriptionBadge({ sub }: { sub: PromoterSubscription }) {
 
 export function VerifiedBadge({ verified }: { verified: boolean }) {
   return verified ? (
-    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">✓ Verificada</span>
+    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-info bg-opacity-10 text-info">✓ Verificada</span>
   ) : (
-    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Não verificada</span>
+    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-textSecondary bg-opacity-10 text-textSecondary">Não verificada</span>
   )
 }
 
 export function EventTypeBadge({ type }: { type: string }) {
-  const isPremium = type === 'PREMIUM_BALLAD'
+  const typeConfig = {
+    'STANDARD': { label: 'Standard', color: 'bg-info bg-opacity-10 text-info' },
+    'PREMIUM_BALLAD': { label: 'Premium Ballad', color: 'bg-warning bg-opacity-10 text-warning' },
+    'NETWORK': { label: 'Network', color: 'bg-primary bg-opacity-10 text-primary' },
+    'OPEN': { label: 'Open', color: 'bg-success bg-opacity-10 text-success' }
+  }
+  
+  const config = typeConfig[type as keyof typeof typeConfig] || typeConfig['STANDARD']
+  
   return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isPremium ? 'bg-amber-100 text-amber-700' : 'bg-sky-100 text-sky-700'}`}>
-      {isPremium ? '★ Premium' : 'Standard'}
+    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.color}`}>
+      {config.label}
     </span>
   )
 }
@@ -125,14 +138,14 @@ export function EventTypeBadge({ type }: { type: string }) {
 
 export function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
   const colors: Record<string, string> = {
-    blue:    'from-blue-500   to-blue-600',
-    violet:  'from-violet-500 to-violet-600',
-    emerald: 'from-emerald-500 to-emerald-600',
-    amber:   'from-amber-500  to-amber-600',
-    rose:    'from-rose-500   to-rose-600',
+    blue:    'from-info      to-info',
+    violet:  'from-primary   to-primary',
+    emerald: 'from-success   to-success',
+    amber:   'from-warning   to-warning',
+    rose:    'from-error     to-error',
   }
   return (
-    <div className={`bg-gradient-to-br ${colors[color] ?? colors.blue} rounded-2xl p-5 text-white shadow-md`}>
+    <div className={`bg-gradient-to-br ${colors[color] ?? colors.violet} rounded-2xl p-5 text-textInverse shadow-theme`}>
       <p className="text-sm opacity-80 font-medium">{label}</p>
       <p className="text-3xl font-bold mt-1">{value}</p>
     </div>
@@ -142,14 +155,14 @@ export function StatCard({ label, value, color }: { label: string; value: number
 // ─── Input / Select helpers ───────────────────────────────────────────────────
 
 export function Label({ children }: { children: ReactNode }) {
-  return <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wide">{children}</label>
+  return <label className="block text-xs font-semibold text-textSecondary mb-1.5 uppercase tracking-wide">{children}</label>
 }
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
+      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
     />
   )
 }
@@ -158,7 +171,7 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
-      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
+      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
     />
   )
 }
@@ -168,7 +181,7 @@ export function SubmitButton({ loading, children }: { loading: boolean; children
     <button
       type="submit"
       disabled={loading}
-      className="w-full bg-violet-600 hover:bg-violet-700 disabled:bg-violet-300 text-white py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+      className="w-full bg-primary hover:bg-primaryHover disabled:bg-primaryLight text-textInverse py-3 rounded-xl text-sm font-semibold transition-colors flex items-center justify-center gap-2"
     >
       {loading ? <Spinner size={4} /> : children}
     </button>

@@ -1,0 +1,27 @@
+# Regras do Projeto: movibe-frontend
+
+## Stack Tecnológica
+- React 19 (Use as novas APIs como 'useActionState' se necessário).
+- Vite 6.
+- TypeScript (Siga rigorosamente as tipagens).
+- Tailwind CSS 4 (Aproveite a nova arquitetura baseada em CSS).
+- Axios para integração com a API Java.
+
+## Integração com o Backend (movibe-rules-service)
+- O backend roda em http://localhost:8080.
+- Centralize as chamadas de API em uma pasta 'src/services' para facilitar a manutenção.
+- Sempre defina Interfaces TypeScript para as respostas que vêm do Spring Boot (ex: Account, Event, Balance).
+
+## Padrões de UI (Foco em Eventos e Baladas)
+- Siga o tema visual do 'movibe': algo moderno, noturno e vibrante.
+- Utilize Tailwind CSS 4 para todos os componentes.
+- Crie componentes reutilizáveis para Cards de Eventos e Inputs de formulários.
+
+## Performance e Ambiente (M1 8GB)
+- Como o ambiente tem 8GB de RAM, evite instalar dependências de UI pesadas (como Material UI) se o Tailwind puder resolver.
+- Mantenha o servidor de desenvolvimento do Vite otimizado, evitando muitos plugins desnecessários.
+
+## Instruções para o Cascade (Economia de Tokens)
+- Gere apenas o código necessário (diffs).
+- Não explique conceitos básicos de React ou TypeScript.
+- Se eu pedir para criar uma integração, verifique os DTOs do projeto Java correspondente para manter a consistência dos dados.

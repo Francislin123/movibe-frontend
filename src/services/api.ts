@@ -29,20 +29,61 @@ export const getHealth = () => unwrap<HealthResponse>(client.get("/health"));
 export const getBaladas = () =>
   unwrap<BaladaResponse[]>(client.get("/baladas"));
 
-export const createBalada = (body: CreateBaladaRequest) =>
-  unwrap<BaladaResponse>(client.post("/baladas", body));
+export const searchBaladas = (query?: string) => 
+  unwrap<BaladaResponse[]>(client.get("/baladas/search", { params: { q: query } }));
+
+export async function createBalada(data: CreateBaladaRequest): Promise<BaladaResponse> {
+  const res = await client.post('/baladas', data)
+  return res.data
+}
+
+export async function updateBalada(id: string, data: Partial<BaladaResponse>): Promise<BaladaResponse> {
+  const res = await client.put(`/baladas/${id}`, data)
+  return res.data
+}
+
+export const updateBaladaImage = (id: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file);
+  return unwrap<BaladaResponse>(
+    client.patch(`/baladas/${id}/image`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  );
+};
 
 // ─── Events ───────────────────────────────────────────────────────────────────
 
 export const getEvents = () => unwrap<EventResponse[]>(client.get("/events"));
 
+export const searchEvents = (query?: string) => 
+  unwrap<EventResponse[]>(client.get("/events/search", { params: { q: query } }));
+
 export const createEvent = (body: CreateEventRequest) =>
   unwrap<EventResponse>(client.post("/events", body));
+
+export const updateEventImage = (id: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file);
+  return unwrap<EventResponse>(
+    client.patch(`/events/${id}/image`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  );
+};
+
+export async function updateEvent(id: string, data: Partial<EventResponse>): Promise<EventResponse> {
+  const res = await client.put(`/events/${id}`, data)
+  return res.data
+}
 
 // ─── Movibers ─────────────────────────────────────────────────────────────────
 
 export const getMovibers = () =>
   unwrap<MoviberResponse[]>(client.get("/movibers"));
+
+export const searchMovibers = (query?: string) => 
+  unwrap<MoviberResponse[]>(client.get("/movibers/search", { params: { q: query } }));
 
 export const createMoviber = (body: CreateMoviberRequest) =>
   unwrap<MoviberResponse>(client.post("/movibers", body));
@@ -50,6 +91,9 @@ export const createMoviber = (body: CreateMoviberRequest) =>
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export const getUsers = () => unwrap<UserResponse[]>(client.get("/users"));
+
+export const searchUsers = (query?: string) => 
+  unwrap<UserResponse[]>(client.get("/users/search", { params: { q: query } }));
 
 export const createUser = (body: CreateUserRequest) =>
   unwrap<UserResponse>(client.post("/users", body));
