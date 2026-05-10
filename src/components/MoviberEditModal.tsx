@@ -1,37 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
-import { updateUser, updateAvatar } from '../services/api'
-import { ErrorAlert, Input, Label, Select, Spinner } from './ui'
-import type { ApiError, UpdateUserRequest, UserResponse, UserStatus } from '../types'
+import { updateMoviberImage } from '../services/api'
+import { ErrorAlert, Label, Select, Spinner } from './ui'
+import type { ApiError, MoviberResponse, PromoterSubscription } from '../types'
 
 interface Props {
-  user: UserResponse
+  moviber: MoviberResponse
   onClose: () => void
-  onSaved: (updated: UserResponse) => void
+  onSaved: (updated: MoviberResponse) => void
 }
 
-export default function UserEditModal({ user, onClose, onSaved }: Props) {
-  // ── form state ──────────────────────────────────────────────────────────────
-  const [form, setForm] = useState<UpdateUserRequest>({
-    displayName:    user.displayName,
-    status:         user.status,
-    email:          user.email          ?? '',
-    cellPhoneNumber:user.cellPhoneNumber ?? '',
-    telephoneNumber:user.telephoneNumber ?? '',
-    cep:            user.cep            ?? '',
-    description:    user.description    ?? '',
-    link:           user.link           ?? '',
-    image:          user.image          ?? '',
-    birthDate:      user.birthDate      ?? '',
-  })
-
+export default function MoviberEditModal({ moviber, onClose, onSaved }: Props) {
   // ── avatar state ─────────────────────────────────────────────────────────────
-  const [avatarFile,    setAvatarFile]    = useState<File | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.image)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(moviber.image)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  // ── form state ──────────────────────────────────────────────────────────────
+  const [subscription, setSubscription] = useState<PromoterSubscription>(moviber.subscription)
+
   // ── save state ───────────────────────────────────────────────────────────────
-  const [saving,  setSaving]  = useState(false)
-  const [error,   setError]   = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // close on Escape
   useEffect(() => {
@@ -40,12 +29,25 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  // ── avatar file picker ───────────────────────────────────────────────────────
+  // ── image file picker ───────────────────────────────────────────────────────
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    setAvatarFile(file)
-    setAvatarPreview(URL.createObjectURL(file))
+
+    // Validação básica
+    if (!file.type.startsWith('image/')) {
+      setError('Por favor, selecione um arquivo de imagem válido')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB
+      setError('A imagem deve ter no máximo 5MB')
+      return
+    }
+
+    setError(null)
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
   }
 
   // ── submit ───────────────────────────────────────────────────────────────────
@@ -55,21 +57,10 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
     setError(null)
 
     try {
-      // 1. Atualiza os dados textuais via PUT
-      let updated = await updateUser(user.id, {
-        ...form,
-        email:           form.email           || undefined,
-        cellPhoneNumber: form.cellPhoneNumber  || undefined,
-        telephoneNumber: form.telephoneNumber  || undefined,
-        cep:             form.cep              || undefined,
-        description:     form.description      || undefined,
-        link:            form.link             || undefined,
-        image:           form.image            || undefined,
-      })
-
-      // 2. Se escolheu nova foto, faz o upload e atualiza o campo image
-      if (avatarFile) {
-        updated = await updateAvatar(user.id, avatarFile)
+      // Se escolheu nova imagem, faz o upload
+      let updated = moviber
+      if (imageFile) {
+        updated = await updateMoviberImage(moviber.id, imageFile)
       }
 
       onSaved(updated)
@@ -80,12 +71,8 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
     }
   }
 
-  const f = (k: keyof UpdateUserRequest) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-      setForm(prev => ({ ...prev, [k]: e.target.value }))
-
   // ── initials avatar ──────────────────────────────────────────────────────────
-  const initials = user.displayName
+  const initials = (moviber.name ?? 'M')
     .split(' ')
     .slice(0, 2)
     .map(n => n[0])
@@ -103,7 +90,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-surfaceBorder">
-          <h2 className="text-base font-bold text-textPrimary">Editar Usuário</h2>
+          <h2 className="text-base font-bold text-textPrimary">Editar Moviber</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-surfaceHover text-textSecondary hover:text-textPrimary transition"
@@ -122,10 +109,10 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
             <div className="flex items-center gap-3">
               {/* Photo preview */}
               <div className="relative shrink-0">
-                {avatarPreview ? (
+                {imagePreview ? (
                   <img
-                    src={avatarPreview}
-                    alt={user.displayName}
+                    src={imagePreview}
+                    alt={moviber.name ?? 'Moviber'}
                     className="w-20 h-20 rounded-2xl object-cover ring-2 ring-primary shadow-lg"
                   />
                 ) : (
@@ -138,7 +125,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary hover:bg-primaryHover text-textInverse flex items-center justify-center shadow-md transition"
-                  title="Trocar foto"
+                  title="Trocar logo"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
@@ -156,18 +143,18 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               </div>
 
               <div className="flex flex-col items-start">
-                <p className="text-sm font-semibold text-textPrimary">{user.displayName}</p>
-                <p className="text-xs text-textTertiary font-mono mt-0.5 break-all">{user.id}</p>
+                <p className="text-sm font-semibold text-textPrimary">{moviber.name ?? 'Moviber sem nome'}</p>
+                <p className="text-xs text-textTertiary font-mono mt-0.5 break-all">{moviber.id}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="mt-1.5 text-xs text-primary hover:text-primaryHover font-medium transition"
                 >
-                  {avatarFile ? `✓ ${avatarFile.name}` : 'Clique para trocar a foto de perfil'}
+                  {imageFile ? `✓ ${imageFile.name}` : 'Clique para trocar a logo'}
                 </button>
-                {avatarFile && (
+                {imageFile && (
                   <p className="text-xs text-textTertiary mt-0.5">
-                    {(avatarFile.size / 1024).toFixed(0)} KB · {avatarFile.type}
+                    {(imageFile.size / 1024).toFixed(0)} KB · {imageFile.type}
                   </p>
                 )}
               </div>
@@ -179,65 +166,14 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
             {/* ── Dados principais ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <Label>Nome de exibição *</Label>
-                <Input required value={form.displayName} onChange={f('displayName')} placeholder="Nome completo" />
-              </div>
-
-              <div>
-                <Label>Status *</Label>
+                <Label>Assinatura *</Label>
                 <Select
-                  value={form.status}
-                  onChange={e => setForm(p => ({ ...p, status: e.target.value as UserStatus }))}
+                  value={subscription}
+                  onChange={e => setSubscription(e.target.value as PromoterSubscription)}
                 >
-                  <option value="ACTIVE">✅ Ativo</option>
-                  <option value="SUSPENDED">🚫 Suspenso</option>
-                  <option value="DELETED">🗑 Deletado</option>
+                  <option value="NONE">Free — sem acesso a eventos premium</option>
+                  <option value="VIP_BALLADS_FOR_PROMOTERS">★ VIP Baladas — eventos premium liberados</option>
                 </Select>
-              </div>
-
-              <div>
-                <Label>E-mail</Label>
-                <Input type="email" value={form.email} onChange={f('email')} placeholder="email@exemplo.com" />
-              </div>
-
-              <div>
-                <Label>Celular</Label>
-                <Input value={form.cellPhoneNumber} onChange={f('cellPhoneNumber')} placeholder="(11) 99999-9999" />
-              </div>
-
-              <div>
-                <Label>Telefone</Label>
-                <Input value={form.telephoneNumber} onChange={f('telephoneNumber')} placeholder="(11) 3000-0000" />
-              </div>
-
-              <div>
-                <Label>CEP</Label>
-                <Input value={form.cep} onChange={f('cep')} placeholder="00000-000" />
-              </div>
-
-              <div>
-                <Label>Instagram</Label>
-                <Input value={form.link} onChange={f('link')} placeholder="@username ou https://instagram.com/user" />
-              </div>
-
-              <div>
-                <Label>Data de Nascimento</Label>
-                <Input
-                  type="date"
-                  value={form.birthDate}
-                  onChange={f('birthDate')}
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <Label>Bio / Descrição</Label>
-                <textarea
-                  rows={3}
-                  value={form.description}
-                  onChange={f('description')}
-                  placeholder="Uma breve descrição sobre o usuário…"
-                  className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
-                />
               </div>
             </div>
 

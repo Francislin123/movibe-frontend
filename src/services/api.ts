@@ -88,6 +88,16 @@ export const searchMovibers = (query?: string) =>
 export const createMoviber = (body: CreateMoviberRequest) =>
   unwrap<MoviberResponse>(client.post("/movibers", body));
 
+export const updateMoviberImage = (id: string, file: File) => {
+  const form = new FormData();
+  form.append("file", file);
+  return unwrap<MoviberResponse>(
+    client.patch(`/movibers/${id}/image`, form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }),
+  );
+};
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export const getUsers = () => unwrap<UserResponse[]>(client.get("/users"));

@@ -530,8 +530,8 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
           <form onSubmit={handleSubmit}>
             {/* Upload de imagem */}
             <div className="mb-6">
-              <div className="flex items-center gap-5">
-                <div 
+              <div className="flex items-center gap-3">
+                <div
                   className="relative shrink-0 group cursor-pointer"
                   onClick={() => fileRef.current?.click()}
                 >
@@ -567,17 +567,17 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                     onChange={handleFileChange}
                   />
                 </div>
-                <div className="flex-1 flex flex-col justify-center">
-                  <p className="text-sm font-semibold text-textPrimary text-center">+ Foto de perfil</p>
+                <div className="flex flex-col items-start">
+                  <p className="text-sm font-semibold text-textPrimary">+ Foto de perfil</p>
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition text-center"
+                    className="mt-1.5 text-xs text-primary hover:text-primaryHover font-medium transition"
                   >
                     {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto'}
                   </button>
                   {imageFile && (
-                    <p className="text-xs text-textTertiary mt-0.5 text-center">
+                    <p className="text-xs text-textTertiary mt-0.5">
                       {(imageFile.size / 1024).toFixed(0)} KB · {imageFile.type}
                     </p>
                   )}
@@ -845,8 +845,8 @@ export default function Users() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Usuários</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-3xl font-bold text-white">Usuários</h1>
+          <p className="text-sm text-gray-400 mt-1">
             Contas base da plataforma · {users.length} cadastrado
             {users.length !== 1 ? "s" : ""}
           </p>
