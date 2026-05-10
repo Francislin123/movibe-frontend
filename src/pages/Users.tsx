@@ -209,7 +209,13 @@ function WhatsAppLink({ phone }: { phone: string | null }) {
 
 // ─── User row (lista compacta) ────────────────────────────────────────────────
 
-function UserRowStatusBadge({ status }: { status?: UserStatus | string | null }) {
+function UserRowStatusBadge({
+  status,
+  selected = false,
+}: {
+  status?: UserStatus | string | null;
+  selected?: boolean;
+}) {
   const statusConfig: Record<string, { label: string }> = {
     ACTIVE: { label: "Ativo" },
     INACTIVE: { label: "Inativo" },
@@ -222,7 +228,9 @@ function UserRowStatusBadge({ status }: { status?: UserStatus | string | null })
     : null;
 
   return (
-    <span className="text-xs font-semibold text-textInverse">
+    <span
+      className={`text-xs font-semibold ${selected ? "text-white" : "text-textSecondary"}`}
+    >
       {config?.label ?? "Desconhecido"}
     </span>
   );
@@ -242,7 +250,7 @@ function UserRow({
       onClick={() => onSelect(user)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-150 border ${
         selected
-          ? "bg-primary bg-opacity-10 border-primary shadow-lg"
+          ? "bg-primary border-primary shadow-lg"
           : "bg-surface border-surfaceBorder hover:border-primary hover:bg-surfaceHover hover:shadow-md"
       }`}
       style={{
@@ -252,18 +260,18 @@ function UserRow({
       <Avatar user={user} size="sm" />
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm font-semibold truncate leading-tight ${selected ? "text-textInverse" : "text-textPrimary hover:text-primary"}`}
+          className={`text-sm font-semibold truncate leading-tight ${selected ? "text-white" : "text-textPrimary hover:text-primary"}`}
         >
           {user.displayName || "Usuário sem nome"}
         </p>
-        <p className={`text-xs truncate mt-0.5 ${selected ? "text-textInverse font-medium" : "text-textTertiary hover:text-textPrimary"}`}>
+        <p className={`text-xs truncate mt-0.5 ${selected ? "text-white font-medium" : "text-textTertiary hover:text-textPrimary"}`}>
           {user.email ?? user.cellPhoneNumber ?? user.id.slice(0, 16) + "…"}
         </p>
       </div>
-      <UserRowStatusBadge status={user.status} />
+      <UserRowStatusBadge status={user.status} selected={selected} />
       {selected && (
         <svg
-          className="w-4 h-4 text-primary shrink-0"
+          className="w-4 h-4 text-white shrink-0"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
