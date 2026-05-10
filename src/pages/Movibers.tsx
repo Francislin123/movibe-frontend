@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { getMovibers, searchMovibers, createMoviber, getUsers } from "../services/api";
+import { useEffect, useRef, useState } from "react";
+import { getMovibers, searchMovibers, createMoviber, updateMoviberImage, getUsers } from "../services/api";
 import {
   Card,
   EmptyState,
   ErrorAlert,
   Field,
+  Input,
   Label,
   SubmitButton,
 } from "../components/ui";
@@ -304,21 +305,22 @@ function MoviberDetail({
       {/* Dados do moviber */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
         <Field
-          label="Assinatura"
-          value={subscriptionLabels[moviber.subscription] ?? "Desconhecido"}
-        />
-        <Field
           label="Seguidores"
           value={
             <span
-              className={`font-bold ${
-                moviber.followerCount > 100 ? "text-success" : "text-textPrimary"
+              className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-white text-xs font-semibold shadow-sm ${
+                moviber.followerCount > 100
+                  ? "bg-gradient-to-r from-amber-500 via-orange-500 to-red-500"
+                  : "bg-gradient-to-r from-slate-500 via-slate-400 to-slate-300"
               }`}
             >
-              {moviber.followerCount}
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              {moviber.followerCount.toLocaleString('pt-BR')}
               {moviber.followerCount > 100 && (
-                <span className="text-xs font-normal text-success ml-1">
-                  (evento gratuito ✓)
+                <span className="text-[10px] font-normal opacity-90">
+                  ✓ gratuito
                 </span>
               )}
             </span>
@@ -332,10 +334,24 @@ function MoviberDetail({
             />
           }
         />
-        <Field label="CEP" value={moviber.cep ?? linkedUser?.cep} />
+        <Field
+          label="CPF"
+          value={
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 text-white text-xs font-semibold shadow-sm">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3 3 0 01-3-3V7a3 3 0 013-3h6a3 3 0 013 3v4a3 3 0 01-3 3h-1m-3-3v1m0-6v1m0 6H9" />
+              </svg>
+              {moviber.cpf ?? linkedUser?.cpf ?? '—'}
+            </span>
+          }
+        />
         <Field
           label="Celular"
-          value={<WhatsAppLink phone={moviber.cellPhoneNumber ?? linkedUser?.cellPhoneNumber} />}
+          value={<WhatsAppLink phone={moviber.cellPhoneNumber ?? linkedUser?.cellPhoneNumber ?? null} />}
+        />
+        <Field
+          label="Assinatura"
+          value={subscriptionLabels[moviber.subscription] ?? "Desconhecido"}
         />
       </div>
     </Card>
@@ -380,12 +396,20 @@ export default function Movibers() {
   const [editingMoviber, setEditingMoviber] = useState<MoviberResponse | null>(null);
 
   // form
+  const [open, setOpen] = useState(false);
   const [linkedUserId, setLinkedUserId] = useState("");
   const [subscription, setSubscription] =
     useState<PromoterSubscription>("NONE");
+  const [cpf, setCpf] = useState("");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+
+  // image upload state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // usuário selecionado no picker — pré-visualização dos dados
   const selectedUser = users.find((u) => u.id === linkedUserId) ?? null;
@@ -439,6 +463,25 @@ export default function Movibers() {
     setEditingMoviber(null);
   }
 
+  function handleDeleted(id: string) {
+    setMovibers((prev) => prev.filter((m) => m.id !== id));
+    if (selected?.id === id) {
+      setSelected(null);
+    }
+  }
+
+  // handle image file selection
+  function handleFileChange(file: File | null) {
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setFormError("Imagem deve ter no máximo 5MB.");
+      return;
+    }
+    setFormError(null);
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }
+
   useEffect(() => {
     load();
   }, []);
@@ -453,6 +496,10 @@ export default function Movibers() {
       setFormError("Usuário não encontrado.");
       return;
     }
+    if (!cpf || cpf.replace(/\D/g, '').length < 11) {
+      setFormError("Informe um CPF válido.");
+      return;
+    }
 
     setSaving(true);
     setFormError(null);
@@ -465,20 +512,39 @@ export default function Movibers() {
         subscription,
         name: selectedUser.displayName,
         email: selectedUser.email ?? undefined,
-        cpf: undefined,
+        cpf: cpf.replace(/\D/g, ''),
         responsibleName: selectedUser.responsibleName ?? undefined,
         cep: selectedUser.cep ?? undefined,
         cellPhoneNumber: selectedUser.cellPhoneNumber ?? undefined,
         telephoneNumber: selectedUser.telephoneNumber ?? undefined,
       };
 
-      const created = normalizeMoviber(await createMoviber(payload));
+      let created = normalizeMoviber(await createMoviber(payload));
+      // Se escolheu imagem, faz upload
+      if (imageFile) {
+        setImageLoading(true);
+        try {
+          created = await updateMoviberImage(created.id, imageFile);
+        } catch (uploadErr) {
+          setFormError("Moviber criado, mas falha ao fazer upload da imagem.");
+        } finally {
+          setImageLoading(false);
+        }
+      }
+
       setSuccess(
         `Moviber "${created.name ?? selectedUser.displayName}" criado com sucesso!`,
       );
       setLinkedUserId("");
       setSubscription("NONE");
+      setCpf("");
+      setImageFile(null);
+      setImagePreview(null);
       load();
+      setTimeout(() => {
+        setSuccess(null);
+        setOpen(false);
+      }, 2000);
     } catch (e) {
       setFormError((e as ApiError).message);
     } finally {
@@ -497,27 +563,51 @@ export default function Movibers() {
       </div>
 
       {/* ─── Formulário de Criação ─── */}
-      <Card className="p-6">
-        <h2 className="text-sm font-bold text-textSecondary mb-5 flex items-center gap-2">
-          <span className="w-5 h-5 bg-primary bg-opacity-20 rounded-md flex items-center justify-center">
-            <svg
-              className="w-3 h-3 text-primary"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2.5}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-          </span>
-          Novo Moviber
-        </h2>
+      <Card className="overflow-hidden">
+        {/* Toggle bar */}
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-5 py-4 hover:bg-surfaceHover transition-colors"
+        >
+          <div className="flex items-center gap-3">
+            <span className="w-7 h-7 bg-primary/20 rounded-lg flex items-center justify-center">
+              <svg
+                className="w-3.5 h-3.5 text-primary"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2.5}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+            </span>
+            <span className="text-sm font-semibold text-textPrimary">
+              Novo Moviber
+            </span>
+          </div>
+          <svg
+            className={`w-4 h-4 text-textTertiary transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Collapsible form */}
+        {open && (
+          <div className="border-t border-surfaceBorder px-5 py-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
           {/* ── Picker de usuário ── */}
           <div>
             <Label>Usuário vinculado *</Label>
@@ -542,6 +632,57 @@ export default function Movibers() {
                 Todos os usuários já possuem um Moviber vinculado.
               </p>
             )}
+          </div>
+
+          {/* ── Upload de imagem ── */}
+          <div>
+            <Label>Foto/Avatar</Label>
+            <div className="mt-2 flex items-center gap-4">
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileRef}
+                className="hidden"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null)}
+              />
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="relative w-16 h-16 rounded-xl overflow-hidden border-2 border-dashed border-surfaceBorder hover:border-primary cursor-pointer transition-colors group bg-surface"
+              >
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : selectedUser?.image ? (
+                  <img
+                    src={selectedUser.image}
+                    alt="User avatar"
+                    className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-textTertiary">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
+                {imageLoading && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-textSecondary">
+                  Clique na foto para adicionar ou alterar
+                </p>
+                <p className="text-[10px] text-textTertiary mt-0.5">
+                  Máx. 5MB • JPG, PNG
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* ── Pré-visualização ── */}
@@ -579,6 +720,30 @@ export default function Movibers() {
             </div>
           )}
 
+          {/* ── CPF ── */}
+          <div>
+            <Label>CPF *</Label>
+            <Input
+              value={cpf}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const raw = e.target.value.replace(/\D/g, '').slice(0, 11);
+                let formatted = raw;
+                if (raw.length > 9) {
+                  formatted = raw.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+                } else if (raw.length > 6) {
+                  formatted = raw.replace(/(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
+                } else if (raw.length > 3) {
+                  formatted = raw.replace(/(\d{3})(\d{3})/, '$1.$2');
+                }
+                setCpf(formatted);
+                setFormError(null);
+              }}
+              placeholder="000.000.000-00"
+              maxLength={14}
+              required
+            />
+          </div>
+
           {/* ── Assinatura ── */}
           <div>
             <Label>Assinatura *</Label>
@@ -611,6 +776,8 @@ export default function Movibers() {
           )}
           <SubmitButton loading={saving}>Criar Moviber</SubmitButton>
         </form>
+          </div>
+        )}
       </Card>
 
       {/* Search input */}
@@ -686,8 +853,10 @@ export default function Movibers() {
       {editingMoviber && (
         <MoviberEditModal
           moviber={editingMoviber}
+          linkedUser={users.find((u) => u.id === editingMoviber.linkedUserId)}
           onClose={() => setEditingMoviber(null)}
           onSaved={handleSaved}
+          onDeleted={handleDeleted}
         />
       )}
     </div>

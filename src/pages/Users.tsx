@@ -487,12 +487,12 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
       {/* Toggle bar */}
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-surfaceHover transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
+          <span className="w-7 h-7 bg-primary/20 rounded-lg flex items-center justify-center">
             <svg
-              className="w-3.5 h-3.5 text-violet-600"
+              className="w-3.5 h-3.5 text-primary"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -505,12 +505,12 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
               />
             </svg>
           </span>
-          <span className="text-sm font-semibold text-gray-700">
+          <span className="text-sm font-semibold text-textPrimary">
             Novo Usuário
           </span>
         </div>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-textTertiary transition-transform duration-200 ${open ? "rotate-180" : ""}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -526,7 +526,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
 
       {/* Collapsible form */}
       {open && (
-        <div className="border-t border-gray-100 px-5 py-5">
+        <div className="border-t border-surfaceBorder px-5 py-5">
           <form onSubmit={handleSubmit}>
             {/* Upload de imagem */}
             <div className="mb-6">

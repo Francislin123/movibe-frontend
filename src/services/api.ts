@@ -8,6 +8,7 @@ import type {
   CreateRsvpRequest,
   CreateUserRequest,
   UpdateUserRequest,
+  UpdateMoviberRequest,
   EventResponse,
   HealthResponse,
   MoviberResponse,
@@ -97,6 +98,14 @@ export const updateMoviberImage = (id: string, file: File) => {
     }),
   );
 };
+
+export async function updateMoviber(id: string, data: UpdateMoviberRequest): Promise<MoviberResponse> {
+  const res = await client.put(`/movibers/${id}`, data);
+  return res.data;
+}
+
+export const deleteMoviber = (id: string) =>
+  unwrap<void>(client.delete(`/movibers/${id}`));
 
 // ─── Users ────────────────────────────────────────────────────────────────────
 

@@ -72,9 +72,9 @@ export function Field({ label, value }: { label: string; value: ReactNode }) {
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
 const STATUS_COLOR: Record<UserStatus, string> = {
-  ACTIVE:    'bg-success bg-opacity-10 text-success',
-  INACTIVE:  'bg-textSecondary bg-opacity-10 text-textSecondary',
-  SUSPENDED: 'bg-error bg-opacity-10 text-error',
+  ACTIVE:    'bg-success/20 text-success border border-success/30',
+  INACTIVE:  'bg-warning/20 text-warning border border-warning/30',
+  SUSPENDED: 'bg-error/20 text-error border border-error/30',
 }
 
 const STATUS_LABEL: Record<UserStatus, string> = {
@@ -92,8 +92,8 @@ export function UserStatusBadge({ status }: { status: UserStatus }) {
 }
 
 const SUB_COLOR: Record<PromoterSubscription, string> = {
-  NONE:                       'bg-textSecondary bg-opacity-10 text-textSecondary',
-  VIP_BALLADS_FOR_PROMOTERS:  'bg-primary bg-opacity-10 text-primary',
+  NONE:                       'bg-surfaceHover text-textSecondary border border-surfaceBorder',
+  VIP_BALLADS_FOR_PROMOTERS:  'bg-primary/20 text-primary border border-primary/30',
 }
 
 const SUB_LABEL: Record<PromoterSubscription, string> = {
@@ -169,10 +169,20 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
 
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select
-      {...props}
-      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
-    />
+    <div className="relative">
+      <select
+        {...props}
+        className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition appearance-none cursor-pointer pr-10"
+        style={{
+          backgroundColor: 'var(--surface, #1a1a2e)',
+        }}
+      />
+      <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-textTertiary">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+    </div>
   )
 }
 

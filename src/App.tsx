@@ -63,7 +63,7 @@ export default function App() {
           <div className="flex items-center gap-3 px-6 py-6 border-b border-surfaceBorder bg-surface bg-opacity-40 backdrop-blur-sm">
             <div className="relative">
               <img 
-                src="/logo.svg" 
+                src="/logoMovibe.png" 
                 alt="Movibe Logo" 
                 className="w-10 h-10 rounded-2xl shadow-lg"
                 style={{

@@ -72,6 +72,7 @@ export interface UserResponse {
   id: string;
   displayName: string;
   cnpj: string | null;
+  cpf: string | null;
   reasonSocial: string | null;
   email: string | null;
   responsibleName: string | null;
@@ -132,10 +133,24 @@ export interface CreateMoviberRequest {
   name?: string;
   email?: string;
   cpf?: string;
+  image?: string;
   responsibleName?: string;
   cep?: string;
   cellPhoneNumber?: string;
   telephoneNumber?: string;
+}
+
+export interface UpdateMoviberRequest {
+  followerCount: number;
+  subscription: PromoterSubscription;
+  cpf?: string;
+  name?: string;
+  email?: string;
+  responsibleName?: string;
+  cep?: string;
+  cellPhoneNumber?: string;
+  telephoneNumber?: string;
+  image?: string;
 }
 
 export interface CreateBaladaRequest {
