@@ -18,6 +18,56 @@ import type {
   UserResponse,
 } from "../types";
 
+// ─── Helpers: data binding fixes ────────────────────────────────────────────
+//
+// Defesa contra um defeito do backend em que a URL do upload
+// (ex: https://res.cloudinary.com/...) era gravada no campo `email`
+// do moviber em vez de no campo `image`. Normalizamos a resposta da API
+// para que `image` receba a URL correta e `email` mostre apenas e-mails.
+
+function isUrlValue(value: string | null | undefined): boolean {
+  if (!value) return false;
+  return /^(https?:\/\/|\/\/)/i.test(value) || /cloudinary\.com/i.test(value);
+}
+
+function sanitizeEmail(email: string | null | undefined): string | null {
+  if (!email || isUrlValue(email)) return null;
+  return email;
+}
+
+function normalizeMoviber(m: MoviberResponse): MoviberResponse {
+  // Se o e-mail vier como URL (defeito de mapeamento da resposta de upload),
+  // recupera a URL para `image` e zera o campo `email`.
+  if (isUrlValue(m.email)) {
+    return {
+      ...m,
+      image: m.image ?? m.email,
+      email: null,
+    };
+  }
+  return m;
+}
+
+// ─── Email pill (interactive link) ──────────────────────────────────────────
+
+function EmailLink({ email }: { email: string | null | undefined }) {
+  const safe = sanitizeEmail(email);
+  if (!safe) {
+    return <span className="text-sm text-textTertiary">—</span>;
+  }
+  return (
+    <a
+      href={`mailto:${safe}`}
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 text-white text-xs font-semibold shadow-sm hover:shadow-md hover:scale-105 transition-all duration-150 max-w-full"
+    >
+      <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+      </svg>
+      <span className="truncate">{safe}</span>
+    </a>
+  );
+}
+
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
 function MoviberAvatar({
@@ -36,7 +86,11 @@ function MoviberAvatar({
         ? "w-11 h-11 text-sm"
         : "w-14 h-14 text-base";
 
-  const image = moviber.image || linkedUser?.image;
+  // Recupera também URLs que o backend possa ter gravado no campo email.
+  const image =
+    moviber.image ||
+    (isUrlValue(moviber.email) ? moviber.email : null) ||
+    linkedUser?.image;
   const name = moviber.name ?? linkedUser?.displayName ?? "Moviber";
 
   const initials = name
@@ -51,14 +105,14 @@ function MoviberAvatar({
       <img
         src={image}
         alt={name}
-        className={`${dim} rounded-xl object-cover shrink-0 ring-2 ring-surface shadow-theme`}
+        className={`${dim} rounded-xl object-cover shrink-0 ring-2 ring-primary shadow-theme`}
       />
     );
   }
 
   return (
     <div
-      className={`${dim} rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold shrink-0 shadow-theme`}
+      className={`${dim} rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-white font-bold shrink-0 ring-2 ring-primary shadow-theme`}
     >
       {initials || "M"}
     </div>
@@ -80,7 +134,9 @@ function MoviberRow({
 }) {
   const name = moviber.name ?? linkedUser?.displayName ?? "Sem nome";
   const subtitle =
-    linkedUser?.email ?? moviber.email ?? moviber.id.slice(0, 16) + "…";
+    sanitizeEmail(linkedUser?.email) ??
+    sanitizeEmail(moviber.email) ??
+    moviber.id.slice(0, 16) + "…";
 
   return (
     <button
@@ -203,7 +259,11 @@ function MoviberDetail({
         />
         <Field
           label="E-mail"
-          value={moviber.email ?? linkedUser?.email}
+          value={
+            <EmailLink
+              email={sanitizeEmail(moviber.email) ?? linkedUser?.email}
+            />
+          }
         />
         <Field
           label="Celular"
@@ -279,7 +339,10 @@ export default function Movibers() {
       : getMovibers();
 
     Promise.all([movibersPromise, getUsers()])
-      .then(([m, u]) => {
+      .then(([rawMovibers, u]) => {
+        // Normaliza a resposta da API: corrige casos em que a URL de upload
+        // foi gravada no campo `email` em vez de `image`.
+        const m = rawMovibers.map(normalizeMoviber);
         setMovibers(m);
         setUsers(u);
         // mantém o moviber selecionado atualizado após reload
@@ -331,7 +394,7 @@ export default function Movibers() {
         telephoneNumber: selectedUser.telephoneNumber ?? undefined,
       };
 
-      const created = await createMoviber(payload);
+      const created = normalizeMoviber(await createMoviber(payload));
       setSuccess(
         `Moviber "${created.name ?? selectedUser.displayName}" criado com sucesso!`,
       );
