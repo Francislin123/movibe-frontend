@@ -162,7 +162,7 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
-      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
     />
   )
 }
@@ -171,8 +171,39 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
-      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
     />
+  )
+}
+
+export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      {...props}
+      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y min-h-[100px]"
+    />
+  )
+}
+
+export function ReadOnlyField({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div>
+      <span className="text-xs font-semibold text-textSecondary mb-1.5 uppercase tracking-wide block">{label}</span>
+      <div className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary transition">
+        {value}
+      </div>
+    </div>
+  )
+}
+
+export function ReadOnlyTextarea({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span className="text-xs font-semibold text-textSecondary mb-1.5 uppercase tracking-wide block">{label}</span>
+      <div className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary transition min-h-[100px] whitespace-pre-wrap">
+        {value}
+      </div>
+    </div>
   )
 }
 

@@ -4,12 +4,13 @@ import {
   Card,
   EmptyState,
   ErrorAlert,
-  Field,
-  UserStatusBadge,
   Label,
   Input,
   Select,
   SubmitButton,
+  Textarea,
+  ReadOnlyField,
+  ReadOnlyTextarea,
 } from "../components/ui";
 import UserEditModal from "../components/UserEditModal";
 import type {
@@ -18,6 +19,19 @@ import type {
   ApiError,
   UserStatus,
 } from "../types";
+
+// ─── Phone mask function ───────────────────────────────────────────────────────
+
+function formatPhone(value: string | undefined): string {
+  if (!value) return "";
+  const cleaned = value.replace(/\D/g, "");
+  if (cleaned.length === 11) {
+    return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+  } else if (cleaned.length === 10) {
+    return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, "($1) $2-$3");
+  }
+  return value;
+}
 
 // ─── Avatar ───────────────────────────────────────────────────────────────────
 
@@ -35,7 +49,7 @@ function Avatar({
         ? "w-9  h-9  text-xs"
         : "w-11 h-11 text-sm";
 
-  const initials = user.displayName
+  const initials = (user.displayName || "Usuário")
     .split(" ")
     .slice(0, 2)
     .map((n) => n[0])
@@ -46,7 +60,7 @@ function Avatar({
     return (
       <img
         src={user.image}
-        alt={user.displayName}
+        alt={user.displayName || "Usuário sem nome"}
         className={`${dim} rounded-xl object-cover shrink-0 ring-2 ring-surface shadow-theme`}
       />
     );
@@ -129,6 +143,25 @@ function InstagramLink({ link }: { link: string }) {
 
 // ─── User row (lista compacta) ────────────────────────────────────────────────
 
+function UserRowStatusBadge({ status }: { status?: UserStatus | string | null }) {
+  const statusConfig: Record<string, { label: string }> = {
+    ACTIVE: { label: "Ativo" },
+    INACTIVE: { label: "Inativo" },
+    SUSPENDED: { label: "Suspenso" },
+  };
+
+  // fallback seguro
+  const config = status
+    ? statusConfig[status]
+    : null;
+
+  return (
+    <span className="text-xs font-semibold text-textInverse">
+      {config?.label ?? "Desconhecido"}
+    </span>
+  );
+}
+
 function UserRow({
   user,
   selected,
@@ -143,25 +176,28 @@ function UserRow({
       onClick={() => onSelect(user)}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all duration-150 border ${
         selected
-          ? "bg-violet-50 border-violet-200 shadow-sm"
-          : "bg-white border-gray-100 hover:border-violet-100 hover:bg-violet-50/40 hover:shadow-sm"
+          ? "bg-primary bg-opacity-10 border-primary shadow-lg"
+          : "bg-surface border-surfaceBorder hover:border-primary hover:bg-surfaceHover hover:shadow-md"
       }`}
+      style={{
+        boxShadow: selected ? `0 0 0 1px rgba(124, 58, 237, 0.5)` : 'none'
+      }}
     >
       <Avatar user={user} size="sm" />
       <div className="flex-1 min-w-0">
         <p
-          className={`text-sm font-semibold truncate leading-tight ${selected ? "text-violet-800" : "text-gray-800"}`}
+          className={`text-sm font-semibold truncate leading-tight ${selected ? "text-textInverse" : "text-textPrimary hover:text-primary"}`}
         >
-          {user.displayName}
+          {user.displayName || "Usuário sem nome"}
         </p>
-        <p className="text-xs text-gray-400 truncate mt-0.5">
+        <p className={`text-xs truncate mt-0.5 ${selected ? "text-textInverse font-medium" : "text-textTertiary hover:text-textPrimary"}`}>
           {user.email ?? user.cellPhoneNumber ?? user.id.slice(0, 16) + "…"}
         </p>
       </div>
-      <UserStatusBadge status={user.status} />
+      <UserRowStatusBadge status={user.status} />
       {selected && (
         <svg
-          className="w-4 h-4 text-violet-500 shrink-0"
+          className="w-4 h-4 text-primary shrink-0"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -187,6 +223,12 @@ function UserDetail({
   user: UserResponse;
   onEdit: (u: UserResponse) => void;
 }) {
+  const statusLabels: Record<string, string> = {
+    ACTIVE: 'Ativo',
+    INACTIVE: 'Inativo',
+    SUSPENDED: 'Suspenso',
+  };
+
   return (
     <Card className="p-6 h-full flex flex-col gap-5">
       {/* Header: avatar grande + nome + badge + botão editar */}
@@ -195,16 +237,16 @@ function UserDetail({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <h2 className="text-lg font-bold text-gray-900 leading-tight truncate">
-                {user.displayName}
+              <h2 className="text-lg font-bold text-textPrimary leading-tight truncate">
+                {user.displayName || "Usuário sem nome"}
               </h2>
-              <p className="text-xs font-mono text-gray-400 mt-0.5 break-all">
+              <p className="text-xs font-mono text-textTertiary mt-0.5 break-all">
                 {user.id}
               </p>
             </div>
             <button
               onClick={() => onEdit(user)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 text-xs font-medium transition-all duration-150 shrink-0"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-surfaceBorder hover:border-primary hover:bg-primary hover:bg-opacity-10 text-textSecondary hover:text-primary text-xs font-medium transition-all duration-150 shrink-0"
             >
               <svg
                 className="w-3.5 h-3.5"
@@ -222,50 +264,42 @@ function UserDetail({
               Editar
             </button>
           </div>
-          <div className="mt-2">
-            <UserStatusBadge status={user.status} />
-          </div>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-100" />
+      <div className="border-t border-surfaceBorder" />
 
-      {/* Campos */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-        <Field label="E-mail" value={user.email} />
-        <Field label="Celular" value={user.cellPhoneNumber} />
-        <Field label="Telefone" value={user.telephoneNumber} />
-        <Field label="CEP" value={user.cep} />
+      {/* Campos padronizados com bordas roxas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+        <ReadOnlyField
+          label="Status"
+          value={statusLabels[user.status as UserStatus] ?? "Desconhecido"}
+        />
+        <ReadOnlyField label="E-mail" value={user.email || "—"} />
+        <ReadOnlyField label="Celular" value={formatPhone(user.cellPhoneNumber || undefined) || "—"} />
+        <ReadOnlyField label="CEP" value={user.cep || "—"} />
 
         {user.birthDate && (
-          <div>
-            <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1.5">
-              Data de Nascimento
-            </span>
-            <p className="text-sm text-gray-700 font-medium">
-              {fmtBirthDate(user.birthDate)}
-            </p>
-          </div>
+          <ReadOnlyField 
+            label="Data de Nascimento" 
+            value={fmtBirthDate(user.birthDate)} 
+          />
         )}
 
         {user.link && (
-          <div className="sm:col-span-2">
-            <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1.5">
-              Instagram
-            </span>
-            <InstagramLink link={user.link} />
-          </div>
+          <ReadOnlyField 
+            label="Instagram" 
+            value={<InstagramLink link={user.link} />}
+          />
         )}
 
         {user.description && (
           <div className="sm:col-span-2">
-            <span className="text-xs text-gray-400 uppercase tracking-wide block mb-1.5">
-              Bio
-            </span>
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {user.description}
-            </p>
+            <ReadOnlyTextarea 
+              label="Bio" 
+              value={user.description} 
+            />
           </div>
         )}
       </div>
@@ -417,22 +451,28 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
             {/* Upload de imagem */}
             <div className="mb-6">
               <div className="flex items-center gap-5">
-                <div className="relative shrink-0">
+                <div 
+                  className="relative shrink-0 group cursor-pointer"
+                  onClick={() => fileRef.current?.click()}
+                >
                   {imagePreview ? (
                     <img
                       src={imagePreview}
                       alt="Preview"
-                      className="w-20 h-20 rounded-2xl object-cover ring-2 ring-violet-200 shadow"
+                      className="w-20 h-20 rounded-2xl object-cover border-2 border-primary border-dashed hover:border-solid shadow-lg transition-all duration-200"
                     />
                   ) : (
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow">
+                    <div className="w-20 h-20 rounded-2xl bg-surface border-2 border-primary border-dashed hover:border-solid hover:bg-surfaceHover flex items-center justify-center text-primary text-2xl font-bold shadow-lg transition-all duration-200 group-hover:scale-105">
                       +
                     </div>
                   )}
                   <button
                     type="button"
-                    onClick={() => fileRef.current?.click()}
-                    className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center shadow-md transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileRef.current?.click();
+                    }}
+                    className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary hover:bg-primaryHover text-textInverse flex items-center justify-center shadow-md transition"
                     title="Adicionar foto"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -447,17 +487,17 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                     onChange={handleFileChange}
                   />
                 </div>
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-gray-800">Foto de perfil</p>
+                <div className="flex-1 flex flex-col justify-center">
+                  <p className="text-sm font-semibold text-textPrimary text-center">+ Foto de perfil</p>
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="mt-2 text-xs text-violet-600 hover:text-violet-800 font-medium transition"
+                    className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition text-center"
                   >
-                    {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto de perfil'}
+                    {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto'}
                   </button>
                   {imageFile && (
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-textTertiary mt-0.5 text-center">
                       {(imageFile.size / 1024).toFixed(0)} KB · {imageFile.type}
                     </p>
                   )}
@@ -474,7 +514,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                   onChange={(e) =>
                     setForm((f) => ({ ...f, displayName: e.target.value }))
                   }
-                  placeholder="Ex: DJ Marquinhos"
+                  placeholder="Digite o nome completo"
                 />
               </div>
               <div>
@@ -503,20 +543,22 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                       email: e.target.value || undefined,
                     }))
                   }
-                  placeholder="email@exemplo.com"
+                  placeholder="Digite o e-mail"
                 />
               </div>
               <div>
                 <Label>Celular</Label>
                 <Input
-                  value={form.cellPhoneNumber ?? ""}
-                  onChange={(e) =>
+                  value={formatPhone(form.cellPhoneNumber)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
                     setForm((f) => ({
                       ...f,
-                      cellPhoneNumber: e.target.value || undefined,
-                    }))
-                  }
+                      cellPhoneNumber: value || undefined,
+                    }));
+                  }}
                   placeholder="(11) 99999-9999"
+                  maxLength={15}
                 />
               </div>
               <div>
@@ -529,7 +571,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                       link: e.target.value || undefined,
                     }))
                   }
-                  placeholder="@username ou https://instagram.com/user"
+                  placeholder="@username"
                 />
               </div>
               <div>
@@ -548,6 +590,21 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
               <div>
                 <SubmitButton loading={saving}>Criar usuário</SubmitButton>
               </div>
+            </div>
+
+            <div className="mt-4">
+              <Label>Bio</Label>
+              <Textarea
+                value={form.description ?? ""}
+                onChange={(e) =>
+                  setForm((f) => ({
+                    ...f,
+                    description: e.target.value || undefined,
+                  }))
+                }
+                placeholder="Digite uma breve descrição sobre o usuário..."
+                rows={3}
+              />
             </div>
 
             {formError && (
@@ -602,7 +659,7 @@ function SearchInput({
     <div className="relative">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <svg
-          className="w-4 h-4 text-gray-400"
+          className="w-4 h-4 text-textTertiary"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -620,12 +677,12 @@ function SearchInput({
         value={query}
         onChange={handleChange}
         placeholder="Buscar por nome, e-mail ou celular..."
-        className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-150"
+        className="w-full pl-10 pr-4 py-2.5 border border-surfaceBorder rounded-xl bg-surface text-sm text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150"
       />
       {loading && (
         <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
           <svg
-            className="animate-spin w-4 h-4 text-violet-400"
+            className="animate-spin w-4 h-4 text-primary"
             fill="none"
             viewBox="0 0 24 24"
           >

@@ -280,6 +280,16 @@ html {
 
 /* ─── Accessibility Utilities ───────────────────────────────────────────────────── */
 
+/* Calendar icon color fix for date inputs in dark theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: brightness(0) invert(1);
+  cursor: pointer;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  filter: brightness(0) invert(1) brightness(1.2);
+}
+
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   :root {

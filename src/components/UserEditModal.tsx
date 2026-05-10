@@ -99,14 +99,14 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       {/* Modal */}
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-surfaceBorder">
 
         {/* ── Header ── */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="text-base font-bold text-gray-900">Editar Usuário</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-surfaceBorder">
+          <h2 className="text-base font-bold text-textPrimary">Editar Usuário</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition"
+            className="p-1.5 rounded-lg hover:bg-surfaceHover text-textSecondary hover:text-textPrimary transition"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -126,10 +126,10 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
                   <img
                     src={avatarPreview}
                     alt={user.displayName}
-                    className="w-20 h-20 rounded-2xl object-cover ring-2 ring-violet-200 shadow"
+                    className="w-20 h-20 rounded-2xl object-cover ring-2 ring-primary shadow-lg"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow">
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center text-textInverse text-2xl font-bold shadow-lg">
                     {initials}
                   </div>
                 )}
@@ -137,7 +137,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-violet-600 hover:bg-violet-700 text-white flex items-center justify-center shadow-md transition"
+                  className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary hover:bg-primaryHover text-textInverse flex items-center justify-center shadow-md transition"
                   title="Trocar foto"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,17 +156,17 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-gray-800">{user.displayName}</p>
-                <p className="text-xs text-gray-400 font-mono mt-0.5 break-all">{user.id}</p>
+                <p className="text-sm font-semibold text-textPrimary">{user.displayName}</p>
+                <p className="text-xs text-textTertiary font-mono mt-0.5 break-all">{user.id}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="mt-2 text-xs text-violet-600 hover:text-violet-800 font-medium transition"
+                  className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition"
                 >
                   {avatarFile ? `✓ ${avatarFile.name}` : 'Clique para trocar a foto de perfil'}
                 </button>
                 {avatarFile && (
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-textTertiary mt-0.5">
                     {(avatarFile.size / 1024).toFixed(0)} KB · {avatarFile.type}
                   </p>
                 )}
@@ -174,7 +174,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
             </div>
 
             {/* ── Divider ── */}
-            <div className="border-t border-gray-100" />
+            <div className="border-t border-surfaceBorder" />
 
             {/* ── Dados principais ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -236,7 +236,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
                   value={form.description}
                   onChange={f('description')}
                   placeholder="Uma breve descrição sobre o usuário…"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition resize-none"
+                  className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
                 />
               </div>
             </div>
@@ -245,19 +245,19 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
           </div>
 
           {/* ── Footer ── */}
-          <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3">
+          <div className="sticky bottom-0 bg-surface border-t border-surfaceBorder px-6 py-4 flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 border border-gray-200 text-gray-600 hover:bg-gray-50 py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
+              className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:bg-violet-300 text-white py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
+              className="flex-1 bg-primary hover:bg-primaryHover disabled:bg-primaryLight text-textInverse py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
             >
               {saving ? (
                 <>
