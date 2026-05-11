@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { getBaladas, searchBaladas, createBaladaWithImage, getEventsByBalada } from '../services/api'
+import { getBaladas, searchBaladas, createBaladaWithImage, getEventsByBalada, getBaladaById } from '../services/api'
 import { Card, EmptyState, ErrorAlert, Field, VerifiedBadge, Label, Input, InputIcon, Spinner, EventTypeBadge } from '../components/ui'
 import SearchInput from '../components/SearchInput'
 import EntityImage from '../components/EntityImage'
@@ -241,26 +241,35 @@ export default function Baladas() {
       return
     }
     setExpandedBaladaId(baladaId)
-    if (baladaEventsCache[baladaId]) return
-    setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: true, events: [], error: null } }))
-    try {
-      const events = await getEventsByBalada(baladaId)
-      setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events, error: null } }))
-    } catch (e) {
-      setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events: [], error: (e as ApiError).message } }))
-    }
+    // Lê o cache atual de forma síncrona via ref para evitar stale closure
+    setBaladaEventsCache(prev => {
+      const entry = prev[baladaId]
+      // Se já temos dados válidos em cache, não rebusca
+      if (entry && !entry.error && (entry.loading || entry.events.length > 0)) return prev
+      // Caso contrário, dispara o fetch e marca como loading
+      getEventsByBalada(baladaId)
+        .then(events => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events, error: null } })))
+        .catch(e => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events: [], error: (e as ApiError).message } })))
+      return { ...prev, [baladaId]: { loading: true, events: [], error: null } }
+    })
   }
 
   function refreshBaladaEvents(baladaId: string) {
-    setBaladaEventsCache(c => {
-      const next = { ...c }
-      delete next[baladaId]
-      return next
-    })
+    // Uma única chamada setState atômica para evitar duplo render / race condition
     setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: true, events: [], error: null } }))
     getEventsByBalada(baladaId)
       .then(events => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events, error: null } })))
       .catch(e => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events: [], error: (e as ApiError).message } })))
+  }
+
+  // Atualiza a balada específica na lista sem recarregar tudo
+  async function refreshBaladaInList(baladaId: string) {
+    try {
+      const updated = await getBaladaById(baladaId)
+      setBaladas(prev => prev.map(b => b.id === baladaId ? updated : b))
+    } catch {
+      // Silencioso — a lista já está visível, só o contador ficará desatualizado
+    }
   }
 
   function load(query?: string) {
@@ -769,10 +778,11 @@ export default function Baladas() {
           hostBaladaName={creatingEventFor.tradeName}
           onClose={() => setCreatingEventFor(null)}
           onSuccess={() => {
+            const baladaId = creatingEventFor.id
             setCreatingEventFor(null)
-            if (expandedBaladaId === creatingEventFor.id) {
-              refreshBaladaEvents(creatingEventFor.id)
-            }
+            // Atualiza contador do card E a lista de eventos simultaneamente
+            refreshBaladaInList(baladaId)
+            refreshBaladaEvents(baladaId)
           }}
         />
       )}
@@ -784,8 +794,9 @@ export default function Baladas() {
           onSuccess={() => {
             const baladaId = editingEvent.hostBaladaId
             setEditingEvent(null)
-            if (baladaId && expandedBaladaId === baladaId) {
+            if (baladaId) {
               refreshBaladaEvents(baladaId)
+              refreshBaladaInList(baladaId)
             }
           }}
         />

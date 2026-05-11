@@ -1,0 +1,111 @@
+Corrija dois problemas encontrados no fluxo de eventos das Baladas no sistema Movibe.
+
+PROBLEMA 1 — Modal da Balada exibindo quantidade incorreta de eventos
+
+Atualmente existe uma inconsistência no modal/lista de eventos da Balada:
+
+* No banco de dados a balada possui apenas 2 eventos
+* Porém no frontend o modal mostra 6 eventos
+
+Investigue e corrija a origem da duplicação.
+
+Validar os seguintes pontos:
+
+1. Verificar se o estado do React está acumulando eventos duplicados
+2. Verificar se existe concatenação indevida no setState
+3. Garantir que a lista de eventos seja sempre substituída e não concatenada
+4. Validar se existe múltipla chamada da API causando duplicidade
+5. Garantir que cada evento seja único pelo ID
+6. Aplicar deduplicação defensiva utilizando:
+
+```ts
+const uniqueEvents = events.filter(
+  (event, index, self) =>
+    index === self.findIndex((e) => e.id === event.id)
+);
+```
+
+7. Verificar se o useEffect está disparando múltiplas vezes
+8. Verificar dependências do useEffect
+9. Garantir que o modal carregue apenas eventos daquela balada específica
+10. Validar se o endpoint do backend está retornando eventos duplicados
+
+IMPORTANTE:
+A quantidade exibida no frontend deve refletir exatamente o banco de dados.
+
+---
+
+PROBLEMA 2 — Quantidade de eventos da Balada não atualiza automaticamente
+
+Atualmente:
+
+* Quando um evento é criado
+* A quantidade de eventos da Balada NÃO atualiza automaticamente
+* Só atualiza após reload manual da página
+
+Corrigir o fluxo para atualização em tempo real após criação do evento.
+
+Implementar:
+
+1. Atualização automática da quantidade de eventos da Balada após criação
+2. Recarregar os dados da Balada após createEvent()
+3. Atualizar o state local sem precisar refresh da página
+4. Garantir sincronização entre:
+
+   * lista de eventos
+   * contador de eventos
+   * modal da balada
+   * card da balada
+
+Fluxo esperado:
+
+* Criou evento
+* Modal atualiza automaticamente
+* Quantidade no card da Balada atualiza automaticamente
+* Lista de eventos atualiza automaticamente
+* Sem precisar F5
+
+---
+
+MELHORIA EXTRA
+
+Criar função centralizada para atualizar dados da Balada:
+
+```ts
+async function refreshBalada(id: string) {
+   const updated = await getBaladaById(id)
+   setSelectedBalada(updated)
+}
+```
+
+E chamar:
+
+* após createEvent
+* após deleteEvent
+* após updateEvent
+
+---
+
+PADRÃO VISUAL
+
+Manter:
+
+* Purple Dark Theme
+* UX atual
+* animações atuais
+* sem alterar layout
+* apenas corrigir sincronização e duplicidade
+
+---
+
+OBJETIVO FINAL
+
+Garantir consistência total entre:
+
+* banco de dados
+* frontend
+* modal
+* contador
+* lista de eventos
+
+Sem duplicações e sem necessidade de recarregar a página.

@@ -30,6 +30,9 @@ export const getHealth = () => unwrap<HealthResponse>(client.get("/health"));
 export const getBaladas = () =>
   unwrap<BaladaResponse[]>(client.get("/baladas"));
 
+export const getBaladaById = (id: string) =>
+  unwrap<BaladaResponse>(client.get(`/baladas/${id}`));
+
 export const searchBaladas = (query?: string) => 
   unwrap<BaladaResponse[]>(client.get("/baladas/search", { params: { q: query } }));
 
@@ -77,7 +80,8 @@ export const getEvents = () => unwrap<EventResponse[]>(client.get("/events"));
 
 export const getEventsByBalada = async (baladaId: string): Promise<EventResponse[]> => {
   const events = await getEvents()
-  return events.filter(e => e.hostBaladaId === baladaId)
+  const filtered = events.filter(e => e.hostBaladaId === baladaId)
+  return filtered.filter((ev, idx, self) => idx === self.findIndex(e => e.id === ev.id))
 };
 
 export const searchEvents = (query?: string) => 
