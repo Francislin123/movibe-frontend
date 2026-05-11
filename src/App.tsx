@@ -144,14 +144,7 @@ export default function App() {
 
           {/* Footer */}
           <div className="px-4 py-4 border-t border-surfaceBorder bg-surface bg-opacity-40 backdrop-blur-sm">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-textTertiary font-mono bg-surface bg-opacity-60 px-2 py-1 rounded-lg">
-                  :8080 → proxy :5173
-                </p>
-              </div>
-              <ThemeSelector />
-            </div>
+            <ThemeSelector />
           </div>
         </aside>
 

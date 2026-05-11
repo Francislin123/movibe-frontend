@@ -55,7 +55,7 @@ export function ThemeSelector() {
           />
           
           {/* Dropdown Content */}
-          <div className="absolute top-full right-0 mt-2 w-64 bg-surface border border-surfaceBorder rounded-2xl shadow-theme z-20 backdrop-blur-xl">
+          <div className="absolute bottom-full left-0 mb-2 w-64 bg-surface border border-surfaceBorder rounded-2xl shadow-theme z-20 backdrop-blur-xl">
             <div className="py-2">
               {availableThemes.map((theme) => (
                 <button
