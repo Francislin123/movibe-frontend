@@ -4,6 +4,7 @@ import { Card, EmptyState, ErrorAlert, Field, VerifiedBadge, Label, Input, Input
 import SearchInput from '../components/SearchInput'
 import EntityImage from '../components/EntityImage'
 import BaladaEditModal from '../components/BaladaEditModal'
+import CreateEventModal from '../components/CreateEventModal'
 import type { BaladaResponse, CreateBaladaRequest, ApiError } from '../types'
 
 // ─── Mask helpers ─────────────────────────────────────────────────────────────
@@ -212,8 +213,8 @@ export default function Baladas() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   
-  // Estado para modal de edição
   const [editingBalada, setEditingBalada] = useState<BaladaResponse | null>(null)
+  const [creatingEventFor, setCreatingEventFor] = useState<BaladaResponse | null>(null)
 
   const handleEdit = (balada: BaladaResponse) => {
     setEditingBalada(balada)
@@ -583,21 +584,42 @@ export default function Baladas() {
                     <p className="text-sm text-textSecondary leading-relaxed line-clamp-3">{b.description}</p>
                   </div>
                 )}
+
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={() => setCreatingEventFor(b)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 text-xs font-medium transition-all duration-150 shrink-0"
+                    title="Criar evento para esta balada"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Criar Evento
+                  </button>
+                </div>
               </div>
             </div>
           </Card>
         ))}
       </div>
 
-      {/* Modal de Edição */}
       {editingBalada && (
         <BaladaEditModal
           balada={editingBalada}
           onClose={() => setEditingBalada(null)}
           onSuccess={() => {
             setEditingBalada(null)
-            load() // Recarregar lista após edição
+            load()
           }}
+        />
+      )}
+
+      {creatingEventFor && (
+        <CreateEventModal
+          hostBaladaId={creatingEventFor.id}
+          hostBaladaName={creatingEventFor.tradeName}
+          onClose={() => setCreatingEventFor(null)}
+          onSuccess={() => setCreatingEventFor(null)}
         />
       )}
     </div>
