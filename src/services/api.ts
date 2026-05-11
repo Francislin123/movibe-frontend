@@ -75,6 +75,11 @@ export const updateBaladaImage = (id: string, file: File) => {
 
 export const getEvents = () => unwrap<EventResponse[]>(client.get("/events"));
 
+export const getEventsByBalada = async (baladaId: string): Promise<EventResponse[]> => {
+  const events = await getEvents()
+  return events.filter(e => e.hostBaladaId === baladaId)
+};
+
 export const searchEvents = (query?: string) => 
   unwrap<EventResponse[]>(client.get("/events/search", { params: { q: query } }));
 

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import { getBaladas, searchBaladas, createBaladaWithImage } from '../services/api'
-import { Card, EmptyState, ErrorAlert, Field, VerifiedBadge, Label, Input, InputIcon, Spinner } from '../components/ui'
+import { getBaladas, searchBaladas, createBaladaWithImage, getEventsByBalada } from '../services/api'
+import { Card, EmptyState, ErrorAlert, Field, VerifiedBadge, Label, Input, InputIcon, Spinner, EventTypeBadge } from '../components/ui'
 import SearchInput from '../components/SearchInput'
 import EntityImage from '../components/EntityImage'
 import BaladaEditModal from '../components/BaladaEditModal'
 import CreateEventModal from '../components/CreateEventModal'
-import type { BaladaResponse, CreateBaladaRequest, ApiError } from '../types'
+import EventEditModal from '../components/EventEditModal'
+import type { BaladaResponse, CreateBaladaRequest, ApiError, EventResponse } from '../types'
 
 // ─── Mask helpers ─────────────────────────────────────────────────────────────
 
@@ -35,6 +36,16 @@ function formatCellPhone(value: string | undefined): string {
   if (cleaned.length <= 2) return `(${cleaned}`
   if (cleaned.length <= 7) return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`
   return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)}-${cleaned.slice(7, 11)}`
+}
+
+// ─── Date helper ──────────────────────────────────────────────────────────────
+
+function fmtDate(value: string) {
+  if (!value) return ''
+  const [datePart, timePart] = value.split('T')
+  const [year, month, day] = datePart.split('-')
+  const [hour, minute] = timePart.split(':')
+  return `${day}/${month}/${year} ${hour}:${minute}`
 }
 
 // ─── Instagram helpers ────────────────────────────────────────────────────────
@@ -215,9 +226,41 @@ export default function Baladas() {
   
   const [editingBalada, setEditingBalada] = useState<BaladaResponse | null>(null)
   const [creatingEventFor, setCreatingEventFor] = useState<BaladaResponse | null>(null)
+  const [editingEvent, setEditingEvent] = useState<EventResponse | null>(null)
+
+  const [expandedBaladaId, setExpandedBaladaId] = useState<string | null>(null)
+  const [baladaEventsCache, setBaladaEventsCache] = useState<Record<string, { loading: boolean; events: EventResponse[]; error: string | null }>>({})
 
   const handleEdit = (balada: BaladaResponse) => {
     setEditingBalada(balada)
+  }
+
+  async function toggleBaladaEvents(baladaId: string) {
+    if (expandedBaladaId === baladaId) {
+      setExpandedBaladaId(null)
+      return
+    }
+    setExpandedBaladaId(baladaId)
+    if (baladaEventsCache[baladaId]) return
+    setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: true, events: [], error: null } }))
+    try {
+      const events = await getEventsByBalada(baladaId)
+      setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events, error: null } }))
+    } catch (e) {
+      setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events: [], error: (e as ApiError).message } }))
+    }
+  }
+
+  function refreshBaladaEvents(baladaId: string) {
+    setBaladaEventsCache(c => {
+      const next = { ...c }
+      delete next[baladaId]
+      return next
+    })
+    setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: true, events: [], error: null } }))
+    getEventsByBalada(baladaId)
+      .then(events => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events, error: null } })))
+      .catch(e => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events: [], error: (e as ApiError).message } })))
   }
 
   function load(query?: string) {
@@ -585,20 +628,126 @@ export default function Baladas() {
                   </div>
                 )}
 
-                <div className="flex justify-end mt-4">
+                {/* ── Botões de ação ── */}
+                <div className="flex items-center justify-between mt-4 gap-2">
+                  <button
+                    onClick={() => toggleBaladaEvents(b.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all duration-150 shrink-0 ${
+                      expandedBaladaId === b.id
+                        ? 'border-amber-400 bg-amber-50 text-amber-600'
+                        : 'border-gray-200 hover:border-amber-300 hover:bg-amber-50 text-gray-500 hover:text-amber-600'
+                    }`}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Eventos ({b.hostedEventIds?.length ?? 0})
+                    <svg
+                      className={`w-3 h-3 transition-transform duration-200 ${expandedBaladaId === b.id ? 'rotate-180' : ''}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
                   <button
                     onClick={() => setCreatingEventFor(b)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 text-xs font-medium transition-all duration-150 shrink-0"
                     title="Criar evento para esta balada"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
                     Criar Evento
                   </button>
                 </div>
               </div>
             </div>
+
+            {/* ── Painel de Eventos ── */}
+            {expandedBaladaId === b.id && (
+              <div className="mt-4 border-t border-surfaceBorder/60 pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-semibold text-textTertiary uppercase tracking-wider">
+                    Eventos da balada
+                  </p>
+                  <button
+                    onClick={() => refreshBaladaEvents(b.id)}
+                    className="p-1 rounded-lg hover:bg-surfaceHover text-textTertiary hover:text-textSecondary transition"
+                    title="Atualizar lista"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                </div>
+
+                {(() => {
+                  const cache = baladaEventsCache[b.id]
+                  if (!cache || cache.loading) {
+                    return (
+                      <div className="flex items-center justify-center py-6">
+                        <Spinner size={5} />
+                        <span className="ml-2 text-xs text-textTertiary">Carregando eventos…</span>
+                      </div>
+                    )
+                  }
+                  if (cache.error) {
+                    return <p className="text-xs text-red-400 py-3">{cache.error}</p>
+                  }
+                  if (cache.events.length === 0) {
+                    return (
+                      <p className="text-xs text-textTertiary text-center py-6">
+                        Nenhum evento cadastrado para esta balada.
+                      </p>
+                    )
+                  }
+                  return (
+                    <div className="space-y-2">
+                      {cache.events.map(ev => (
+                        <div
+                          key={ev.id}
+                          className="flex items-center gap-3 p-3 rounded-xl bg-surface/50 border border-surfaceBorder/40 hover:border-amber-500/30 transition-all duration-150"
+                        >
+                          {/* Avatar */}
+                          <div className="shrink-0">
+                            {ev.image ? (
+                              <img src={ev.image} alt={ev.title} className="w-10 h-10 rounded-xl object-cover ring-1 ring-amber-500/20" />
+                            ) : (
+                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-sm font-bold">
+                                {ev.title.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-textPrimary truncate">{ev.title}</p>
+                            <p className="text-xs text-textTertiary mt-0.5">
+                              {fmtDate(ev.startsAt)} → {fmtDate(ev.endsAt)}
+                            </p>
+                          </div>
+
+                          {/* Badge + Edit */}
+                          <div className="flex items-center gap-2 shrink-0">
+                            <EventTypeBadge type={ev.type} />
+                            <button
+                              onClick={() => setEditingEvent(ev)}
+                              className="p-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 transition-all duration-150"
+                              title="Editar evento"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
           </Card>
         ))}
       </div>
@@ -619,7 +768,26 @@ export default function Baladas() {
           hostBaladaId={creatingEventFor.id}
           hostBaladaName={creatingEventFor.tradeName}
           onClose={() => setCreatingEventFor(null)}
-          onSuccess={() => setCreatingEventFor(null)}
+          onSuccess={() => {
+            setCreatingEventFor(null)
+            if (expandedBaladaId === creatingEventFor.id) {
+              refreshBaladaEvents(creatingEventFor.id)
+            }
+          }}
+        />
+      )}
+
+      {editingEvent && (
+        <EventEditModal
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSuccess={() => {
+            const baladaId = editingEvent.hostBaladaId
+            setEditingEvent(null)
+            if (baladaId && expandedBaladaId === baladaId) {
+              refreshBaladaEvents(baladaId)
+            }
+          }}
         />
       )}
     </div>
