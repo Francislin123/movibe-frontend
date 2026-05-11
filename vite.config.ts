@@ -17,6 +17,9 @@ export default defineConfig(({ mode }) => {
           target: apiTarget,
           changeOrigin: true,
           secure: false,
+          headers: {
+            "ngrok-skip-browser-warning": "true",
+          },
         },
       },
     },
