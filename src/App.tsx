@@ -50,100 +50,146 @@ export default function App() {
         {/* ── Sidebar ── */}
         <aside
           className={`
-            fixed top-0 left-0 h-full w-64 bg-backgroundSecondary border-r border-surfaceBorder shadow-2xl z-30
+            fixed top-0 left-0 h-full w-64 z-30
             flex flex-col transition-transform duration-300 ease-out
             ${sideOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
           style={{
-            boxShadow: '4px 0 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06)'
+            background: 'linear-gradient(180deg, var(--color-backgroundSecondary) 0%, var(--color-background) 100%)',
+            borderRight: '1px solid var(--color-surfaceBorder)',
+            boxShadow: '4px 0 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.08)',
           }}
         >
+          {/* Glow overlay sutil no topo */}
+          <div
+            className="absolute top-0 left-0 right-0 h-48 pointer-events-none"
+            style={{
+              background: 'radial-gradient(ellipse 120% 80% at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 70%)',
+            }}
+          />
+
           {/* Logo */}
-          <div className="flex items-center gap-3 px-6 py-6 border-b border-surfaceBorder bg-surface bg-opacity-40 backdrop-blur-sm">
-            <div className="relative">
-              <img 
-                src="/logoMovibe.png" 
-                alt="Movibe Logo" 
-                className="w-10 h-10 rounded-2xl shadow-lg"
+          <div
+            className="relative flex items-center gap-3 px-6 py-5"
+            style={{
+              background: 'linear-gradient(135deg, var(--color-surface) 0%, var(--color-backgroundSecondary) 100%)',
+              borderBottom: '1px solid var(--color-surfaceBorder)',
+              boxShadow: 'inset 0 0 0 1px rgba(124,58,237,0.08)',
+            }}
+          >
+            <div className="relative shrink-0">
+              <img
+                src="/logoMovibe.png"
+                alt="Movibe Logo"
+                className="w-10 h-10 rounded-2xl"
                 style={{
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.3), 0 0 20px rgba(124, 58, 237, 0.35)'
+                  boxShadow: '0 4px 16px rgba(0,0,0,0.4), 0 0 24px rgba(124,58,237,0.4)',
                 }}
               />
-              {/* Glow effect */}
-              <div 
+              <div
                 className="absolute inset-0 rounded-2xl pointer-events-none"
                 style={{
-                  background: 'radial-gradient(circle, rgba(124, 58, 237, 0.3) 0%, transparent 70%)',
-                  filter: 'blur(8px)'
+                  background: 'radial-gradient(circle, rgba(124,58,237,0.35) 0%, transparent 70%)',
+                  filter: 'blur(10px)',
                 }}
               />
             </div>
-            <div className="flex flex-col">
+            <div>
               <p className="text-base font-bold text-textPrimary leading-tight tracking-tight">
                 Movibe
               </p>
+              <p className="text-xs text-textTertiary mt-0.5">Admin Dashboard</p>
             </div>
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-            {NAV.map((n) => (
-              <button
-                key={n.id}
-                onClick={() => {
-                  setPage(n.id);
-                  setSideOpen(false);
-                }}
-                className={`
-                  group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 text-left
-                  overflow-hidden
-                  ${
-                    page === n.id
-                      ? "text-textInverse bg-primary bg-opacity-90 shadow-lg font-semibold"
-                      : "text-textSecondary hover:text-textPrimary hover:bg-surface hover:bg-opacity-50 font-medium"
+          <nav className="relative flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+            {NAV.map((n) => {
+              const isActive = page === n.id;
+              return (
+                <button
+                  key={n.id}
+                  onClick={() => { setPage(n.id); setSideOpen(false); }}
+                  className="group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-left overflow-hidden"
+                  style={
+                    isActive
+                      ? {
+                          background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
+                          color: '#ffffff',
+                          boxShadow: '0 4px 20px rgba(124,58,237,0.4), inset 0 0 0 1px rgba(255,255,255,0.12)',
+                        }
+                      : {
+                          color: 'var(--color-textSecondary)',
+                        }
                   }
-                `}
-                style={{
-                  boxShadow: page === n.id ? `0 4px 16px rgba(124, 58, 237, 0.25), inset 0 0 0 1px rgba(124, 58, 237, 0.2)` : 'none'
-                }}
-              >
-                {/* Active indicator glow */}
-                {page === n.id && (
-                  <div 
-                    className="absolute inset-0 rounded-xl opacity-30"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.3) 0%, transparent 50%)',
-                      filter: 'blur(12px)'
-                    }}
-                  />
-                )}
-                
-                {/* Icon */}
-                <span className={`
-                  text-lg transition-all duration-200
-                  ${page === n.id ? 'scale-110' : 'group-hover:scale-105'}
-                `}>
-                  {n.emoji}
-                </span>
-                
-                {/* Label */}
-                <span className="relative z-10 font-medium">{n.label}</span>
-                
-                {/* Active dot */}
-                {page === n.id && (
-                  <div 
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 w-2 h-2 rounded-full bg-primary"
-                    style={{
-                      boxShadow: '0 0 8px rgba(124, 58, 237, 0.6)'
-                    }}
-                  />
-                )}
-              </button>
-            ))}
+                  onMouseEnter={e => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, var(--color-surface) 0%, var(--color-surfaceHover) 100%)'
+                      ;(e.currentTarget as HTMLElement).style.color = 'var(--color-textPrimary)'
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = 'inset 0 0 0 1px var(--color-surfaceBorder)'
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive) {
+                      (e.currentTarget as HTMLElement).style.background = ''
+                      ;(e.currentTarget as HTMLElement).style.color = 'var(--color-textSecondary)'
+                      ;(e.currentTarget as HTMLElement).style.boxShadow = ''
+                    }
+                  }}
+                >
+                  {/* Shimmer do item ativo */}
+                  {isActive && (
+                    <div
+                      className="absolute inset-0 rounded-xl pointer-events-none"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%)',
+                      }}
+                    />
+                  )}
+
+                  {/* Barra lateral esquerda no item ativo */}
+                  {isActive && (
+                    <div
+                      className="absolute left-0 top-2 bottom-2 w-1 rounded-full"
+                      style={{
+                        background: 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.4) 100%)',
+                        boxShadow: '0 0 8px rgba(255,255,255,0.5)',
+                      }}
+                    />
+                  )}
+
+                  {/* Emoji */}
+                  <span className={`text-lg transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`}>
+                    {n.emoji}
+                  </span>
+
+                  {/* Label */}
+                  <span className="relative z-10">{n.label}</span>
+
+                  {/* Dot no item ativo */}
+                  {isActive && (
+                    <div
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full"
+                      style={{
+                        background: 'rgba(255,255,255,0.8)',
+                        boxShadow: '0 0 6px rgba(255,255,255,0.6)',
+                      }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </nav>
 
           {/* Footer */}
-          <div className="px-4 py-4 border-t border-surfaceBorder bg-surface bg-opacity-40 backdrop-blur-sm">
+          <div
+            className="relative px-4 py-4"
+            style={{
+              background: 'linear-gradient(0deg, var(--color-backgroundSecondary) 0%, var(--color-surface) 100%)',
+              borderTop: '1px solid var(--color-surfaceBorder)',
+              boxShadow: 'inset 0 1px 0 rgba(124,58,237,0.08)',
+            }}
+          >
             <ThemeSelector />
           </div>
         </aside>
