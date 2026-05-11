@@ -47,8 +47,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-textPrimary">Dashboard</h1>
-        <p className="text-sm text-textSecondary mt-1">Visão geral da plataforma Movibe</p>
+        <h1 className="text-2xl font-bold text-textPrimary">Bem-vindo ao Movibe 👋</h1>
+        <p className="text-sm text-textSecondary mt-1">Visão geral da plataforma</p>
       </div>
 
       {error && <ErrorAlert message={error} />}
@@ -72,17 +72,6 @@ export default function Dashboard() {
         <StatCard label="Movibers" value={counts.movibers} color="violet" />
         <StatCard label="Usuários" value={counts.users} color="emerald" />
         <StatCard label="RSVPs" value={counts.rsvps} color="rose" />
-      </div>
-
-      {/* Quick-start hint */}
-      <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5">
-        <p className="text-sm font-semibold text-violet-700 mb-2">🚀 Como usar</p>
-        <ul className="text-sm text-violet-600 space-y-1 list-disc list-inside">
-          <li>Use o menu lateral para navegar entre as entidades</li>
-          <li>Cada seção exibe a listagem e um formulário de criação</li>
-          <li>Para criar um RSVP você precisa de um <strong>User ID</strong> e um <strong>Event ID</strong> válidos</li>
-          <li>Eventos PREMIUM_BALLAD requerem um Moviber com assinatura <strong>VIP_BALLADS_FOR_PROMOTERS</strong></li>
-        </ul>
       </div>
     </div>
   )
