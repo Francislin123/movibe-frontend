@@ -490,7 +490,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
         className="w-full flex items-center justify-between px-5 py-4 hover:bg-surfaceHover transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="w-7 h-7 bg-primary/20 rounded-lg flex items-center justify-center">
+          <span className="w-7 h-7 bg-primary-20 rounded-lg flex items-center justify-center">
             <svg
               className="w-3.5 h-3.5 text-primary"
               fill="none"

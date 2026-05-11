@@ -51,9 +51,8 @@ export default function App() {
         <aside
           className={`
             fixed top-0 left-0 h-full w-64 bg-backgroundSecondary border-r border-surfaceBorder shadow-2xl z-30
-            flex flex-col transition-all duration-300 ease-out
-            ${sideOpen ? "translate-x-0" : "-translate-x-full"}
-            lg:translate-x-0 lg:static lg:z-auto
+            flex flex-col transition-transform duration-300 ease-out
+            ${sideOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           `}
           style={{
             boxShadow: '4px 0 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.06)'
@@ -83,7 +82,6 @@ export default function App() {
               <p className="text-base font-bold text-textPrimary leading-tight tracking-tight">
                 Movibe
               </p>
-              <p className="text-xs text-textTertiary font-medium">Rules Service</p>
             </div>
           </div>
 
@@ -158,7 +156,7 @@ export default function App() {
         </aside>
 
         {/* ── Main ── */}
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
           {/* Topbar (mobile) */}
           <header className="lg:hidden flex items-center gap-4 bg-surface border-b border-surfaceBorder px-4 py-3 shadow-theme sticky top-0 z-10">
             <button

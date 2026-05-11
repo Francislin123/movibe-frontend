@@ -38,6 +38,24 @@ export async function createBalada(data: CreateBaladaRequest): Promise<BaladaRes
   return res.data
 }
 
+export async function createBaladaWithImage(
+  data: CreateBaladaRequest,
+  imageFile?: File | null
+): Promise<BaladaResponse> {
+  // 1. Cria a balada
+  const created = await createBalada(data)
+
+  // 2. Se houver imagem, faz upload
+  if (imageFile && created.id) {
+    await updateBaladaImage(created.id, imageFile)
+    // Retorna a balada atualizada com a imagem
+    const updated = await client.get<BaladaResponse>(`/baladas/${created.id}`)
+    return updated.data
+  }
+
+  return created
+}
+
 export async function updateBalada(id: string, data: Partial<BaladaResponse>): Promise<BaladaResponse> {
   const res = await client.put(`/baladas/${id}`, data)
   return res.data
@@ -62,6 +80,15 @@ export const searchEvents = (query?: string) =>
 
 export const createEvent = (body: CreateEventRequest) =>
   unwrap<EventResponse>(client.post("/events", body));
+
+export const listEventMovibers = (eventId: string) =>
+  unwrap<MoviberResponse[]>(client.get(`/events/${eventId}/movibers`));
+
+export const linkEventMovibers = (eventId: string, moviberIds: string[]) =>
+  unwrap<EventResponse>(client.post(`/events/${eventId}/movibers`, { moviberIds }));
+
+export const unlinkEventMoviber = (eventId: string, moviberId: string) =>
+  unwrap<EventResponse>(client.delete(`/events/${eventId}/movibers/${moviberId}`));
 
 export const updateEventImage = (id: string, file: File) => {
   const form = new FormData();

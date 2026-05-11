@@ -57,15 +57,15 @@ export default function Rsvps() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">RSVPs — EU VOU</h1>
-        <p className="text-sm text-gray-500 mt-1">Confirmações de presença — ordenadas por data (DESC)</p>
+        <h1 className="text-2xl font-bold text-textPrimary">RSVPs — EU VOU</h1>
+        <p className="text-sm text-textSecondary mt-1">Confirmações de presença — ordenadas por data (DESC)</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form */}
         <Card className="p-6 lg:col-span-1 h-fit">
-          <h2 className="text-sm font-bold text-gray-700 mb-4">Novo RSVP</h2>
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 text-xs text-amber-700">
+          <h2 className="text-sm font-bold text-textPrimary mb-4">Novo RSVP</h2>
+          <div className="bg-warning-20 border border-warning-30 rounded-xl px-4 py-3 mb-4 text-xs text-warning">
             ⚠ Usuário deve estar <strong>ACTIVE</strong>. RSVP não permitido após o fim do evento.
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -93,17 +93,17 @@ export default function Rsvps() {
 
         {/* List */}
         <div className="lg:col-span-2 space-y-3">
-          {loading && <p className="text-sm text-gray-400 text-center py-10">Carregando…</p>}
+          {loading && <p className="text-sm text-textTertiary text-center py-10">Carregando…</p>}
           {error && <ErrorAlert message={error} />}
           {!loading && !error && rsvps.length === 0 && <EmptyState label="Nenhum RSVP registrado ainda." />}
           {rsvps.map(r => (
             <Card key={r.id} className="p-4">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <p className="font-semibold text-gray-800">{INTENTION_LABEL[r.intention]}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">RSVP #{r.id} · {fmtDate(r.decidedAt)}</p>
+                  <p className="font-semibold text-textPrimary">{INTENTION_LABEL[r.intention]}</p>
+                  <p className="text-xs text-textTertiary mt-0.5">RSVP #{r.id} · {fmtDate(r.decidedAt)}</p>
                 </div>
-                <span className="text-xs bg-rose-100 text-rose-700 font-semibold px-2 py-0.5 rounded-full">EU VOU</span>
+                <span className="text-xs bg-error-20 text-error border border-error-30 font-semibold px-2 py-0.5 rounded-full">EU VOU</span>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-y-2">
                 <Field label="User ID" value={<span className="font-mono text-xs break-all">{r.userId}</span>} />

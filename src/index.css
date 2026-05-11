@@ -68,6 +68,24 @@
 .text-accent { color: var(--color-accent); }
 .text-accentHover { color: var(--color-accentHover); }
 
+.text-success { color: var(--color-success); }
+.text-warning { color: var(--color-warning); }
+.text-error { color: var(--color-error); }
+.text-info { color: var(--color-info); }
+
+.bg-success { background-color: var(--color-success); }
+.bg-success-20 { background-color: rgba(16, 185, 129, 0.2); }
+.bg-warning-20 { background-color: rgba(245, 158, 11, 0.2); }
+.bg-error-20 { background-color: rgba(239, 68, 68, 0.2); }
+.bg-info-20 { background-color: rgba(59, 130, 246, 0.2); }
+.bg-primary-20 { background-color: rgba(124, 58, 237, 0.2); }
+
+.border-success-30 { border-color: rgba(16, 185, 129, 0.3); }
+.border-warning-30 { border-color: rgba(245, 158, 11, 0.3); }
+.border-error-30 { border-color: rgba(239, 68, 68, 0.3); }
+.border-info-30 { border-color: rgba(59, 130, 246, 0.3); }
+.border-primary-30 { border-color: rgba(124, 58, 237, 0.3); }
+
 .border-primary { border-color: var(--color-primary); }
 .border-surfaceBorder { border-color: var(--color-surfaceBorder); }
 
@@ -281,12 +299,14 @@ html {
 /* ─── Accessibility Utilities ───────────────────────────────────────────────────── */
 
 /* Calendar icon color fix for date inputs in dark theme */
-input[type="date"]::-webkit-calendar-picker-indicator {
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
   filter: brightness(0) invert(1);
   cursor: pointer;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator:hover {
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   filter: brightness(0) invert(1) brightness(1.2);
 }
 

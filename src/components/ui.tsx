@@ -44,12 +44,13 @@ export function EmptyState({ label }: { label: string }) {
 
 // ─── Section card ─────────────────────────────────────────────────────────────
 
-export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function Card({ children, className = '', style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <div 
+    <div
       className={`bg-surface bg-opacity-80 backdrop-blur-xl rounded-2xl border border-surfaceBorder shadow-theme transition-all duration-300 hover:bg-surfaceHover ${className}`}
       style={{
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.06)',
+        ...style
       }}
     >
       {children}
@@ -72,9 +73,9 @@ export function Field({ label, value }: { label: string; value: ReactNode }) {
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
 const STATUS_COLOR: Record<UserStatus, string> = {
-  ACTIVE:    'bg-success/20 text-success border border-success/30',
-  INACTIVE:  'bg-warning/20 text-warning border border-warning/30',
-  SUSPENDED: 'bg-error/20 text-error border border-error/30',
+  ACTIVE:    'bg-success-20 text-success border border-success-30',
+  INACTIVE:  'bg-warning-20 text-warning border border-warning-30',
+  SUSPENDED: 'bg-error-20 text-error border border-error-30',
 }
 
 const STATUS_LABEL: Record<UserStatus, string> = {
@@ -93,7 +94,7 @@ export function UserStatusBadge({ status }: { status: UserStatus }) {
 
 const SUB_COLOR: Record<PromoterSubscription, string> = {
   NONE:                       'bg-surfaceHover text-textSecondary border border-surfaceBorder',
-  VIP_BALLADS_FOR_PROMOTERS:  'bg-primary/20 text-primary border border-primary/30',
+  VIP_BALLADS_FOR_PROMOTERS:  'bg-primary-20 text-primary border border-primary-30',
 }
 
 const SUB_LABEL: Record<PromoterSubscription, string> = {
@@ -111,24 +112,27 @@ export function SubscriptionBadge({ sub }: { sub: PromoterSubscription }) {
 
 export function VerifiedBadge({ verified }: { verified: boolean }) {
   return verified ? (
-    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-info bg-opacity-10 text-info">✓ Verificada</span>
+    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-success-20 text-success border border-success-30">✓ Verificada</span>
   ) : (
-    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-textSecondary bg-opacity-10 text-textSecondary">Não verificada</span>
+    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-surfaceHover text-textSecondary border border-surfaceBorder">Não verificada</span>
   )
 }
 
 export function EventTypeBadge({ type }: { type: string }) {
   const typeConfig = {
-    'STANDARD': { label: 'Standard', color: 'bg-info bg-opacity-10 text-info' },
-    'PREMIUM_BALLAD': { label: 'Premium Ballad', color: 'bg-warning bg-opacity-10 text-warning' },
-    'NETWORK': { label: 'Network', color: 'bg-primary bg-opacity-10 text-primary' },
-    'OPEN': { label: 'Open', color: 'bg-success bg-opacity-10 text-success' }
+    'STANDARD': { label: 'Standard', bg: 'rgba(59, 130, 246, 0.15)', text: '#3b82f6' },
+    'PREMIUM_BALLAD': { label: 'Premium Ballad', bg: 'rgba(245, 158, 11, 0.15)', text: '#f59e0b' },
+    'NETWORK': { label: 'Network', bg: 'rgba(124, 58, 237, 0.15)', text: '#7c3aed' },
+    'OPEN': { label: 'Open', bg: 'rgba(16, 185, 129, 0.15)', text: '#10b981' }
   }
-  
+
   const config = typeConfig[type as keyof typeof typeConfig] || typeConfig['STANDARD']
-  
+
   return (
-    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${config.color}`}>
+    <span
+      className="text-xs font-semibold px-2 py-0.5 rounded-full"
+      style={{ backgroundColor: config.bg, color: config.text }}
+    >
       {config.label}
     </span>
   )
@@ -159,11 +163,38 @@ export function Label({ children }: { children: ReactNode }) {
 }
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const { className, ...rest } = props
   return (
     <input
-      {...props}
-      className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+      {...rest}
+      className={`w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition${className ? ` ${className}` : ''}`}
     />
+  )
+}
+
+interface InputIconProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  icon: React.ReactNode;
+  iconGradient?: boolean;
+}
+
+export function InputIcon({ icon, iconGradient = true, ...props }: InputIconProps) {
+  const { className, ...rest } = props
+  return (
+    <div className="relative">
+      <div
+        className={`absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center ${
+          iconGradient
+            ? 'bg-gradient-to-br from-primary to-accent text-white'
+            : 'bg-surfaceHover text-textSecondary'
+        }`}
+      >
+        {icon}
+      </div>
+      <input
+        {...rest}
+        className={`w-full border border-surfaceBorder rounded-xl pl-14 pr-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition${className ? ` ${className}` : ''}`}
+      />
+    </div>
   )
 }
 

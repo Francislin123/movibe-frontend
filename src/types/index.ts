@@ -41,7 +41,6 @@ export interface BaladaResponse {
 
 export interface EventResponse {
   id: string;
-  promoterId: string;
   hostBaladaId: string | null;
   type: EventType;
   title: string;
@@ -154,19 +153,20 @@ export interface UpdateMoviberRequest {
 }
 
 export interface CreateBaladaRequest {
-  ownerUserId: string;
+  /** @deprecated O backend define automaticamente baseado no usuário autenticado */
+  ownerUserId?: string;
   tradeName: string;
   cnpj?: string;
   email?: string;
   description?: string;
   cellPhoneNumber?: string;
+  telephoneNumber?: string;
   local?: string;
   link?: string;
 }
 
 export interface CreateEventRequest {
-  promoterId: string;
-  hostBaladaId?: string;
+  hostBaladaId: string;
   type: EventType;
   title: string;
   cep?: string;

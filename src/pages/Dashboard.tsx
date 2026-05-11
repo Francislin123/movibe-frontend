@@ -47,21 +47,21 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-1">Visão geral da plataforma Movibe</p>
+        <h1 className="text-2xl font-bold text-textPrimary">Dashboard</h1>
+        <p className="text-sm text-textSecondary mt-1">Visão geral da plataforma Movibe</p>
       </div>
 
       {error && <ErrorAlert message={error} />}
 
       {/* Health */}
       {health && (
-        <div className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl px-5 py-4 shadow-sm">
-          <span className={`w-2.5 h-2.5 rounded-full ${health.status === 'UP' ? 'bg-emerald-500' : 'bg-red-500'} animate-pulse`} />
+        <div className="flex items-center gap-3 bg-surface border border-surfaceBorder rounded-2xl px-5 py-4 shadow-sm">
+          <span className={`w-2.5 h-2.5 rounded-full ${health.status === 'UP' ? 'bg-success' : 'bg-error'} animate-pulse`} />
           <div>
-            <p className="text-sm font-semibold text-gray-800">{health.service}</p>
-            <p className="text-xs text-gray-400">Status: <span className={health.status === 'UP' ? 'text-emerald-600 font-semibold' : 'text-red-600 font-semibold'}>{health.status}</span></p>
+            <p className="text-sm font-semibold text-textPrimary">{health.service}</p>
+            <p className="text-xs text-textTertiary">Status: <span className={health.status === 'UP' ? 'text-success font-semibold' : 'text-error font-semibold'}>{health.status}</span></p>
           </div>
-          <span className="ml-auto text-xs text-gray-300 font-mono">localhost:8080</span>
+          <span className="ml-auto text-xs text-textTertiary font-mono">localhost:8080</span>
         </div>
       )}
 
