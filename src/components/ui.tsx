@@ -141,17 +141,21 @@ export function EventTypeBadge({ type }: { type: string }) {
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
 export function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
-  const colors: Record<string, string> = {
-    blue:    'from-info      to-info',
-    violet:  'from-primary   to-primary',
-    emerald: 'from-success   to-success',
-    amber:   'from-warning   to-warning',
-    rose:    'from-error     to-error',
+  const bgColors: Record<string, string> = {
+    blue:    'var(--color-info)',
+    violet:  'var(--color-primary)',
+    emerald: 'var(--color-success)',
+    amber:   'var(--color-warning)',
+    rose:    'var(--color-error)',
   }
+  const bg = bgColors[color] ?? bgColors.violet
   return (
-    <div className={`bg-gradient-to-br ${colors[color] ?? colors.violet} rounded-2xl p-5 text-textInverse shadow-theme`}>
-      <p className="text-sm opacity-80 font-medium">{label}</p>
-      <p className="text-3xl font-bold mt-1">{value}</p>
+    <div
+      className="rounded-2xl p-5 shadow-theme"
+      style={{ background: bg }}
+    >
+      <p className="text-sm font-medium" style={{ color: '#ffffff', opacity: 0.85 }}>{label}</p>
+      <p className="text-3xl font-bold mt-1" style={{ color: '#ffffff' }}>{value}</p>
     </div>
   )
 }
