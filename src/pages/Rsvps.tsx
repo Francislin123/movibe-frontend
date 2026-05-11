@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getRsvps, createRsvp } from '../services/api'
 import { Card, EmptyState, ErrorAlert, Field, Label, Input, Select, SubmitButton } from '../components/ui'
 import type { RsvpGoingResponse, CreateRsvpRequest, ApiError, RsvpIntention } from '../types'
 
-const INTENTION_LABEL: Record<RsvpIntention, string> = {
-  ONLY_DRINKS:  '🍹 Só beber',
-  FIND_PARTNER: '💘 Encontrar alguém',
-  JUST_DANCE:   '💃 Dançar',
-  NETWORK:      '🤝 Networking',
-  OPEN:         '✨ Aberto',
+function useIntentionLabels() {
+  const { t } = useTranslation()
+  return {
+    ONLY_DRINKS:  '🍹 ' + t('intentionDrinks'),
+    FIND_PARTNER: '💘 ' + t('intentionPartner'),
+    JUST_DANCE:   '💃 ' + t('intentionDance'),
+    NETWORK:      '🤝 ' + t('intentionNetwork'),
+    OPEN:         '✨ ' + t('intentionOpen'),
+  } as Record<RsvpIntention, string>
 }
 
 function fmtDate(value: string) {
@@ -23,6 +27,8 @@ function fmtDate(value: string) {
 }
 
 export default function Rsvps() {
+  const { t } = useTranslation()
+  const INTENTION_LABEL = useIntentionLabels()
   const [rsvps, setRsvps]     = useState<RsvpGoingResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState<string | null>(null)
@@ -57,28 +63,28 @@ export default function Rsvps() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-textPrimary">RSVPs — EU VOU</h1>
-        <p className="text-sm text-textSecondary mt-1">Confirmações de presença — ordenadas por data (DESC)</p>
+        <h1 className="text-2xl font-bold text-textPrimary">{t('rsvpTitle')}</h1>
+        <p className="text-sm text-textSecondary mt-1">{t('rsvpDesc')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Form */}
         <Card className="p-6 lg:col-span-1 h-fit">
-          <h2 className="text-sm font-bold text-textPrimary mb-4">Novo RSVP</h2>
+          <h2 className="text-sm font-bold text-textPrimary mb-4">{t('newRsvp')}</h2>
           <div className="bg-warning-20 border border-warning-30 rounded-xl px-4 py-3 mb-4 text-xs text-warning">
-            ⚠ Usuário deve estar <strong>ACTIVE</strong>. RSVP não permitido após o fim do evento.
+            ⚠ {t('rsvpWarning')}
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>User ID *</Label>
-              <Input required value={form.userId} onChange={e => setForm(f => ({ ...f, userId: e.target.value }))} placeholder="UUID do usuário" />
+              <Label>{t('userId')} *</Label>
+              <Input required value={form.userId} onChange={e => setForm(f => ({ ...f, userId: e.target.value }))} placeholder={t('placeholderUuid')} />
             </div>
             <div>
-              <Label>Event ID *</Label>
-              <Input required value={form.eventId} onChange={e => setForm(f => ({ ...f, eventId: e.target.value }))} placeholder="UUID do evento" />
+              <Label>{t('eventId')} *</Label>
+              <Input required value={form.eventId} onChange={e => setForm(f => ({ ...f, eventId: e.target.value }))} placeholder={t('placeholderUuid')} />
             </div>
             <div>
-              <Label>Intenção *</Label>
+              <Label>{t('intention')} *</Label>
               <Select value={form.intention} onChange={e => setForm(f => ({ ...f, intention: e.target.value as RsvpIntention }))}>
                 {(Object.keys(INTENTION_LABEL) as RsvpIntention[]).map(k => (
                   <option key={k} value={k}>{INTENTION_LABEL[k]}</option>
@@ -87,15 +93,15 @@ export default function Rsvps() {
             </div>
             {formError && <ErrorAlert message={formError} />}
             {success && <div className="text-xs bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-4 py-3 break-all">{success}</div>}
-            <SubmitButton loading={saving}>Confirmar EU VOU</SubmitButton>
+            <SubmitButton loading={saving}>{t('rsvpConfirm')}</SubmitButton>
           </form>
         </Card>
 
         {/* List */}
         <div className="lg:col-span-2 space-y-3">
-          {loading && <p className="text-sm text-textTertiary text-center py-10">Carregando…</p>}
+          {loading && <p className="text-sm text-textTertiary text-center py-10">{t('loadingData')}</p>}
           {error && <ErrorAlert message={error} />}
-          {!loading && !error && rsvps.length === 0 && <EmptyState label="Nenhum RSVP registrado ainda." />}
+          {!loading && !error && rsvps.length === 0 && <EmptyState label={t('noEntity', { entity: 'RSVP' })} />}
           {rsvps.map(r => (
             <Card key={r.id} className="p-4">
               <div className="flex items-center justify-between gap-2">
@@ -103,11 +109,11 @@ export default function Rsvps() {
                   <p className="font-semibold text-textPrimary">{INTENTION_LABEL[r.intention]}</p>
                   <p className="text-xs text-textTertiary mt-0.5">RSVP #{r.id} · {fmtDate(r.decidedAt)}</p>
                 </div>
-                <span className="text-xs bg-error-20 text-error border border-error-30 font-semibold px-2 py-0.5 rounded-full">EU VOU</span>
+                <span className="text-xs bg-error-20 text-error border border-error-30 font-semibold px-2 py-0.5 rounded-full">{t('rsvpConfirm')}</span>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-y-2">
-                <Field label="User ID" value={<span className="font-mono text-xs break-all">{r.userId}</span>} />
-                <Field label="Event ID" value={<span className="font-mono text-xs break-all">{r.eventId}</span>} />
+                <Field label={t('userId')} value={<span className="font-mono text-xs break-all">{r.userId}</span>} />
+                <Field label={t('eventId')} value={<span className="font-mono text-xs break-all">{r.eventId}</span>} />
               </div>
             </Card>
           ))}

@@ -181,7 +181,6 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
 
               <div className="flex-1 min-w-0">
                 <h3 className="text-base font-semibold text-textPrimary truncate">{balada.tradeName}</h3>
-                <p className="text-xs text-textTertiary font-mono mt-1 break-all">{balada.id}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}

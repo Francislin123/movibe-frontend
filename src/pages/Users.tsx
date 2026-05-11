@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useTranslation } from 'react-i18next';
 import { getUsers, searchUsers, createUser, updateAvatar } from "../services/api";
 import {
   Card,
@@ -49,7 +50,7 @@ function Avatar({
         ? "w-9  h-9  text-xs"
         : "w-11 h-11 text-sm";
 
-  const initials = (user.displayName || "Usuário")
+  const initials = (user.displayName || "U")
     .split(" ")
     .slice(0, 2)
     .map((n) => n[0])
@@ -60,7 +61,7 @@ function Avatar({
     return (
       <img
         src={user.image}
-        alt={user.displayName || "Usuário sem nome"}
+        alt={user.displayName || ""}
         className={`${dim} rounded-xl object-cover shrink-0 ring-2 ring-surface shadow-theme`}
       />
     );
@@ -216,10 +217,11 @@ function UserRowStatusBadge({
   status?: UserStatus | string | null;
   selected?: boolean;
 }) {
+  const { t } = useTranslation();
   const statusConfig: Record<string, { label: string }> = {
-    ACTIVE: { label: "Ativo" },
-    INACTIVE: { label: "Inativo" },
-    SUSPENDED: { label: "Suspenso" },
+    ACTIVE: { label: t('active') },
+    INACTIVE: { label: t('inactive') },
+    SUSPENDED: { label: t('suspended') },
   };
 
   // fallback seguro
@@ -231,7 +233,7 @@ function UserRowStatusBadge({
     <span
       className={`text-xs font-semibold ${selected ? "text-white" : "text-textSecondary"}`}
     >
-      {config?.label ?? "Desconhecido"}
+      {config?.label ?? t('unknown')}
     </span>
   );
 }
@@ -265,7 +267,7 @@ function UserRow({
           {user.displayName || "Usuário sem nome"}
         </p>
         <p className={`text-xs truncate mt-0.5 ${selected ? "text-white font-medium" : "text-textTertiary hover:text-textPrimary"}`}>
-          {user.email ?? user.cellPhoneNumber ?? user.id.slice(0, 16) + "…"}
+          {user.email ?? user.cellPhoneNumber ?? "—"}
         </p>
       </div>
       <UserRowStatusBadge status={user.status} selected={selected} />
@@ -297,10 +299,11 @@ function UserDetail({
   user: UserResponse;
   onEdit: (u: UserResponse) => void;
 }) {
+  const { t } = useTranslation();
   const statusLabels: Record<string, string> = {
-    ACTIVE: 'Ativo',
-    INACTIVE: 'Inativo',
-    SUSPENDED: 'Suspenso',
+    ACTIVE: t('active'),
+    INACTIVE: t('inactive'),
+    SUSPENDED: t('suspended'),
   };
 
   return (
@@ -312,16 +315,13 @@ function UserDetail({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-textPrimary leading-tight truncate">
-                {user.displayName || "Usuário sem nome"}
+                {user.displayName || "—"}
               </h2>
               <p className="text-xs font-mono text-textTertiary mt-0.5 flex items-center gap-1">
                 <svg className="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z" />
                 </svg>
-                Idade: {calculateAge(user.birthDate) ?? "—"} {calculateAge(user.birthDate) && "anos"}
-              </p>
-              <p className="text-xs font-mono text-textTertiary mt-0.5 break-all">
-                {user.id}
+                {t('age')}: {calculateAge(user.birthDate) ?? "—"} {calculateAge(user.birthDate) ? t('years') : ""}
               </p>
             </div>
             <button
@@ -341,7 +341,7 @@ function UserDetail({
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              Editar
+              {t('edit')}
             </button>
           </div>
         </div>
@@ -353,23 +353,23 @@ function UserDetail({
       {/* Campos padronizados com bordas roxas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
         <ReadOnlyField
-          label="Status"
-          value={statusLabels[user.status as UserStatus] ?? "Desconhecido"}
+          label={t('status')}
+          value={statusLabels[user.status as UserStatus] ?? t('unknown')}
         />
-        <ReadOnlyField label="E-mail" value={<EmailLink email={user.email} />} />
-        <ReadOnlyField label="CEP" value={user.cep || "—"} />
-        <ReadOnlyField label="Celular" value={<WhatsAppLink phone={user.cellPhoneNumber} />} />
+        <ReadOnlyField label={t('email')} value={<EmailLink email={user.email} />} />
+        <ReadOnlyField label={t('cep')} value={user.cep || "—"} />
+        <ReadOnlyField label={t('cellPhone')} value={<WhatsAppLink phone={user.cellPhoneNumber} />} />
 
         {user.birthDate && (
           <ReadOnlyField 
-            label="Data de Nascimento" 
+            label={t('birthDate')} 
             value={fmtBirthDate(user.birthDate)} 
           />
         )}
 
         {user.link && (
           <ReadOnlyField 
-            label="Instagram" 
+            label={t('instagram')} 
             value={<InstagramLink link={user.link} />}
           />
         )}
@@ -377,7 +377,7 @@ function UserDetail({
         {user.description && (
           <div className="sm:col-span-2">
             <ReadOnlyTextarea 
-              label="Bio" 
+              label={t('bio')} 
               value={user.description} 
             />
           </div>
@@ -390,6 +390,7 @@ function UserDetail({
 // ─── Empty detail placeholder ─────────────────────────────────────────────────
 
 function DetailPlaceholder() {
+  const { t } = useTranslation();
   return (
     <div className="h-full flex flex-col items-center justify-center text-gray-300 gap-3 py-16">
       <svg
@@ -406,7 +407,7 @@ function DetailPlaceholder() {
         />
       </svg>
       <p className="text-sm font-medium">
-        Selecione um usuário para ver os detalhes
+        {t('selectToView', { entity: t('nav.users') })}
       </p>
     </div>
   );
@@ -415,6 +416,7 @@ function DetailPlaceholder() {
 // ─── Create form (colapsável no topo) ────────────────────────────────────────
 
 function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<CreateUserRequest>({
     displayName: "",
@@ -438,12 +440,12 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
 
     // Validação básica
     if (!file.type.startsWith('image/')) {
-      setFormError('Por favor, selecione um arquivo de imagem válido');
+      setFormError('Invalid image file');
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) { // 5MB
-      setFormError('A imagem deve ter no máximo 5MB');
+      setFormError(t('maxSize'));
       return;
     }
 
@@ -466,7 +468,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
         created = await updateAvatar(created.id, imageFile);
       }
       
-      setSuccess(`Usuário "${created.displayName}" criado!`);
+      setSuccess(`${t('nav.users')} "${created.displayName}" ${t('created')}!`);
       setForm({ displayName: "", status: "ACTIVE", link: "", birthDate: "" });
       setImageFile(null);
       setImagePreview(null);
@@ -506,7 +508,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
             </svg>
           </span>
           <span className="text-sm font-semibold text-textPrimary">
-            Novo Usuário
+            {t('newEntity', { entity: t('nav.users') })}
           </span>
         </div>
         <svg
@@ -553,7 +555,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                       fileRef.current?.click();
                     }}
                     className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary hover:bg-primaryHover text-textInverse flex items-center justify-center shadow-md transition"
-                    title="Adicionar foto"
+                    title={t('clickToAddPhoto')}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -568,13 +570,13 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                   />
                 </div>
                 <div className="flex flex-col items-start">
-                  <p className="text-sm font-semibold text-textPrimary">+ Foto de perfil</p>
+                  <p className="text-sm font-semibold text-textPrimary">+ {t('clickToChangePhoto')}</p>
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
                     className="mt-1.5 text-xs text-primary hover:text-primaryHover font-medium transition"
                   >
-                    {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto'}
+                    {imageFile ? `✓ ${imageFile.name}` : t('clickToAddPhoto')}
                   </button>
                   {imageFile && (
                     <p className="text-xs text-textTertiary mt-0.5">
@@ -587,18 +589,18 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 items-end">
               <div>
-                <Label>Nome de exibição *</Label>
+                <Label>{t('displayName')} *</Label>
                 <Input
                   required
                   value={form.displayName}
                   onChange={(e) =>
                     setForm((f) => ({ ...f, displayName: e.target.value }))
                   }
-                  placeholder="Digite o nome completo"
+                  placeholder={t('placeholderName')}
                 />
               </div>
               <div>
-                <Label>Status *</Label>
+                <Label>{t('status')} *</Label>
                 <Select
                   value={form.status}
                   onChange={(e) =>
@@ -608,12 +610,12 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                     }))
                   }
                 >
-                  <option value="ACTIVE">✅ Ativo</option>
-                  <option value="SUSPENDED">🚫 Suspenso</option>
+                  <option value="ACTIVE">{t('statusActive')}</option>
+                  <option value="SUSPENDED">{t('statusSuspended')}</option>
                 </Select>
               </div>
               <div>
-                <Label>E-mail</Label>
+                <Label>{t('email')}</Label>
                 <Input
                   type="email"
                   value={form.email ?? ""}
@@ -623,11 +625,11 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                       email: e.target.value || undefined,
                     }))
                   }
-                  placeholder="Digite o e-mail"
+                  placeholder={t('placeholderEmail')}
                 />
               </div>
               <div>
-                <Label>Celular</Label>
+                <Label>{t('cellPhone')}</Label>
                 <Input
                   value={formatPhone(form.cellPhoneNumber)}
                   onChange={(e) => {
@@ -637,12 +639,12 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                       cellPhoneNumber: value || undefined,
                     }));
                   }}
-                  placeholder="(11) 99999-9999"
+                  placeholder={t('placeholderPhone')}
                   maxLength={15}
                 />
               </div>
               <div>
-                <Label>Instagram</Label>
+                <Label>{t('instagram')}</Label>
                 <Input
                   value={form.link ?? ""}
                   onChange={(e) =>
@@ -651,11 +653,11 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                       link: e.target.value || undefined,
                     }))
                   }
-                  placeholder="@username"
+                  placeholder={t('placeholderInstagram')}
                 />
               </div>
               <div>
-                <Label>Data de Nascimento</Label>
+                <Label>{t('birthDate')}</Label>
                 <Input
                   type="date"
                   value={form.birthDate ?? ""}
@@ -668,12 +670,12 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                 />
               </div>
               <div>
-                <SubmitButton loading={saving}>Criar usuário</SubmitButton>
+                <SubmitButton loading={saving}>{t('createEntity', { entity: t('nav.users') })}</SubmitButton>
               </div>
             </div>
 
             <div className="mt-4">
-              <Label>Bio</Label>
+              <Label>{t('bio')}</Label>
               <Textarea
                 value={form.description ?? ""}
                 onChange={(e) =>
@@ -682,7 +684,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                     description: e.target.value || undefined,
                   }))
                 }
-                placeholder="Digite uma breve descrição sobre o usuário..."
+                placeholder={t('placeholderDesc')}
                 rows={3}
               />
             </div>
@@ -713,6 +715,7 @@ function SearchInput({
   onSearch: (query: string) => void; 
   loading: boolean; 
 }) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
 
   // Debounce de 500ms para evitar múltiplas requisições
@@ -756,7 +759,7 @@ function SearchInput({
         type="text"
         value={query}
         onChange={handleChange}
-        placeholder="Buscar por nome, e-mail ou celular..."
+        placeholder={t('searchBy')}
         className="w-full pl-10 pr-4 py-2.5 border border-surfaceBorder rounded-xl bg-surface text-sm text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-150"
       />
       {loading && (
@@ -789,6 +792,7 @@ function SearchInput({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function Users() {
+  const { t } = useTranslation();
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -845,10 +849,9 @@ export default function Users() {
       {/* ── Page header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">Usuários</h1>
+          <h1 className="text-3xl font-bold text-white">{t('nav.users')}</h1>
           <p className="text-sm text-gray-400 mt-1">
-            Contas base da plataforma · {users.length} cadastrado
-            {users.length !== 1 ? "s" : ""}
+            {users.length === 1 ? t('entityCount', { count: users.length }) : t('entityCountPlural', { count: users.length })}
           </p>
         </div>
       </div>
@@ -886,12 +889,12 @@ export default function Users() {
                   d="M4 12a8 8 0 018-8v8H4z"
                 />
               </svg>
-              <span className="text-sm font-medium">Carregando…</span>
+              <span className="text-sm font-medium">{t('loadingData')}</span>
             </div>
           )}
           {!loading && error && <ErrorAlert message={error} />}
           {!loading && !error && users.length === 0 && (
-            <EmptyState label="Nenhum usuário cadastrado ainda." />
+            <EmptyState label={t('noEntity', { entity: t('nav.users') })} />
           )}
           {users.map((u) => (
             <UserRow

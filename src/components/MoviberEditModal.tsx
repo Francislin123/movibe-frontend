@@ -259,7 +259,6 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                   <h3 className="text-base font-semibold text-textPrimary truncate">{displayName || 'Sem nome'}</h3>
                   <SubscriptionBadge sub={form.subscription} />
                 </div>
-                <p className="text-xs text-textTertiary font-mono mt-1 break-all">{moviber.id}</p>
                 {linkedUser && (
                   <p className="text-xs text-textSecondary mt-1">
                     Vinculado a: <span className="text-primary">{linkedUser.displayName}</span>

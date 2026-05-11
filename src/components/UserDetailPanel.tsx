@@ -196,11 +196,6 @@ export function UserDetailPanel({ user, onClose, onEdit, className = '' }: UserD
                 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-surfaceBorder">
-                    <span className="text-sm text-textTertiary">ID</span>
-                    <span className="text-sm font-mono text-textSecondary">{user.id.slice(0, 8)}...</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center py-2 border-b border-surfaceBorder">
                     <span className="text-sm text-textTertiary">Status</span>
                     <UserStatusBadge status={user.status} />
                   </div>

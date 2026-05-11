@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getBaladas, searchBaladas, createBaladaWithImage, getEventsByBalada, getBaladaById } from '../services/api'
 import { Card, EmptyState, ErrorAlert, Field, VerifiedBadge, Label, Input, InputIcon, Spinner, EventTypeBadge } from '../components/ui'
 import SearchInput from '../components/SearchInput'
@@ -183,12 +184,12 @@ function EmailBadge({ email }: { email: string | null }) {
 }
 
 // Botão de edição (padronizado com Users.tsx)
-function EditButton({ onClick }: { onClick: () => void }) {
+function EditButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 text-xs font-medium transition-all duration-150 shrink-0"
-      title="Editar balada"
+      title={label}
     >
       <svg
         className="w-3.5 h-3.5"
@@ -203,12 +204,13 @@ function EditButton({ onClick }: { onClick: () => void }) {
           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
         />
       </svg>
-      Editar
+      {label}
     </button>
   )
 }
 
 export default function Baladas() {
+  const { t } = useTranslation()
   const [baladas, setBaladas] = useState<BaladaResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState<string | null>(null)
@@ -299,12 +301,12 @@ export default function Baladas() {
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setFormError('Por favor, selecione um arquivo de imagem válido')
+      setFormError('Invalid image file')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setFormError('A imagem deve ter no máximo 5MB')
+      setFormError(t('maxSize'))
       return
     }
 
@@ -325,7 +327,7 @@ export default function Baladas() {
     setSaving(true); setFormError(null); setSuccess(null)
     try {
       const created = await createBaladaWithImage(form, imageFile)
-      setSuccess(`Balada "${created.tradeName}" criada! ID: ${created.id}`)
+      setSuccess(`${t('nav.baladas')} "${created.tradeName}" ${t('created')}!`)
       resetForm()
       load()
       setTimeout(() => {
@@ -342,8 +344,8 @@ export default function Baladas() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-textPrimary">Baladas</h1>
-        <p className="text-sm text-textSecondary mt-1">Estabelecimentos cadastrados — ordenados por nome</p>
+        <h1 className="text-2xl font-bold text-textPrimary">{t('nav.baladas')}</h1>
+        <p className="text-sm text-textSecondary mt-1">{t('searchByBalada')}</p>
       </div>
 
       {/* ─── Formulário de Criação ─── */}
@@ -370,7 +372,7 @@ export default function Baladas() {
               </svg>
             </span>
             <span className="text-sm font-semibold text-textPrimary">
-              Nova Balada
+              {t('newEntity', { entity: t('nav.baladas') })}
             </span>
           </div>
           <svg
@@ -417,7 +419,7 @@ export default function Baladas() {
                         fileRef.current?.click();
                       }}
                       className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary hover:bg-primaryHover text-textInverse flex items-center justify-center shadow-md transition"
-                      title="Adicionar foto"
+                      title={t('clickToAddPhoto')}
                     >
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -432,13 +434,13 @@ export default function Baladas() {
                     />
                   </div>
                   <div className="flex flex-col items-start">
-                    <p className="text-sm font-semibold text-textPrimary">+ Foto da Balada</p>
+                    <p className="text-sm font-semibold text-textPrimary">+ {t('clickToChangePhoto')}</p>
                     <button
                       type="button"
                       onClick={() => fileRef.current?.click()}
                       className="mt-1.5 text-xs text-primary hover:text-primaryHover font-medium transition"
                     >
-                      {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto'}
+                      {imageFile ? `✓ ${imageFile.name}` : t('clickToAddPhoto')}
                     </button>
                     {imageFile && (
                       <p className="text-xs text-textTertiary mt-0.5">
@@ -452,11 +454,11 @@ export default function Baladas() {
               {/* ── FORM FIELDS ── */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <Label>Nome fantasia *</Label>
-                  <Input required value={form.tradeName} onChange={e => setForm(f => ({ ...f, tradeName: e.target.value }))} placeholder="Ex: Club Infinity" />
+                  <Label>{t('tradeName')} *</Label>
+                  <Input required value={form.tradeName} onChange={e => setForm(f => ({ ...f, tradeName: e.target.value }))} placeholder={t('placeholderTradeName')} />
                 </div>
                 <div>
-                  <Label>E-mail</Label>
+                  <Label>{t('email')}</Label>
                   <InputIcon
                     icon={
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -466,23 +468,23 @@ export default function Baladas() {
                     type="email"
                     value={form.email ?? ''}
                     onChange={set('email')}
-                    placeholder="contato@empresa.com"
+                    placeholder={t('placeholderEmail')}
                   />
                 </div>
                 <div>
-                  <Label>CNPJ</Label>
+                  <Label>{t('cnpj')}</Label>
                   <Input 
                     value={formatCNPJ(form.cnpj)} 
                     onChange={(e) => {
                       const value = e.target.value.replace(/\D/g, '')
                       setForm(f => ({ ...f, cnpj: value || undefined }))
                     }} 
-                    placeholder="00.000.000/0000-00" 
+                    placeholder={t('placeholderCnpj')} 
                     maxLength={18}
                   />
                 </div>
                 <div>
-                  <Label>Telefone</Label>
+                  <Label>{t('phone')}</Label>
                   <Input 
                     value={formatPhone(form.telephoneNumber)} 
                     onChange={(e) => {
@@ -494,7 +496,7 @@ export default function Baladas() {
                   />
                 </div>
                 <div>
-                  <Label>Celular</Label>
+                  <Label>{t('cellPhone')}</Label>
                   <InputIcon
                     icon={
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -506,20 +508,20 @@ export default function Baladas() {
                       const value = e.target.value.replace(/\D/g, '')
                       setForm(f => ({ ...f, cellPhoneNumber: value || undefined }))
                     }}
-                    placeholder="(11) 00000-0000"
+                    placeholder={t('placeholderPhone')}
                     maxLength={15}
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <Label>Logradouro</Label>
-                  <Input value={form.local ?? ''} onChange={set('local')} placeholder="Rua, bairro, cidade" />
+                  <Label>{t('address')}</Label>
+                  <Input value={form.local ?? ''} onChange={set('local')} placeholder={t('placeholderLocal')} />
                 </div>
                 <div className="md:col-span-2">
-                  <Label>Descrição</Label>
-                  <Input value={form.description ?? ''} onChange={set('description')} placeholder="Breve descrição da balada…" />
+                  <Label>{t('description')}</Label>
+                  <Input value={form.description ?? ''} onChange={set('description')} placeholder={t('placeholderDesc')} />
                 </div>
                 <div className="md:col-span-2">
-                  <Label>Instagram</Label>
+                  <Label>{t('instagram')}</Label>
                   <InputIcon
                     icon={
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -531,7 +533,7 @@ export default function Baladas() {
                       const formatted = formatInstagramInput(e.target.value)
                       setForm(f => ({ ...f, link: formatted || undefined }))
                     }}
-                    placeholder="@nomedabalada ou https://instagram.com/nomedabalada"
+                    placeholder={t('placeholderInstagram')}
                   />
                 </div>
               </div>
@@ -550,7 +552,7 @@ export default function Baladas() {
                   disabled={saving}
                   className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
                 >
-                  Cancelar
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
@@ -560,14 +562,14 @@ export default function Baladas() {
                   {saving ? (
                     <>
                       <Spinner size={4} />
-                      <span>Criando...</span>
+                      <span>{t('creating')}</span>
                     </>
                   ) : (
                     <>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      <span>Criar Balada</span>
+                      <span>{t('createBalada')}</span>
                     </>
                   )}
                 </button>
@@ -582,15 +584,15 @@ export default function Baladas() {
         <SearchInput 
           onSearch={handleSearch} 
           loading={loading} 
-          placeholder="Buscar por CNPJ, e-mail ou nome fantasia..." 
+          placeholder={t('searchByBalada')} 
         />
       </Card>
 
       {/* ─── Lista de Baladas ─── */}
       <div className="space-y-3">
-        {loading && <p className="text-sm text-gray-400 text-center py-10">Carregando…</p>}
+        {loading && <p className="text-sm text-gray-400 text-center py-10">{t('loadingData')}</p>}
         {error && <ErrorAlert message={error} />}
-        {!loading && !error && baladas.length === 0 && <EmptyState label="Nenhuma balada cadastrada ainda." />}
+        {!loading && !error && baladas.length === 0 && <EmptyState label={t('noEntity', { entity: t('nav.baladas') })} />}
         {baladas.map(b => (
           <Card
             key={b.id}
@@ -617,22 +619,22 @@ export default function Baladas() {
                   </div>
                   <div className="flex items-center gap-2">
                     <VerifiedBadge verified={b.verified} />
-                    <EditButton onClick={() => handleEdit(b)} />
+                    <EditButton onClick={() => handleEdit(b)} label={t('edit')} />
                   </div>
                 </div>
 
                 <div className="mt-4 p-4 rounded-xl border border-primary/20 bg-surface/50">
                   <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                    <Field label="CNPJ" value={<CNPJBadge cnpj={b.cnpj || null} />} />
-                    <Field label="E-mail" value={<EmailBadge email={b.email || null} />} />
-                    <Field label="Instagram" value={<InstagramLink link={b.link || null} />} />
-                    <Field label="Celular" value={<WhatsAppLink phone={b.cellPhoneNumber || null} />} />
+                    <Field label={t('cnpj')} value={<CNPJBadge cnpj={b.cnpj || null} />} />
+                    <Field label={t('email')} value={<EmailBadge email={b.email || null} />} />
+                    <Field label={t('instagram')} value={<InstagramLink link={b.link || null} />} />
+                    <Field label={t('cellPhone')} value={<WhatsAppLink phone={b.cellPhoneNumber || null} />} />
                   </div>
                 </div>
 
                 {b.description && (
                   <div className="mt-4 p-3 rounded-xl bg-primary/5 border-l-4 border-primary">
-                    <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1.5">Descrição</p>
+                    <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1.5">{t('description')}</p>
                     <p className="text-sm text-textSecondary leading-relaxed line-clamp-3">{b.description}</p>
                   </div>
                 )}
@@ -650,7 +652,7 @@ export default function Baladas() {
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    Eventos ({b.hostedEventIds?.length ?? 0})
+                    {t('events')} ({b.hostedEventIds?.length ?? 0})
                     <svg
                       className={`w-3 h-3 transition-transform duration-200 ${expandedBaladaId === b.id ? 'rotate-180' : ''}`}
                       fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -662,12 +664,12 @@ export default function Baladas() {
                   <button
                     onClick={() => setCreatingEventFor(b)}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 text-xs font-medium transition-all duration-150 shrink-0"
-                    title="Criar evento para esta balada"
+                    title={t('createEvent')}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                     </svg>
-                    Criar Evento
+                    {t('createEvent')}
                   </button>
                 </div>
               </div>
@@ -678,12 +680,12 @@ export default function Baladas() {
               <div className="mt-4 border-t border-surfaceBorder/60 pt-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-semibold text-textTertiary uppercase tracking-wider">
-                    Eventos da balada
+                    {t('baladaEvents')}
                   </p>
                   <button
                     onClick={() => refreshBaladaEvents(b.id)}
                     className="p-1 rounded-lg hover:bg-surfaceHover text-textTertiary hover:text-textSecondary transition"
-                    title="Atualizar lista"
+                    title={t('refreshList')}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -697,7 +699,7 @@ export default function Baladas() {
                     return (
                       <div className="flex items-center justify-center py-6">
                         <Spinner size={5} />
-                        <span className="ml-2 text-xs text-textTertiary">Carregando eventos…</span>
+                        <span className="ml-2 text-xs text-textTertiary">{t('loadingData')}</span>
                       </div>
                     )
                   }
@@ -707,7 +709,7 @@ export default function Baladas() {
                   if (cache.events.length === 0) {
                     return (
                       <p className="text-xs text-textTertiary text-center py-6">
-                        Nenhum evento cadastrado para esta balada.
+                        {t('noEntity', { entity: t('nav.events') })}.
                       </p>
                     )
                   }
@@ -743,7 +745,7 @@ export default function Baladas() {
                             <button
                               onClick={() => setEditingEvent(ev)}
                               className="p-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 transition-all duration-150"
-                              title="Editar evento"
+                              title={t('editEvent')}
                             >
                               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

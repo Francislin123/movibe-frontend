@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getHealth, getBaladas, getEvents, getMovibers, getUsers, getRsvps } from '../services/api'
 import { StatCard, ErrorAlert } from '../components/ui'
 import type { HealthResponse } from '../types'
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   const [health, setHealth] = useState<HealthResponse | null>(null)
   const [counts, setCounts] = useState({ baladas: 0, events: 0, movibers: 0, users: 0, rsvps: 0 })
   const [loading, setLoading] = useState(true)
@@ -39,7 +41,7 @@ export default function Dashboard() {
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
         </svg>
-        <span className="text-sm font-medium">Carregando dados…</span>
+        <span className="text-sm font-medium">{t('loading')}</span>
       </div>
     )
 
@@ -47,8 +49,8 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-textPrimary">Bem-vindo ao Movibe 👋</h1>
-        <p className="text-sm text-textSecondary mt-1">Visão geral da plataforma</p>
+        <h1 className="text-2xl font-bold text-textPrimary">{t('welcome')}</h1>
+        <p className="text-sm text-textSecondary mt-1">{t('overview')}</p>
       </div>
 
       {error && <ErrorAlert message={error} />}
@@ -59,7 +61,7 @@ export default function Dashboard() {
           <span className={`w-2.5 h-2.5 rounded-full ${health.status === 'UP' ? 'bg-success' : 'bg-error'} animate-pulse`} />
           <div>
             <p className="text-sm font-semibold text-textPrimary">{health.service}</p>
-            <p className="text-xs text-textTertiary">Status: <span className={health.status === 'UP' ? 'text-success font-semibold' : 'text-error font-semibold'}>{health.status}</span></p>
+            <p className="text-xs text-textTertiary">{t('healthStatus')}: <span className={health.status === 'UP' ? 'text-success font-semibold' : 'text-error font-semibold'}>{health.status}</span></p>
           </div>
           <span className="ml-auto text-xs text-textTertiary font-mono">localhost:8080</span>
         </div>
@@ -67,11 +69,11 @@ export default function Dashboard() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <StatCard label="Baladas" value={counts.baladas} color="blue" />
-        <StatCard label="Eventos" value={counts.events} color="amber" />
-        <StatCard label="Movibers" value={counts.movibers} color="violet" />
-        <StatCard label="Usuários" value={counts.users} color="emerald" />
-        <StatCard label="RSVPs" value={counts.rsvps} color="rose" />
+        <StatCard label={t('stats.baladas')} value={counts.baladas} color="blue" />
+        <StatCard label={t('stats.events')} value={counts.events} color="amber" />
+        <StatCard label={t('stats.movibers')} value={counts.movibers} color="violet" />
+        <StatCard label={t('stats.users')} value={counts.users} color="emerald" />
+        <StatCard label={t('stats.rsvps')} value={counts.rsvps} color="rose" />
       </div>
     </div>
   )

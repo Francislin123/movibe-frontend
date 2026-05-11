@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ThemeSelector } from "./components/ThemeSelector";
+import { LanguageSelector } from "./components/LanguageSelector";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import Movibers from "./pages/Movibers";
@@ -12,13 +14,13 @@ import Rsvps from "./pages/Rsvps";
 
 type Page = "dashboard" | "users" | "movibers" | "baladas" | "events" | "rsvps";
 
-const NAV: { id: Page; label: string; emoji: string; color: string }[] = [
-  { id: "dashboard", label: "Dashboard", emoji: "📊", color: "text-textSecondary" },
-  { id: "users", label: "Usuários", emoji: "👤", color: "text-emerald-600" },
-  { id: "movibers", label: "Movibers", emoji: "🎧", color: "text-primary" },
-  { id: "baladas", label: "Baladas", emoji: "🏠", color: "text-blue-600" },
-  { id: "events", label: "Eventos", emoji: "🎉", color: "text-amber-600" },
-  { id: "rsvps", label: "RSVPs", emoji: "✅", color: "text-rose-600" },
+const NAV: { id: Page; emoji: string; color: string }[] = [
+  { id: "dashboard", emoji: "📊", color: "text-textSecondary" },
+  { id: "users", emoji: "👤", color: "text-emerald-600" },
+  { id: "movibers", emoji: "🎧", color: "text-primary" },
+  { id: "baladas", emoji: "🏠", color: "text-blue-600" },
+  { id: "events", emoji: "🎉", color: "text-amber-600" },
+  { id: "rsvps", emoji: "✅", color: "text-rose-600" },
 ];
 
 const PAGE_MAP: Record<Page, React.ReactNode> = {
@@ -33,6 +35,7 @@ const PAGE_MAP: Record<Page, React.ReactNode> = {
 // ─── App ──────────────────────────────────────────────────────────────────────
 
 export default function App() {
+  const { t } = useTranslation();
   const [page, setPage] = useState<Page>("dashboard");
   const [sideOpen, setSideOpen] = useState(false);
 
@@ -164,7 +167,7 @@ export default function App() {
                   </span>
 
                   {/* Label */}
-                  <span className="relative z-10">{n.label}</span>
+                  <span className="relative z-10">{t('nav.' + n.id)}</span>
 
                   {/* Dot no item ativo */}
                   {isActive && (
@@ -190,7 +193,10 @@ export default function App() {
               boxShadow: 'inset 0 1px 0 rgba(124,58,237,0.08)',
             }}
           >
-            <ThemeSelector />
+            <div className="space-y-2">
+              <ThemeSelector />
+              <LanguageSelector />
+            </div>
           </div>
         </aside>
 
@@ -218,7 +224,7 @@ export default function App() {
             </button>
             <p className="text-sm font-bold text-textPrimary">
               {NAV.find((n) => n.id === page)?.emoji}{" "}
-              {NAV.find((n) => n.id === page)?.label}
+              {t('nav.' + page)}
             </p>
           </header>
 

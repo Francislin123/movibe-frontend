@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { updateUser, updateAvatar } from '../services/api'
 import { ErrorAlert, Input, Label, Select, Spinner } from './ui'
 import type { ApiError, UpdateUserRequest, UserResponse, UserStatus } from '../types'
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function UserEditModal({ user, onClose, onSaved }: Props) {
+  const { t } = useTranslation()
   // ── form state ──────────────────────────────────────────────────────────────
   const [form, setForm] = useState<UpdateUserRequest>({
     displayName:    user.displayName,
@@ -103,7 +105,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-surfaceBorder">
-          <h2 className="text-base font-bold text-textPrimary">Editar Usuário</h2>
+          <h2 className="text-base font-bold text-textPrimary">{t('editEntity', { entity: t('nav.users') })}</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-surfaceHover text-textSecondary hover:text-textPrimary transition"
@@ -138,7 +140,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-primary hover:bg-primaryHover text-textInverse flex items-center justify-center shadow-md transition"
-                  title="Trocar foto"
+                  title={t('changeImage')}
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5}
@@ -157,13 +159,12 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
 
               <div className="flex flex-col items-start">
                 <p className="text-sm font-semibold text-textPrimary">{user.displayName}</p>
-                <p className="text-xs text-textTertiary font-mono mt-0.5 break-all">{user.id}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="mt-1.5 text-xs text-primary hover:text-primaryHover font-medium transition"
                 >
-                  {avatarFile ? `✓ ${avatarFile.name}` : 'Clique para trocar a foto de perfil'}
+                  {avatarFile ? `✓ ${avatarFile.name}` : t('clickToChangePhoto')}
                 </button>
                 {avatarFile && (
                   <p className="text-xs text-textTertiary mt-0.5">
@@ -179,49 +180,49 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
             {/* ── Dados principais ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <Label>Nome de exibição *</Label>
-                <Input required value={form.displayName} onChange={f('displayName')} placeholder="Nome completo" />
+                <Label>{t('displayName')} *</Label>
+                <Input required value={form.displayName} onChange={f('displayName')} placeholder={t('placeholderName')} />
               </div>
 
               <div>
-                <Label>Status *</Label>
+                <Label>{t('status')} *</Label>
                 <Select
                   value={form.status}
                   onChange={e => setForm(p => ({ ...p, status: e.target.value as UserStatus }))}
                 >
-                  <option value="ACTIVE">✅ Ativo</option>
-                  <option value="SUSPENDED">🚫 Suspenso</option>
-                  <option value="DELETED">🗑 Deletado</option>
+                  <option value="ACTIVE">{t('statusActive')}</option>
+                  <option value="SUSPENDED">{t('statusSuspended')}</option>
+                  <option value="DELETED">{t('statusDeleted')}</option>
                 </Select>
               </div>
 
               <div>
-                <Label>E-mail</Label>
-                <Input type="email" value={form.email} onChange={f('email')} placeholder="email@exemplo.com" />
+                <Label>{t('email')}</Label>
+                <Input type="email" value={form.email} onChange={f('email')} placeholder={t('placeholderEmail')} />
               </div>
 
               <div>
-                <Label>Celular</Label>
-                <Input value={form.cellPhoneNumber} onChange={f('cellPhoneNumber')} placeholder="(11) 99999-9999" />
+                <Label>{t('cellPhone')}</Label>
+                <Input value={form.cellPhoneNumber} onChange={f('cellPhoneNumber')} placeholder={t('placeholderPhone')} />
               </div>
 
               <div>
-                <Label>Telefone</Label>
+                <Label>{t('phone')}</Label>
                 <Input value={form.telephoneNumber} onChange={f('telephoneNumber')} placeholder="(11) 3000-0000" />
               </div>
 
               <div>
-                <Label>CEP</Label>
+                <Label>{t('cep')}</Label>
                 <Input value={form.cep} onChange={f('cep')} placeholder="00000-000" />
               </div>
 
               <div>
-                <Label>Instagram</Label>
-                <Input value={form.link} onChange={f('link')} placeholder="@username ou https://instagram.com/user" />
+                <Label>{t('instagram')}</Label>
+                <Input value={form.link} onChange={f('link')} placeholder={t('placeholderInstagram')} />
               </div>
 
               <div>
-                <Label>Data de Nascimento</Label>
+                <Label>{t('birthDate')}</Label>
                 <Input
                   type="date"
                   value={form.birthDate}
@@ -230,12 +231,12 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               </div>
 
               <div className="sm:col-span-2">
-                <Label>Bio / Descrição</Label>
+                <Label>{t('bio')}</Label>
                 <textarea
                   rows={3}
                   value={form.description}
                   onChange={f('description')}
-                  placeholder="Uma breve descrição sobre o usuário…"
+                  placeholder={t('placeholderDesc')}
                   className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
                 />
               </div>
@@ -252,7 +253,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               disabled={saving}
               className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -262,14 +263,14 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               {saving ? (
                 <>
                   <Spinner size={4} />
-                  Salvando…
+                  {t('saving')}
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Salvar alterações
+                  {t('saveChanges')}
                 </>
               )}
             </button>

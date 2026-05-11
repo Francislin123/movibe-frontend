@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { getEvents, searchEvents } from '../services/api'
 import { Card, Field, EventTypeBadge } from '../components/ui'
 import SearchInput from '../components/SearchInput'
@@ -6,17 +7,17 @@ import EntityImage from '../components/EntityImage'
 import EventEditModal from '../components/EventEditModal'
 import type { EventResponse } from '../types'
 
-function EditButton({ onClick }: { onClick: () => void }) {
+function EditButton({ onClick, label }: { onClick: () => void; label: string }) {
   return (
     <button
       onClick={onClick}
       className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 hover:border-violet-300 hover:bg-violet-50 text-gray-500 hover:text-violet-600 text-xs font-medium transition-all duration-150 shrink-0"
-      title="Editar evento"
+      title={label}
     >
       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
       </svg>
-      Editar
+      {label}
     </button>
   )
 }
@@ -30,6 +31,7 @@ function fmtDate(value: string) {
 }
 
 export default function Events() {
+  const { t } = useTranslation()
   const [events, setEvents] = useState<EventResponse[]>([])
   const [loading, setLoading] = useState(true)
   const [editingEvent, setEditingEvent] = useState<EventResponse | null>(null)
@@ -49,16 +51,16 @@ export default function Events() {
     <>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-textPrimary">Eventos</h1>
-          <p className="text-sm text-textSecondary mt-1">Ordenados por data de início (ASC)</p>
+          <h1 className="text-2xl font-bold text-textPrimary">{t('nav.events')}</h1>
+          <p className="text-sm text-textSecondary mt-1">{t('searchByEvent')}</p>
         </div>
 
         <Card className="p-4">
-          <SearchInput onSearch={load} loading={loading} placeholder="Buscar eventos..." />
+          <SearchInput onSearch={load} loading={loading} placeholder={t('searchByEvent')} />
         </Card>
 
         <div className="space-y-3">
-          {loading && <p className="text-sm text-gray-400 text-center py-10">Carregando…</p>}
+          {loading && <p className="text-sm text-gray-400 text-center py-10">{t('loadingData')}</p>}
           {events.map(e => (
             <Card
               key={e.id}
@@ -83,13 +85,13 @@ export default function Events() {
                     </div>
                     <div className="flex items-center gap-2">
                       <EventTypeBadge type={e.type} />
-                      <EditButton onClick={() => setEditingEvent(e)} />
+                      <EditButton onClick={() => setEditingEvent(e)} label={t('edit')} />
                     </div>
                   </div>
 
                   <div className="mt-4 p-4 rounded-xl border border-primary/20 bg-surface/50">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                      <Field label="Início" value={
+                      <Field label={t('eventStart')} value={
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white text-xs font-semibold shadow-sm">
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -97,7 +99,7 @@ export default function Events() {
                           {fmtDate(e.startsAt)}
                         </span>
                       } />
-                      <Field label="Fim" value={
+                      <Field label={t('eventEnd')} value={
                         <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-white text-xs font-semibold shadow-sm">
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -110,7 +112,7 @@ export default function Events() {
 
                   {e.desc && (
                     <div className="mt-4 p-3 rounded-xl bg-primary/5 border-l-4 border-primary">
-                      <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1.5">Descrição</p>
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1.5">{t('description')}</p>
                       <p className="text-sm text-textSecondary leading-relaxed line-clamp-3">{e.desc}</p>
                     </div>
                   )}

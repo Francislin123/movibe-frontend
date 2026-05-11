@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { getMovibers, searchMovibers, createMoviber, updateMoviberImage, getUsers } from "../services/api";
 import {
   Card,
@@ -175,7 +176,7 @@ function MoviberRow({
   const subtitle =
     sanitizeEmail(linkedUser?.email) ??
     sanitizeEmail(moviber.email) ??
-    moviber.id.slice(0, 16) + "…";
+    "—";
 
   return (
     <button
@@ -251,9 +252,10 @@ function MoviberDetail({
   linkedUser?: UserResponse;
   onEdit: (m: MoviberResponse) => void;
 }) {
+  const { t } = useTranslation();
   const subscriptionLabels: Record<string, string> = {
-    NONE: "Free — sem acesso a eventos premium",
-    VIP_BALLADS_FOR_PROMOTERS: "VIP Baladas — eventos premium liberados",
+    NONE: t('subscriptionFree'),
+    VIP_BALLADS_FOR_PROMOTERS: t('subscriptionVip'),
   };
 
   return (
@@ -265,16 +267,13 @@ function MoviberDetail({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <h2 className="text-lg font-bold text-textPrimary leading-tight truncate">
-                {moviber.name ?? linkedUser?.displayName ?? "Sem nome"}
+                {moviber.name ?? linkedUser?.displayName ?? "—"}
               </h2>
               {linkedUser && (
                 <p className="text-xs text-primary font-medium truncate mt-0.5">
-                  👤 {linkedUser.displayName}
+                  👤 {t('userLinked')} {linkedUser.displayName}
                 </p>
               )}
-              <p className="text-xs font-mono text-textTertiary mt-0.5 break-all">
-                {moviber.id}
-              </p>
             </div>
             <button
               onClick={() => onEdit(moviber)}
@@ -293,7 +292,7 @@ function MoviberDetail({
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                 />
               </svg>
-              Editar
+              {t('edit')}
             </button>
           </div>
         </div>
@@ -305,7 +304,7 @@ function MoviberDetail({
       {/* Dados do moviber */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
         <Field
-          label="Seguidores"
+          label={t('followers')}
           value={
             <span
               className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-white text-xs font-semibold shadow-sm ${
@@ -320,14 +319,14 @@ function MoviberDetail({
               {moviber.followerCount.toLocaleString('pt-BR')}
               {moviber.followerCount > 100 && (
                 <span className="text-[10px] font-normal opacity-90">
-                  ✓ gratuito
+                  ✓ {t('free')}
                 </span>
               )}
             </span>
           }
         />
         <Field
-          label="E-mail"
+          label={t('email')}
           value={
             <EmailLink
               email={sanitizeEmail(moviber.email) ?? linkedUser?.email}
@@ -335,7 +334,7 @@ function MoviberDetail({
           }
         />
         <Field
-          label="CPF"
+          label={t('cpf')}
           value={
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-500 via-purple-500 to-fuchsia-500 text-white text-xs font-semibold shadow-sm">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -346,12 +345,12 @@ function MoviberDetail({
           }
         />
         <Field
-          label="Celular"
+          label={t('cellPhone')}
           value={<WhatsAppLink phone={moviber.cellPhoneNumber ?? linkedUser?.cellPhoneNumber ?? null} />}
         />
         <Field
-          label="Assinatura"
-          value={subscriptionLabels[moviber.subscription] ?? "Desconhecido"}
+          label={t('subscription')}
+          value={subscriptionLabels[moviber.subscription] ?? t('unknown')}
         />
       </div>
     </Card>
@@ -361,6 +360,7 @@ function MoviberDetail({
 // ─── Empty detail placeholder ─────────────────────────────────────────────────
 
 function DetailPlaceholder() {
+  const { t } = useTranslation();
   return (
     <Card className="h-full">
       <div className="h-full flex flex-col items-center justify-center text-textTertiary gap-3 py-16">
@@ -378,7 +378,7 @@ function DetailPlaceholder() {
           />
         </svg>
         <p className="text-sm font-medium">
-          Selecione um moviber para ver os detalhes
+          {t('selectToView', { entity: t('nav.movibers') })}
         </p>
       </div>
     </Card>
@@ -388,6 +388,7 @@ function DetailPlaceholder() {
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function Movibers() {
+  const { t } = useTranslation();
   const [movibers, setMovibers] = useState<MoviberResponse[]>([]);
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -474,7 +475,7 @@ export default function Movibers() {
   function handleFileChange(file: File | null) {
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
-      setFormError("Imagem deve ter no máximo 5MB.");
+      setFormError(t('maxSize'));
       return;
     }
     setFormError(null);
@@ -489,15 +490,15 @@ export default function Movibers() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!linkedUserId) {
-      setFormError("Selecione um usuário.");
+      setFormError(t('selectUser'));
       return;
     }
     if (!selectedUser) {
-      setFormError("Usuário não encontrado.");
+      setFormError(t('selectUser'));
       return;
     }
     if (!cpf || cpf.replace(/\D/g, '').length < 11) {
-      setFormError("Informe um CPF válido.");
+      setFormError(t('cpf') + ' ' + t('required') + '.');
       return;
     }
 
@@ -526,14 +527,14 @@ export default function Movibers() {
         try {
           created = await updateMoviberImage(created.id, imageFile);
         } catch (uploadErr) {
-          setFormError("Moviber criado, mas falha ao fazer upload da imagem.");
+          setFormError(t('createEntity', { entity: 'Moviber' }) + ', ' + t('error'));
         } finally {
           setImageLoading(false);
         }
       }
 
       setSuccess(
-        `Moviber "${created.name ?? selectedUser.displayName}" criado com sucesso!`,
+        `${t('nav.movibers')} "${created.name ?? selectedUser.displayName}" ${t('created')}!`,
       );
       setLinkedUserId("");
       setSubscription("NONE");
@@ -555,10 +556,9 @@ export default function Movibers() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white">Movibers</h1>
+        <h1 className="text-3xl font-bold text-white">{t('nav.movibers')}</h1>
         <p className="text-sm text-gray-400 mt-1">
-          Promoters da plataforma — ordenados por seguidores · {movibers.length}{" "}
-          cadastrado{movibers.length !== 1 ? "s" : ""}
+          {movibers.length === 1 ? t('entityCount', { count: movibers.length }) : t('entityCountPlural', { count: movibers.length })}
         </p>
       </div>
 
@@ -586,7 +586,7 @@ export default function Movibers() {
               </svg>
             </span>
             <span className="text-sm font-semibold text-textPrimary">
-              Novo Moviber
+              {t('newEntity', { entity: t('nav.movibers') })}
             </span>
           </div>
           <svg
@@ -610,7 +610,7 @@ export default function Movibers() {
             <form onSubmit={handleSubmit} className="space-y-5">
           {/* ── Picker de usuário ── */}
           <div>
-            <Label>Usuário vinculado *</Label>
+            <Label>{t('linkedUser')} *</Label>
             <select
               required
               value={linkedUserId}
@@ -620,7 +620,7 @@ export default function Movibers() {
               }}
               className="w-full mt-1 px-3 py-2 border border-surfaceBorder rounded-xl bg-surface text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
-              <option value="">Selecione um usuário...</option>
+              <option value="">{t('selectUser')}</option>
               {availableUsers.map((u) => (
                 <option key={u.id} value={u.id}>
                   {u.displayName} ({u.email})
@@ -629,14 +629,14 @@ export default function Movibers() {
             </select>
             {availableUsers.length === 0 && !loading && (
               <p className="text-xs text-warning mt-1.5">
-                Todos os usuários já possuem um Moviber vinculado.
+                {t('allUsersLinked')}
               </p>
             )}
           </div>
 
           {/* ── Upload de imagem ── */}
           <div>
-            <Label>Foto/Avatar</Label>
+            <Label>{t('clickToChangePhoto')}</Label>
             <div className="mt-2 flex items-center gap-4">
               <input
                 type="file"
@@ -676,10 +676,10 @@ export default function Movibers() {
               </div>
               <div className="flex-1">
                 <p className="text-xs text-textSecondary">
-                  Clique na foto para adicionar ou alterar
+                  {t('imageHint')}
                 </p>
                 <p className="text-[10px] text-textTertiary mt-0.5">
-                  Máx. 5MB • JPG, PNG
+                  {t('imageFormats')}
                 </p>
               </div>
             </div>
@@ -689,29 +689,29 @@ export default function Movibers() {
           {selectedUser && (
             <div className="p-4 bg-surface rounded-xl border border-surfaceBorder">
               <p className="text-xs font-semibold text-textSecondary mb-3">
-                Dados herdados do usuário:
+                {t('inheritedData')}
               </p>
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
                 <div>
-                  <span className="text-textTertiary">Nome:</span>
+                  <span className="text-textTertiary">{t('name')}:</span>
                   <p className="font-medium text-textPrimary">
                     {selectedUser.displayName}
                   </p>
                 </div>
                 <div>
-                  <span className="text-textTertiary">E-mail:</span>
+                  <span className="text-textTertiary">{t('email')}:</span>
                   <p className="font-medium text-textPrimary">
                     {selectedUser.email}
                   </p>
                 </div>
                 <div>
-                  <span className="text-textTertiary">Celular:</span>
+                  <span className="text-textTertiary">{t('cellPhone')}:</span>
                   <p className="font-medium text-textPrimary">
                     {selectedUser.cellPhoneNumber || "—"}
                   </p>
                 </div>
                 <div>
-                  <span className="text-textTertiary">CEP:</span>
+                  <span className="text-textTertiary">{t('cep')}:</span>
                   <p className="font-medium text-textPrimary">
                     {selectedUser.cep || "—"}
                   </p>
@@ -722,7 +722,7 @@ export default function Movibers() {
 
           {/* ── CPF ── */}
           <div>
-            <Label>CPF *</Label>
+            <Label>{t('cpf')} *</Label>
             <Input
               value={cpf}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -746,7 +746,7 @@ export default function Movibers() {
 
           {/* ── Assinatura ── */}
           <div>
-            <Label>Assinatura *</Label>
+            <Label>{t('subscription')} *</Label>
             <select
               value={subscription}
               onChange={(e) =>
@@ -755,16 +755,16 @@ export default function Movibers() {
               className="w-full mt-1 px-3 py-2 border border-surfaceBorder rounded-xl bg-surface text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
             >
               <option value="NONE">
-                Free — sem acesso a eventos premium
+                {t('subscriptionFree')}
               </option>
               <option value="VIP_BALLADS_FOR_PROMOTERS">
-                ★ VIP Baladas — eventos premium liberados
+                ★ {t('subscriptionVip')}
               </option>
             </select>
             <p className="text-xs text-textTertiary mt-1.5">
               {subscription === "VIP_BALLADS_FOR_PROMOTERS"
-                ? "★ Permite criar eventos do tipo PREMIUM_BALLAD."
-                : "Apenas eventos do tipo STANDARD."}
+                ? '★ ' + t('subscriptionVipDesc')
+                : t('subscriptionFreeDesc')}
             </p>
           </div>
 
@@ -774,7 +774,7 @@ export default function Movibers() {
               ✓ {success}
             </div>
           )}
-          <SubmitButton loading={saving}>Criar Moviber</SubmitButton>
+          <SubmitButton loading={saving}>{t('createMoviber')}</SubmitButton>
         </form>
           </div>
         )}
@@ -785,7 +785,7 @@ export default function Movibers() {
         <SearchInput
           onSearch={handleSearch}
           loading={loading}
-          placeholder="Buscar por nome, e-mail ou celular..."
+          placeholder={t('searchBy')}
         />
       </Card>
 
@@ -814,12 +814,12 @@ export default function Movibers() {
                   d="M4 12a8 8 0 018-8v8H4z"
                 />
               </svg>
-              <span className="text-sm font-medium">Carregando…</span>
+              <span className="text-sm font-medium">{t('loadingData')}</span>
             </div>
           )}
           {!loading && error && <ErrorAlert message={error} />}
           {!loading && !error && movibers.length === 0 && (
-            <EmptyState label="Nenhum moviber cadastrado ainda." />
+            <EmptyState label={t('noEntity', { entity: t('nav.movibers') })} />
           )}
           {movibers.map((m) => {
             const linkedUser = users.find((u) => u.id === m.linkedUserId);
