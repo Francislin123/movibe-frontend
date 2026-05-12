@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { updateMoviber, updateMoviberImage, deleteMoviber } from '../services/api'
 import { ErrorAlert, Input, Label, Select, Spinner, SubscriptionBadge } from './ui'
 import type { ApiError, MoviberResponse, PromoterSubscription, UpdateMoviberRequest, UserResponse } from '../types'
@@ -35,6 +36,7 @@ function isUrlValue(value: string | null | undefined): boolean {
 }
 
 export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved, onDeleted }: Props) {
+  const { t } = useTranslation()
   // ── avatar state ─────────────────────────────────────────────────────────────
   const [imageFile, setImageFile] = useState<File | null>(null)
   // Usa imagem do Moviber, ou do Usuário vinculado, ou null
@@ -81,12 +83,12 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Por favor, selecione um arquivo de imagem válido')
+      setError('Invalid image file')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('A imagem deve ter no máximo 5MB')
+      setError(t('maxSize'))
       return
     }
 
@@ -172,12 +174,12 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
   // ── subscription options ─────────────────────────────────────────────────────
   const subscriptionLabels: Record<PromoterSubscription, { label: string; description: string }> = {
     NONE: {
-      label: 'Free',
-      description: 'Sem acesso a eventos premium'
+      label: t('free'),
+      description: t('subscriptionFreeDesc')
     },
     VIP_BALLADS_FOR_PROMOTERS: {
-      label: 'VIP Baladas',
-      description: 'Eventos premium liberados'
+      label: t('subscriptionVip'),
+      description: t('subscriptionVipDesc')
     },
   }
 
@@ -201,8 +203,8 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-textPrimary">Editar Moviber</h2>
-              <p className="text-xs text-textTertiary">Atualize as informações do promoter</p>
+              <h2 className="text-lg font-bold text-textPrimary">{t('editEntity', { entity: t('nav.movibers') })}</h2>
+              <p className="text-xs text-textTertiary">{t('updateInfo')}</p>
             </div>
           </div>
           <button
@@ -238,7 +240,7 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                  title="Trocar foto"
+                  title={t('changeImage')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -256,12 +258,12 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="text-base font-semibold text-textPrimary truncate">{displayName || 'Sem nome'}</h3>
+                  <h3 className="text-base font-semibold text-textPrimary truncate">{displayName || '—'}</h3>
                   <SubscriptionBadge sub={form.subscription} />
                 </div>
                 {linkedUser && (
                   <p className="text-xs text-textSecondary mt-1">
-                    Vinculado a: <span className="text-primary">{linkedUser.displayName}</span>
+                    {t('userLinked')} <span className="text-primary">{linkedUser.displayName}</span>
                   </p>
                 )}
                 <button
@@ -281,7 +283,7 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      {imagePreview ? 'Trocar imagem' : 'Adicionar imagem'}
+                      {imagePreview ? t('changeImage') : t('addImage')}
                     </>
                   )}
                 </button>
@@ -297,29 +299,29 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Nome */}
               <div className="sm:col-span-2">
-                <Label>Nome do Moviber</Label>
+                <Label>{t('name')}</Label>
                 <Input
                   value={form.name}
                   onChange={handleChange('name')}
-                  placeholder="Nome de exibição do promoter"
+                  placeholder={t('placeholderName')}
                   maxLength={100}
                 />
               </div>
 
               {/* Email */}
               <div className="sm:col-span-2">
-                <Label>E-mail</Label>
+                <Label>{t('email')}</Label>
                 <Input
                   type="email"
                   value={form.email}
                   onChange={handleChange('email')}
-                  placeholder="email@exemplo.com"
+                  placeholder={t('placeholderEmail')}
                 />
               </div>
 
               {/* CPF */}
               <div>
-                <Label>CPF</Label>
+                <Label>{t('cpf')}</Label>
                 <Input
                   value={form.cpf}
                   onChange={handleCPFChange}
@@ -330,11 +332,11 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
 
               {/* Celular */}
               <div>
-                <Label>Celular</Label>
+                <Label>{t('cellPhone')}</Label>
                 <Input
                   value={form.cellPhoneNumber}
                   onChange={handlePhoneChange}
-                  placeholder="(11) 99999-9999"
+                  placeholder={t('placeholderPhone')}
                   maxLength={15}
                 />
               </div>
@@ -342,7 +344,7 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
               {/* Subscription */}
               <div className="sm:col-span-2">
                 <div className="flex items-center justify-between mb-1.5">
-                  <Label>Assinatura</Label>
+                  <Label>{t('subscription')}</Label>
                   <SubscriptionBadge sub={form.subscription} />
                 </div>
                 <Select
@@ -358,8 +360,8 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                 </Select>
                 <p className="text-xs text-textTertiary mt-1.5">
                   {form.subscription === 'VIP_BALLADS_FOR_PROMOTERS'
-                    ? 'Permite criar eventos do tipo PREMIUM_BALLAD e acessar funcionalidades exclusivas.'
-                    : 'Apenas eventos do tipo STANDARD podem ser criados.'}
+                    ? t('subscriptionVipDesc')
+                    : t('subscriptionFreeDesc')}
                 </p>
               </div>
             </div>
@@ -371,7 +373,7 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Alterações salvas com sucesso!
+                {t('changesSaved')}
               </div>
             )}
           </div>
@@ -383,12 +385,12 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
               onClick={() => setShowDeleteConfirm(true)}
               disabled={saving}
               className="flex-none px-4 bg-surfaceHover border border-surfaceBorder text-textPrimary hover:bg-error hover:border-error hover:text-white py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              title="Excluir Movibe"
+              title={t('deleteEntity', { entity: t('nav.movibers') })}
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              <span>Excluir</span>
+              <span>{t('delete')}</span>
             </button>
             <button
               type="button"
@@ -396,7 +398,7 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
               disabled={saving}
               className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover hover:text-textPrimary py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -406,14 +408,14 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
               {saving ? (
                 <>
                   <Spinner size={4} />
-                  <span>Salvando...</span>
+                  <span>{t('saving')}</span>
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Salvar alterações</span>
+                  <span>{t('saveChanges')}</span>
                 </>
               )}
             </button>
@@ -432,10 +434,10 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-textPrimary text-center mb-2">
-                Excluir Movibe?
+                {t('deleteEntity', { entity: t('nav.movibers') })}?
               </h3>
               <p className="text-sm text-textSecondary text-center">
-                Esta ação não pode ser desfeita. O Movibe <strong className="text-textPrimary">{moviber.name || linkedUser?.displayName || 'selecionado'}</strong> será removido permanentemente.
+                {t('deleteConfirm', { entity: t('nav.movibers'), name: moviber.name || linkedUser?.displayName || t('selected') })}
               </p>
             </div>
             <div className="px-6 py-4 border-t border-surfaceBorder flex gap-3">
@@ -445,7 +447,7 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                 disabled={deleting}
                 className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover hover:text-textPrimary py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-50"
               >
-                Cancelar
+                {t('cancel')}
               </button>
               <button
                 type="button"
@@ -456,14 +458,14 @@ export default function MoviberEditModal({ moviber, linkedUser, onClose, onSaved
                 {deleting ? (
                   <>
                     <Spinner size={4} />
-                    <span>Excluindo...</span>
+                    <span>{t('deleting')}</span>
                   </>
                 ) : (
                   <>
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
-                    <span>Excluir</span>
+                    <span>{t('delete')}</span>
                   </>
                 )}
               </button>

@@ -10,13 +10,14 @@ import type {
   UpdateUserRequest,
   UpdateMoviberRequest,
   EventResponse,
+  EventUserResponse,
   HealthResponse,
   MoviberResponse,
   RsvpGoingResponse,
   UserResponse,
 } from "../types";
 
-const client = axios.create({
+export const client = axios.create({
   baseURL: "/api/v1",
   headers: { "Content-Type": "application/json" },
 });
@@ -173,6 +174,36 @@ export const getRsvps = () =>
 
 export const createRsvp = (body: CreateRsvpRequest) =>
   unwrap<RsvpGoingResponse>(client.post("/event-rsvps", body));
+
+// ─── Event Users ───────────────────────────────────────────────────────────────
+
+export const getEventUsers = async (eventId: string): Promise<EventUserResponse[]> => {
+  // Buscar todos os eventos para encontrar o evento específico e obter os userIds
+  const events = await getEvents();
+  const event = events.find(e => e.id === eventId);
+  
+  if (!event || !event.userIds || event.userIds.length === 0) {
+    return [];
+  }
+  
+  // Buscar todos os usuários (poderia ser otimizado com cache no futuro)
+  const allUsers = await getUsers();
+  
+  // Filtrar usuários que estão confirmados no evento
+  const confirmedUsers = allUsers.filter(user => event.userIds.includes(user.id));
+  
+  // Criar EventUserResponse para cada usuário confirmado
+  const eventUsers: EventUserResponse[] = confirmedUsers.map((user) => ({
+    id: `${eventId}-user-${user.id}`,
+    eventId: eventId,
+    userId: user.id,
+    confirmedAt: new Date().toISOString(), // Data atual como placeholder
+    user: user
+  }));
+  
+  // Retornar usuários ordenados alfabeticamente
+  return eventUsers.sort((a, b) => a.user.displayName.localeCompare(b.user.displayName));
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

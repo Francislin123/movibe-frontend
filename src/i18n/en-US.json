@@ -158,6 +158,31 @@
     "excluirMovibe": "Delete Movibe?",
     "excluirConfirm": "This cannot be undone. Movibe {{name}} will be permanently removed.",
     "alteracoesSalvas": "Changes saved successfully!",
+    "updateInfo": "Update the information",
+    "companyName": "Company Name",
+    "responsibleName": "Responsible Name",
+    "placeholderCompanyName": "Company name in social contract",
+    "placeholderResponsibleName": "Full name of the responsible person",
+    "placeholderRules": "Internal rules...",
+    "eventTitle": "Title",
+    "type": "Type",
+    "startTime": "Start",
+    "endTime": "End",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "eventTypeStandard": "Standard",
+    "eventTypePremium": "Premium Ballad",
+    "eventTypeNetwork": "Network",
+    "eventTypeOpen": "Open",
+    "eventPhoto": "Event Photo",
+    "balada": "Ballad",
+    "placeholderTitle": "Ex: Pool Party SP",
+    "datesRequired": "Start and end dates are required",
+    "invalidDateTimeFormat": "Invalid date/time format",
+    "eventCreated": "Event \"{{title}}\" created successfully!",
+    "eventUpdated": "Event updated successfully!",
+    "selected": "selected",
+    "changesSaved": "Changes saved successfully!",
     "nav": {
       "dashboard": "Dashboard",
       "users": "Users",
@@ -185,6 +210,9 @@
       "pt": "Português",
       "en": "English",
       "es": "Español"
-    }
+    },
+    "confirmedUsers": "Confirmed Users",
+    "eventConfirmedUsers": "Confirmed Users in Event",
+    "noConfirmedUsers": "No confirmed users for this event."
   }
 }

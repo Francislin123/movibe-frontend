@@ -50,6 +50,8 @@ export interface EventResponse {
   image: string | null;
   startsAt: string;
   endsAt: string;
+  userIds: string[];
+  moviberIds: string[];
 }
 
 export interface MoviberResponse {
@@ -92,6 +94,14 @@ export interface RsvpGoingResponse {
   userId: string;
   intention: RsvpIntention;
   decidedAt: string;
+}
+
+export interface EventUserResponse {
+  id: string;
+  eventId: string;
+  userId: string;
+  confirmedAt: string;
+  user: UserResponse;
 }
 
 // ─── Request DTOs ─────────────────────────────────────────────────────────────

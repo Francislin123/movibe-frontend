@@ -185,6 +185,9 @@
       "pt": "Português",
       "en": "English",
       "es": "Español"
-    }
+    },
+    "confirmedUsers": "Usuarios Confirmados",
+    "eventConfirmedUsers": "Usuarios Confirmados en el Evento",
+    "noConfirmedUsers": "No hay usuarios confirmados en este evento."
   }
 }

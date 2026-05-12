@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { createEvent, updateEventImage } from '../services/api'
 import { Label, Input, ErrorAlert, Spinner } from '../components/ui'
 import type { CreateEventRequest, ApiError, EventType } from '../types'
@@ -19,6 +20,7 @@ function toIso(local: string) {
 }
 
 export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose, onSuccess }: Props) {
+  const { t } = useTranslation()
   const [form, setForm] = useState<{
     type: EventType; title: string; cep: string; desc: string; startsAt: string; endsAt: string
   }>({ type: 'STANDARD', title: '', cep: '', desc: '', startsAt: '', endsAt: '' })
@@ -38,11 +40,11 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) {
-      setError('Por favor, selecione um arquivo de imagem válido')
+      setError('Invalid image file')
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('A imagem deve ter no máximo 5MB')
+      setError(t('maxSize'))
       return
     }
     setError(null)
@@ -55,11 +57,11 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
     setError(null)
 
     if (!form.startsAt || !form.endsAt) {
-      setError('Datas de início e fim são obrigatórias')
+      setError(t('datesRequired'))
       return
     }
     if (!isValidDateTimeLocal(form.startsAt) || !isValidDateTimeLocal(form.endsAt)) {
-      setError('Formato de data/hora inválido')
+      setError(t('invalidDateTimeFormat'))
       return
     }
 
@@ -80,7 +82,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
         await updateEventImage(created.id, imageFile)
       }
 
-      setSuccess(`Evento "${created.title}" criado com sucesso!`)
+      setSuccess(t('eventCreated', { title: created.title }))
       setTimeout(() => onSuccess(), 1500)
     } catch (err) {
       setError((err as ApiError).message)
@@ -108,9 +110,9 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-textPrimary">Criar Evento</h2>
+              <h2 className="text-lg font-bold text-textPrimary">{t('createEvent')}</h2>
               <p className="text-xs text-textTertiary mt-0.5">
-                Balada: <span className="text-primary font-medium">{hostBaladaName}</span>
+                {t('balada')}: <span className="text-primary font-medium">{hostBaladaName}</span>
               </p>
             </div>
           </div>
@@ -146,7 +148,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                  title="Adicionar foto"
+                  title={t('addImage')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -162,13 +164,13 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                 />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-textPrimary">Foto do Evento</p>
+                <p className="text-sm font-semibold text-textPrimary">{t('eventPhoto')}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition"
                 >
-                  {imageFile ? `✓ ${imageFile.name}` : 'Clique para adicionar foto'}
+                  {imageFile ? `✓ ${imageFile.name}` : t('clickToAddPhoto')}
                 </button>
                 {imageFile && (
                   <p className="text-xs text-textTertiary mt-0.5">
@@ -181,26 +183,26 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
             {/* Fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <Label>Título *</Label>
-                <Input required value={form.title} onChange={s('title')} placeholder="Ex: Pool Party SP" />
+                <Label>{t('eventTitle')} *</Label>
+                <Input required value={form.title} onChange={s('title')} placeholder={t('placeholderTitle')} />
               </div>
 
               <div className="col-span-2">
-                <Label>Tipo *</Label>
+                <Label>{t('type')} *</Label>
                 <select
                   value={form.type}
                   onChange={s('type')}
                   className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
                 >
-                  <option value="STANDARD">Standard</option>
-                  <option value="PREMIUM_BALLAD">Premium Ballad</option>
-                  <option value="NETWORK">Network</option>
-                  <option value="OPEN">Open</option>
+                  <option value="STANDARD">{t('eventTypeStandard')}</option>
+                  <option value="PREMIUM_BALLAD">{t('eventTypePremium')}</option>
+                  <option value="NETWORK">{t('eventTypeNetwork')}</option>
+                  <option value="OPEN">{t('eventTypeOpen')}</option>
                 </select>
               </div>
 
               <div>
-                <Label>Início *</Label>
+                <Label>{t('startTime')} *</Label>
                 <Input
                   type="datetime-local"
                   required
@@ -211,7 +213,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                 />
               </div>
               <div>
-                <Label>Fim *</Label>
+                <Label>{t('endTime')} *</Label>
                 <Input
                   type="datetime-local"
                   required
@@ -223,17 +225,17 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
               </div>
 
               <div>
-                <Label>CEP</Label>
+                <Label>{t('cep')}</Label>
                 <Input value={form.cep} onChange={s('cep')} placeholder="00000-000" maxLength={9} />
               </div>
             </div>
 
             <div>
-              <Label>Descrição</Label>
+              <Label>{t('description')}</Label>
               <textarea
                 value={form.desc}
                 onChange={s('desc')}
-                placeholder="Descrição do evento..."
+                placeholder={t('placeholderDesc')}
                 rows={3}
                 className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-none"
               />
@@ -255,7 +257,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
               disabled={saving}
               className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -265,14 +267,14 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
               {saving ? (
                 <>
                   <Spinner size={4} />
-                  <span>Criando...</span>
+                  <span>{t('creating')}</span>
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  <span>Criar Evento</span>
+                  <span>{t('createEvent')}</span>
                 </>
               )}
             </button>

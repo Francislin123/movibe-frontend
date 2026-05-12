@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { updateBalada, updateBaladaImage } from '../services/api'
 import { Label, Input, ErrorAlert, Spinner } from '../components/ui'
 import type { BaladaResponse, ApiError } from '../types'
@@ -37,6 +38,7 @@ interface BaladaEditModalProps {
 }
 
 export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEditModalProps) {
+  const { t } = useTranslation()
   const [form, setForm] = useState<Partial<BaladaResponse>>({})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -126,8 +128,8 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-textPrimary">Editar Balada</h2>
-              <p className="text-xs text-textTertiary">Atualize as informações do estabelecimento</p>
+              <h2 className="text-lg font-bold text-textPrimary">{t('editEntity', { entity: t('nav.baladas') })}</h2>
+              <p className="text-xs text-textTertiary">{t('updateInfo')}</p>
             </div>
           </div>
           <button
@@ -163,7 +165,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                  title="Trocar foto"
+                  title={t('changeImage')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -198,7 +200,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
                       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      {imagePreview ? 'Trocar imagem' : 'Adicionar imagem'}
+                      {imagePreview ? t('changeImage') : t('addImage')}
                     </>
                   )}
                 </button>
@@ -213,55 +215,55 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
             {/* ── FORM FIELDS ── */}
             <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>Nome Fantasia *</Label>
+              <Label>{t('tradeName')} *</Label>
               <Input
                 required
                 value={form.tradeName || balada.tradeName || ''}
                 onChange={(e) => setForm({ ...form, tradeName: e.target.value })}
-                placeholder="Ex: Balada Show"
+                placeholder={t('placeholderTradeName')}
               />
             </div>
 
             <div>
-              <Label>CNPJ</Label>
+              <Label>{t('cnpj')}</Label>
               <Input
                 value={form.cnpj ? formatCNPJ(form.cnpj) : balada.cnpj ? formatCNPJ(balada.cnpj) : ''}
                 onChange={(e) => setForm({ ...form, cnpj: e.target.value.replace(/\D/g, '') })}
-                placeholder="00.000.000/0001-00"
+                placeholder={t('placeholderCnpj')}
                 maxLength={18}
               />
             </div>
 
             <div>
-              <Label>Razão Social</Label>
+              <Label>{t('companyName')}</Label>
               <Input
                 value={form.reasonSocial || balada.reasonSocial || ''}
                 onChange={(e) => setForm({ ...form, reasonSocial: e.target.value })}
-                placeholder="Nome da empresa no contrato social"
+                placeholder={t('placeholderCompanyName')}
               />
             </div>
 
             <div>
-              <Label>E-mail</Label>
+              <Label>{t('email')}</Label>
               <Input
                 type="email"
                 value={form.email || balada.email || ''}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder="contato@balada.com"
+                placeholder={t('placeholderEmail')}
               />
             </div>
 
             <div>
-              <Label>Nome do Responsável</Label>
+              <Label>{t('responsibleName')}</Label>
               <Input
                 value={form.responsibleName || balada.responsibleName || ''}
                 onChange={(e) => setForm({ ...form, responsibleName: e.target.value })}
-                placeholder="Nome completo do responsável"
+                placeholder={t('placeholderResponsibleName')}
               />
             </div>
 
             <div>
-              <Label>CEP</Label>
+              <Label>{t('cep')}</Label>
               <Input
                 value={form.cep || balada.cep || ''}
                 onChange={(e) => setForm({ ...form, cep: e.target.value })}
@@ -271,7 +273,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
             </div>
 
             <div>
-              <Label>Número</Label>
+              <Label>{t('number')}</Label>
               <Input
                 value={form.numb || balada.numb || ''}
                 onChange={(e) => setForm({ ...form, numb: e.target.value })}
@@ -280,28 +282,28 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
             </div>
 
             <div>
-              <Label>Localização</Label>
+              <Label>{t('address')}</Label>
               <Input
                 value={form.local || balada.local || ''}
                 onChange={(e) => setForm({ ...form, local: e.target.value })}
-                placeholder="Rua das Flores, 123 - Centro"
+                placeholder={t('placeholderLocal')}
               />
             </div>
 
             <div className="col-span-2">
-              <Label>Descrição</Label>
+              <Label>{t('description')}</Label>
               <textarea
                 className="w-full px-4 py-2.5 border border-surfaceBorder rounded-xl text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
                 rows={3}
                 value={form.description || balada.description || ''}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Descrição detalhada da balada..."
+                placeholder={t('placeholderDesc')}
                 maxLength={4000}
               />
             </div>
 
             <div>
-              <Label>Telefone</Label>
+              <Label>{t('phone')}</Label>
               <Input
                 value={form.telephoneNumber ? formatPhone(form.telephoneNumber) : balada.telephoneNumber ? formatPhone(balada.telephoneNumber) : ''}
                 onChange={(e) => setForm({ ...form, telephoneNumber: e.target.value.replace(/\D/g, '') })}
@@ -311,39 +313,39 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
             </div>
 
             <div>
-              <Label>Celular</Label>
+              <Label>{t('cellPhone')}</Label>
               <Input
                 value={form.cellPhoneNumber ? formatCellPhone(form.cellPhoneNumber) : balada.cellPhoneNumber ? formatCellPhone(balada.cellPhoneNumber) : ''}
                 onChange={(e) => setForm({ ...form, cellPhoneNumber: e.target.value.replace(/\D/g, '') })}
-                placeholder="(00) 90000-0000"
+                placeholder={t('placeholderPhone')}
                 maxLength={15}
               />
             </div>
 
             <div className="col-span-2">
-              <Label>Regulamento Interno</Label>
+              <Label>{t('rules')}</Label>
               <textarea
                 className="w-full px-4 py-2.5 border border-surfaceBorder rounded-xl text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
                 rows={3}
                 value={form.rules || balada.rules || ''}
                 onChange={(e) => setForm({ ...form, rules: e.target.value })}
-                placeholder="Regras internas da balada..."
+                placeholder={t('placeholderRules')}
                 maxLength={4000}
               />
             </div>
 
             <div className="col-span-2">
-              <Label>Link</Label>
+              <Label>{t('instagram')}</Label>
               <Input
                 value={form.link || balada.link || ''}
                 onChange={(e) => setForm({ ...form, link: e.target.value })}
-                placeholder="https://instagram.com/balada"
+                placeholder={t('placeholderInstagram')}
               />
             </div>
 
             <div className="col-span-2">
               <div className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl border border-surfaceBorder/50">
-                <span className="text-sm text-textPrimary">Balada Verificada</span>
+                <span className="text-sm text-textPrimary">{t('verified')}</span>
                 <input
                   type="checkbox"
                   checked={form.verified !== undefined ? form.verified : balada.verified}
@@ -366,7 +368,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
               disabled={saving}
               className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover hover:text-textPrimary py-2.5 rounded-xl text-sm font-medium transition-all duration-200 disabled:opacity-50"
             >
-              Cancelar
+              {t('cancel')}
             </button>
             <button
               type="submit"
@@ -376,14 +378,14 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
               {saving ? (
                 <>
                   <Spinner size={4} />
-                  <span>Salvando...</span>
+                  <span>{t('saving')}</span>
                 </>
               ) : (
                 <>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Salvar alterações</span>
+                  <span>{t('saveChanges')}</span>
                 </>
               )}
             </button>

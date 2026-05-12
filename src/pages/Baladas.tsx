@@ -232,6 +232,9 @@ export default function Baladas() {
 
   const [expandedBaladaId, setExpandedBaladaId] = useState<string | null>(null)
   const [baladaEventsCache, setBaladaEventsCache] = useState<Record<string, { loading: boolean; events: EventResponse[]; error: string | null }>>({})
+  
+  // ── balada events search state ───────────────────────────────────────────────────────
+  const [baladaEventSearchCache, setBaladaEventSearchCache] = useState<Record<string, string>>({})
 
   const handleEdit = (balada: BaladaResponse) => {
     setEditingBalada(balada)
@@ -262,6 +265,26 @@ export default function Baladas() {
     getEventsByBalada(baladaId)
       .then(events => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events, error: null } })))
       .catch(e => setBaladaEventsCache(c => ({ ...c, [baladaId]: { loading: false, events: [], error: (e as ApiError).message } })))
+  }
+
+  function handleBaladaEventSearch(baladaId: string, query: string) {
+    setBaladaEventSearchCache(prev => ({ ...prev, [baladaId]: query }))
+  }
+
+  function getFilteredBaladaEvents(baladaId: string): EventResponse[] {
+    const cache = baladaEventsCache[baladaId]
+    if (!cache || !cache.events) return []
+    
+    const searchQuery = baladaEventSearchCache[baladaId]
+    if (!searchQuery || !searchQuery.trim()) return cache.events
+    
+    const searchLower = searchQuery.toLowerCase()
+    return cache.events.filter(event => 
+      event.title.toLowerCase().includes(searchLower) ||
+      event.desc?.toLowerCase().includes(searchLower) ||
+      event.cep?.toLowerCase().includes(searchLower) ||
+      event.type.toLowerCase().includes(searchLower)
+    )
   }
 
   // Atualiza a balada específica na lista sem recarregar tudo
@@ -693,6 +716,15 @@ export default function Baladas() {
                   </button>
                 </div>
 
+                {/* Search input for balada events */}
+                <div className="mb-4">
+                  <SearchInput 
+                    onSearch={(query) => handleBaladaEventSearch(b.id, query)} 
+                    loading={false} 
+                    placeholder="Pesquisar evento por título, descrição, tipo ou CEP..." 
+                  />
+                </div>
+
                 {(() => {
                   const cache = baladaEventsCache[b.id]
                   if (!cache || cache.loading) {
@@ -706,7 +738,19 @@ export default function Baladas() {
                   if (cache.error) {
                     return <p className="text-xs text-red-400 py-3">{cache.error}</p>
                   }
-                  if (cache.events.length === 0) {
+                  
+                  const searchQuery = baladaEventSearchCache[b.id]
+                  const filteredEvents = getFilteredBaladaEvents(b.id)
+                  
+                  if (searchQuery && searchQuery.trim() && filteredEvents.length === 0) {
+                    return (
+                      <p className="text-xs text-textTertiary text-center py-6">
+                        Nenhum evento encontrado para "{searchQuery}"
+                      </p>
+                    )
+                  }
+                  
+                  if (filteredEvents.length === 0) {
                     return (
                       <p className="text-xs text-textTertiary text-center py-6">
                         {t('noEntity', { entity: t('nav.events') })}.
@@ -715,7 +759,7 @@ export default function Baladas() {
                   }
                   return (
                     <div className="space-y-2">
-                      {cache.events.map(ev => (
+                      {filteredEvents.map(ev => (
                         <div
                           key={ev.id}
                           className="flex items-center gap-3 p-3 rounded-xl bg-surface/50 border border-surfaceBorder/40 hover:border-amber-500/30 transition-all duration-150"

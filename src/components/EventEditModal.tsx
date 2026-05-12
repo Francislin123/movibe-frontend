@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { updateEvent, updateEventImage } from '../services/api'
 import { Label, Input, SubmitButton, ErrorAlert } from '../components/ui'
 import type { EventResponse, ApiError, EventType } from '../types'
@@ -25,6 +26,7 @@ function formatDateTimeLocal(dateString: string): string {
 }
 
 export default function EventEditModal({ event, onClose, onSuccess }: EventEditModalProps) {
+  const { t } = useTranslation()
   const [form, setForm] = useState<Partial<EventResponse>>({})
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,12 +61,12 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Por favor, selecione um arquivo de imagem válido')
+      setError('Invalid image file')
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('A imagem deve ter no máximo 5MB')
+      setError(t('maxSize'))
       return
     }
 
@@ -134,8 +136,8 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-textPrimary">Editar Evento</h2>
-              <p className="text-xs text-textTertiary">Atualize as informações do evento</p>
+              <h2 className="text-lg font-bold text-textPrimary">{t('editEntity', { entity: t('nav.events') })}</h2>
+              <p className="text-xs text-textTertiary">{t('updateInfo')}</p>
             </div>
           </div>
           <button
@@ -171,7 +173,7 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                  title="Trocar foto"
+                  title={t('changeImage')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -194,7 +196,7 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
                   onClick={() => fileRef.current?.click()}
                   className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition"
                 >
-                  {imageFile ? `✓ ${imageFile.name}` : 'Clique para trocar a foto do evento'}
+                  {imageFile ? `✓ ${imageFile.name}` : t('clickToChangePhoto')}
                 </button>
                 {imageFile && (
                   <p className="text-xs text-textTertiary mt-0.5">
@@ -207,32 +209,32 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
             {/* ── FORM FIELDS ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Tipo *</Label>
+                <Label>{t('type')} *</Label>
                 <select
                   required
                   value={form.type || event.type || 'STANDARD'}
                   onChange={(e) => setForm({ ...form, type: e.target.value as EventType })}
                   className="w-full mt-1 px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
                 >
-                  <option value="STANDARD">Standard</option>
-                  <option value="PREMIUM_BALLAD">Premium Ballad</option>
-                  <option value="NETWORK">Network</option>
-                  <option value="OPEN">Open</option>
+                  <option value="STANDARD">{t('eventTypeStandard')}</option>
+                  <option value="PREMIUM_BALLAD">{t('eventTypePremium')}</option>
+                  <option value="NETWORK">{t('eventTypeNetwork')}</option>
+                  <option value="OPEN">{t('eventTypeOpen')}</option>
                 </select>
               </div>
 
               <div>
-                <Label>Título *</Label>
+                <Label>{t('eventTitle')} *</Label>
                 <Input
                   required
                   value={form.title || event.title || ''}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  placeholder="Ex: Festa de Aniversário"
+                  placeholder={t('placeholderTitle')}
                 />
               </div>
 
               <div>
-                <Label>CEP</Label>
+                <Label>{t('cep')}</Label>
                 <Input
                   value={form.cep || event.cep || ''}
                   onChange={(e) => setForm({ ...form, cep: e.target.value })}
@@ -242,7 +244,7 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div>
-                <Label>Número</Label>
+                <Label>{t('number')}</Label>
                 <Input
                   value={form.numb || event.numb || ''}
                   onChange={(e) => setForm({ ...form, numb: e.target.value })}
@@ -251,19 +253,19 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div className="md:col-span-2">
-                <Label>Descrição</Label>
+                <Label>{t('description')}</Label>
                 <textarea
                   className="w-full mt-1 px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-none"
                   rows={3}
                   value={form.desc || event.desc || ''}
                   onChange={(e) => setForm({ ...form, desc: e.target.value })}
-                  placeholder="Descrição detalhada do evento..."
+                  placeholder={t('placeholderDesc')}
                   maxLength={4000}
                 />
               </div>
 
               <div>
-                <Label>Data de Início *</Label>
+                <Label>{t('startDate')} *</Label>
                 <Input
                   type="datetime-local"
                   required
@@ -274,7 +276,7 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div>
-                <Label>Data de Fim *</Label>
+                <Label>{t('endDate')} *</Label>
                 <Input
                   type="datetime-local"
                   required
@@ -288,10 +290,11 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
             {error && <ErrorAlert message={error} />}
             {success && (
               <div className="text-xs text-center bg-success/10 border border-success/20 text-success rounded-xl px-4 py-3">
-                Evento atualizado com sucesso!
+                {t('eventUpdated')}
               </div>
             )}
-          </div>
+
+            </div>
 
           {/* ── FOOTER ── */}
           <div className="px-6 py-4 border-t border-surfaceBorder bg-surface/30 flex justify-end gap-3">
@@ -301,9 +304,9 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               disabled={saving}
               className="px-4 py-2 text-sm font-medium text-textSecondary hover:text-textPrimary hover:bg-surfaceHover rounded-xl transition-all duration-200 disabled:opacity-50"
             >
-              Cancelar
+              {t('cancel')}
             </button>
-            <SubmitButton loading={saving}>Salvar Alterações</SubmitButton>
+            <SubmitButton loading={saving}>{t('saveChanges')}</SubmitButton>
           </div>
         </form>
       </div>

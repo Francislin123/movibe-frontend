@@ -845,7 +845,7 @@ export default function Users() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* ── Page header ── */}
       <div className="flex items-center justify-between">
         <div>
@@ -856,64 +856,76 @@ export default function Users() {
         </div>
       </div>
 
-      {/* ── Create form (top, colapsável) ── */}
+      {/* ── Create form (primeiro, antes da pesquisa) ── */}
       <CreateForm onCreated={handleCreated} />
 
-      {/* ── Search input ── */}
+      {/* ── Search input (depois do create form) ── */}
       <Card className="p-4">
         <SearchInput onSearch={handleSearch} loading={loading} />
       </Card>
 
-      {/* ── List + Detail ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Lista compacta — 1/3 */}
-        <div className="lg:col-span-1 space-y-2">
-          {loading && (
-            <div className="flex items-center justify-center py-14 text-violet-400 gap-3">
-              <svg
-                className="animate-spin w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                />
-              </svg>
-              <span className="text-sm font-medium">{t('loadingData')}</span>
-            </div>
-          )}
-          {!loading && error && <ErrorAlert message={error} />}
-          {!loading && !error && users.length === 0 && (
-            <EmptyState label={t('noEntity', { entity: t('nav.users') })} />
-          )}
-          {users.map((u) => (
-            <UserRow
-              key={u.id}
-              user={u}
-              selected={selected?.id === u.id}
-              onSelect={setSelected}
-            />
-          ))}
-        </div>
+      {/* ── User list (antes dos detalhes, com altura limitada) ── */}
+      <div className="lg:max-h-80 lg:overflow-y-auto">
+        <Card className="p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-textPrimary">
+              {t('nav.users')} ({users.length})
+            </h3>
+            {selected && (
+              <div className="text-xs text-textTertiary">
+                {t('selected')}: {selected.displayName}
+              </div>
+            )}
+          </div>
 
-        {/* Painel de detalhes — 2/3 */}
-        <div className="lg:col-span-2 sticky top-4">
-          {selected ? (
-            <UserDetail user={selected} onEdit={setEditingUser} />
-          ) : (
-            <DetailPlaceholder />
-          )}
-        </div>
+          <div className="space-y-2">
+            {loading && (
+              <div className="flex items-center justify-center py-14 text-violet-400 gap-3">
+                <svg
+                  className="animate-spin w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  />
+                </svg>
+                <span className="text-sm font-medium">{t('loadingData')}</span>
+              </div>
+            )}
+            {!loading && error && <ErrorAlert message={error} />}
+            {!loading && !error && users.length === 0 && (
+              <EmptyState label={t('noEntity', { entity: t('nav.users') })} />
+            )}
+            {users.map((u) => (
+              <UserRow
+                key={u.id}
+                user={u}
+                selected={selected?.id === u.id}
+                onSelect={setSelected}
+              />
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* ── User details panel (fixo sem ficar atrás da lista) ── */}
+      <div className="lg:sticky lg:top-6 lg:z-20">
+        {selected ? (
+          <UserDetail user={selected} onEdit={setEditingUser} />
+        ) : (
+          <DetailPlaceholder />
+        )}
       </div>
 
       {/* ── Edit modal ── */}
