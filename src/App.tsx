@@ -10,7 +10,7 @@ import Baladas from "./pages/Baladas";
 import Events from "./pages/Events";
 import Rsvps from "./pages/Rsvps";
 
-// ─── Nav config ───────────────────────────────────────────────────────────────
+// ─── Nav config ───────────────────────────────────────────────────────
 
 type Page = "dashboard" | "users" | "movibers" | "baladas" | "events" | "rsvps";
 
@@ -32,7 +32,7 @@ const PAGE_MAP: Record<Page, React.ReactNode> = {
   rsvps: <Rsvps />,
 };
 
-// ─── App ──────────────────────────────────────────────────────────────────────
+// ─── App ──────────────────────────────────────────────────────────────
 
 export default function App() {
   const { t } = useTranslation();
@@ -99,9 +99,9 @@ export default function App() {
             </div>
             <div>
               <p className="text-base font-bold text-textPrimary leading-tight tracking-tight">
-                Movibe
+                UP
               </p>
-              <p className="text-xs text-textTertiary mt-0.5">Admin Dashboard</p>
+              <p className="text-xs text-textTertiary mt-0.5">Status</p>
             </div>
           </div>
 

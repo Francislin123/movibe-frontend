@@ -10,6 +10,48 @@ export type RsvpIntention =
   | "NETWORK"
   | "OPEN";
 
+// ─── Dashboard Types ────────────────────────────────────────────────────────────
+
+export interface DashboardMetricsResponse {
+  totalBaladas: number;
+  totalEvents: number;
+  totalMovibers: number;
+  totalUsers: number;
+  totalRsvps: number;
+  totalCheckIns: number;
+  totalFollowers: number;
+  totalActiveEvents: number;
+  userGrowthRate: number;
+  eventGrowthRate: number;
+  averageAttendanceRate: number;
+}
+
+export interface EventRankingResponse {
+  id: string;
+  title: string;
+  image: string;
+  confirmedCount: number;
+  checkInCount: number;
+  attendanceRate: number;
+  eventDate: string;
+  eventType: string;
+}
+
+export interface GrowthDataResponse {
+  date: string;
+  userCount: number;
+  eventCount: number;
+  rsvpCount: number;
+  checkInCount: number;
+  followerCount: number;
+}
+
+export interface EventTypeDistributionResponse {
+  eventType: string;
+  count: number;
+  percentage: number;
+}
+
 // ─── Response DTOs ────────────────────────────────────────────────────────────
 
 export interface HealthResponse {
