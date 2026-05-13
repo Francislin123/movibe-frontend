@@ -1,4 +1,3 @@
-import React from 'react';
 import { colors, purpleGlassmorphism, purpleGradients, purpleShadows } from '../../styles/purple-design-system';
 
 interface PremiumGrowthChartProps {
@@ -58,21 +57,22 @@ export default function PremiumGrowthChart({
         height: `${height}px`,
       }}
     >
-      {/* Header with enhanced typography */}
+      {/* Header */}
       <div className="mb-6">
-        <h2 
+        <h2
           className="text-2xl font-bold tracking-tight mb-2"
-          style={{ 
+          style={{
             color: colors.text.primary,
             textShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         >
           {title}
         </h2>
+
         {subtitle && (
-          <p 
+          <p
             className="text-sm font-medium opacity-80"
-            style={{ 
+            style={{
               color: colors.text.secondary,
               letterSpacing: '0.025em',
             }}
@@ -82,8 +82,8 @@ export default function PremiumGrowthChart({
         )}
       </div>
 
-      {/* Chart container with glassmorphism */}
-      <div 
+      {/* Chart container */}
+      <div
         className={`
           relative h-full rounded-xl p-4
           ${purpleGlassmorphism.medium.background}
@@ -92,7 +92,7 @@ export default function PremiumGrowthChart({
           transition-all duration-300
         `}
       >
-        {/* Grid lines */}
+        {/* Grid */}
         <div className="absolute inset-0 pointer-events-none">
           <svg className="w-full h-full" style={{ opacity: 0.1 }}>
             <defs>
@@ -108,15 +108,15 @@ export default function PremiumGrowthChart({
           </svg>
         </div>
 
-        {/* Data visualization */}
+        {/* Bars */}
         <div className="relative h-full flex items-end justify-between gap-2">
           {data.map((item, index) => {
             const maxValue = Math.max(
               ...metrics.map(metric => item[metric as keyof typeof item] as number)
             );
-            
+
             return (
-              <div 
+              <div
                 key={index}
                 className="flex-1 flex flex-col items-center gap-1 group"
                 style={{
@@ -124,22 +124,14 @@ export default function PremiumGrowthChart({
                   animationDelay: `${index * 50}ms`,
                 }}
               >
-                {/* Bars for each metric */}
                 {metrics.map((metric, metricIndex) => {
                   const value = item[metric as keyof typeof item] as number;
                   const percentage = (value / maxValue) * 100;
-                  
+
                   return (
-                    <div 
-                      key={metricIndex}
-                      className="relative w-full flex flex-col items-center"
-                    >
-                      {/* Bar */}
-                      <div 
-                        className={`
-                          w-full rounded-t-lg transition-all duration-300
-                          group-hover:scale-y-110
-                        `}
+                    <div key={metricIndex} className="relative w-full flex flex-col items-center">
+                      <div
+                        className="w-full rounded-t-lg transition-all duration-300 group-hover:scale-y-110"
                         style={{
                           height: `${(percentage / 100) * (height - 60)}px`,
                           background: getMetricGradient(metric),
@@ -147,40 +139,32 @@ export default function PremiumGrowthChart({
                           transformOrigin: 'bottom',
                         }}
                       />
-                      
-                      {/* Glow effect on hover */}
-                      <div 
+
+                      <div
                         className="absolute inset-0 rounded-t-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                         style={{
                           background: `linear-gradient(to top, ${getMetricColor(metric)}40, transparent)`,
                           boxShadow: `0 -4px 20px ${getMetricColor(metric)}60`,
                         }}
                       />
-                      
-                      {/* Value label */}
-                      <div 
+
+                      <div
                         className="mt-2 text-xs font-semibold opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                        style={{ 
-                          color: colors.text.secondary,
-                        }}
+                        style={{ color: colors.text.secondary }}
                       >
                         {value}
                       </div>
                     </div>
                   );
                 })}
-                
-                {/* Date label */}
-                <div 
+
+                <div
                   className="text-xs font-medium opacity-60"
-                  style={{ 
-                    color: colors.text.secondary,
-                    marginTop: '4px',
-                  }}
+                  style={{ color: colors.text.secondary }}
                 >
-                  {new Date(item.date).toLocaleDateString('pt-BR', { 
-                    day: '2-digit', 
-                    month: 'short' 
+                  {new Date(item.date).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: 'short'
                   })}
                 </div>
               </div>
@@ -188,8 +172,8 @@ export default function PremiumGrowthChart({
           })}
         </div>
 
-        {/* Animated gradient overlay */}
-        <div 
+        {/* Overlay */}
+        <div
           className="absolute inset-0 rounded-xl opacity-20 pointer-events-none"
           style={{
             background: purpleGradients.animated.pulse,
@@ -201,7 +185,7 @@ export default function PremiumGrowthChart({
       {/* Legend */}
       <div className="flex justify-center gap-4 mt-4">
         {metrics.map((metric, index) => (
-          <div 
+          <div
             key={index}
             className="flex items-center gap-2 px-3 py-1 rounded-full"
             style={{
@@ -210,71 +194,34 @@ export default function PremiumGrowthChart({
               border: `1px solid ${getMetricColor(metric)}40`,
             }}
           >
-            <div 
+            <div
               className="w-3 h-3 rounded-full"
-              style={{ 
+              style={{
                 background: getMetricGradient(metric),
                 boxShadow: `0 0 8px ${getMetricColor(metric)}40`,
               }}
             />
-            <span 
-              className="text-xs font-medium capitalize"
-              style={{ 
-                color: colors.text.secondary,
-              }}
-            >
+            <span className="text-xs font-medium capitalize" style={{ color: colors.text.secondary }}>
               {metric}
             </span>
           </div>
         ))}
       </div>
-
-      {/* Interactive tooltip placeholder */}
-      <div 
-        className="absolute bottom-4 right-4 px-2 py-1 rounded-lg text-xs opacity-0 hover:opacity-100 transition-opacity duration-300"
-        style={{
-          background: purpleGlassmorphism.heavy.background,
-          backdropFilter: purpleGlassmorphism.heavy.backdropFilter,
-          border: `1px solid ${colors.purple.DEFAULT}40`,
-          color: colors.text.secondary,
-        }}
-      >
-        Hover para detalhes
-      </div>
     </div>
-
-    {/* Subtle glow effect */}
-    <div 
-      className="absolute inset-0 rounded-2xl opacity-30 pointer-events-none"
-      style={{
-        background: purpleGradients.background.mesh,
-        boxShadow: purpleGlassmorphism.glow.subtle,
-      }}
-    />
   );
 }
 
-// Add CSS animations
+// Styles
 const style = document.createElement('style');
 style.textContent = `
   @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-  
+
   @keyframes pulse {
-    0%, 100% {
-      opacity: 0.2;
-    }
-    50% {
-      opacity: 0.4;
-    }
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.4; }
   }
 `;
 document.head.appendChild(style);

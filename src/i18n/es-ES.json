@@ -160,6 +160,7 @@
     "alteracoesSalvas": "¡Cambios guardados con éxito!",
     "nav": {
       "dashboard": "Dashboard",
+      "analyticsDashboard": "Analytics Dashboard",
       "users": "Usuarios",
       "movibers": "Movibers",
       "baladas": "Baladas",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getEvents, searchEvents, getEventUsers, getUsers } from '../services/api'
+import { getEvents, searchEvents, getEventUsers } from '../services/api'
 import { performEventCheckIn, cancelEventCheckIn, isUserCheckedIn, getEventCheckInStats } from '../services/checkin'
 import { Card, Field, EventTypeBadge, Spinner } from '../components/ui'
 import SearchInput from '../components/SearchInput'
@@ -46,7 +46,6 @@ export default function Events() {
   // ── event check-in state ─────────────────────────────────────────────────────
   const [checkInCache, setCheckInCache] = useState<Record<string, Set<string>>>({})
   const [checkInLoadingCache, setCheckInLoadingCache] = useState<Record<string, Set<string>>>({})
-  const [eventStatsCache, setEventStatsCache] = useState<Record<string, { totalConfirmed: number; totalCheckedIn: number }>>({})
   
   // ── event search state ───────────────────────────────────────────────────────
   const [eventSearchQuery, setEventSearchQuery] = useState('')
@@ -218,11 +217,7 @@ export default function Events() {
 
   async function loadEventStats(eventId: string) {
     try {
-      const stats = await getEventCheckInStats(eventId)
-      setEventStatsCache(prev => ({
-        ...prev,
-        [eventId]: { totalConfirmed: stats.totalConfirmed, totalCheckedIn: stats.totalCheckedIn }
-      }))
+      await getEventCheckInStats(eventId)
     } catch (error) {
       console.error('Failed to load event stats:', error)
     }
@@ -447,7 +442,6 @@ export default function Events() {
                           <EventUserCard 
                             key={eventUser.id} 
                             eventUser={eventUser} 
-                            eventId={e.id}
                             onCheckIn={(userId) => handleCheckIn(e.id, userId)}
                             onCancelCheckIn={(userId) => handleCancelCheckIn(e.id, userId)}
                             isCheckedIn={isUserCheckedInCached(e.id, eventUser.user.id)}

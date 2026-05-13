@@ -8,19 +8,17 @@ import Users from "./pages/Users";
 import Movibers from "./pages/Movibers";
 import Baladas from "./pages/Baladas";
 import Events from "./pages/Events";
-import Rsvps from "./pages/Rsvps";
 
 // ─── Nav config ───────────────────────────────────────────────────────
 
-type Page = "dashboard" | "users" | "movibers" | "baladas" | "events" | "rsvps";
+type Page = "dashboard" | "users" | "movibers" | "baladas" | "events";
 
-const NAV: { id: Page; emoji: string; color: string }[] = [
-  { id: "dashboard", emoji: "📊", color: "text-textSecondary" },
+const NAV: { id: Page; emoji: string; color: string; label?: string }[] = [
+  { id: "dashboard", emoji: "📊", color: "text-textSecondary", label: "dashboard" },
   { id: "users", emoji: "👤", color: "text-emerald-600" },
   { id: "movibers", emoji: "🎧", color: "text-primary" },
   { id: "baladas", emoji: "🏠", color: "text-blue-600" },
   { id: "events", emoji: "🎉", color: "text-amber-600" },
-  { id: "rsvps", emoji: "✅", color: "text-rose-600" },
 ];
 
 const PAGE_MAP: Record<Page, React.ReactNode> = {
@@ -29,7 +27,6 @@ const PAGE_MAP: Record<Page, React.ReactNode> = {
   movibers: <Movibers />,
   baladas: <Baladas />,
   events: <Events />,
-  rsvps: <Rsvps />,
 };
 
 // ─── App ──────────────────────────────────────────────────────────────
@@ -167,7 +164,7 @@ export default function App() {
                   </span>
 
                   {/* Label */}
-                  <span className="relative z-10">{t('nav.' + n.id)}</span>
+                  <span className="relative z-10">{t('nav.' + (n.label || n.id))}</span>
 
                   {/* Dot no item ativo */}
                   {isActive && (

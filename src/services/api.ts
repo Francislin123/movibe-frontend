@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import type {
+import type { 
   ApiError,
   BaladaResponse,
   CreateBaladaRequest,
@@ -169,8 +169,8 @@ export const updateAvatar = (id: string, file: File) => {
 
 // ─── RSVPs ────────────────────────────────────────────────────────────────────
 
-export const getRsvps = () =>
-  unwrap<RsvpGoingResponse[]>(client.get("/event-rsvps"));
+// Note: RSVP endpoints are not implemented in the backend yet
+// These functions are kept for future implementation
 
 export const createRsvp = (body: CreateRsvpRequest) =>
   unwrap<RsvpGoingResponse>(client.post("/event-rsvps", body));

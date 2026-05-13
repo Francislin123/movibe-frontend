@@ -1,24 +1,25 @@
-import React, { useState } from 'react';
-import { RefreshCw, Calendar, Filter } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { colors, purpleGlassmorphism, purpleGradients, purpleShadows } from '../../styles/purple-design-system';
 
 interface DashboardHeaderProps {
-  title?: string
-  subtitle?: string
-  onRefresh?: () => void
-  onFilterChange?: (filter: string) => void
-  loading?: boolean
+  title?: string;
+  subtitle?: string;
+  onRefresh?: () => void;
+  onFilterChange?: (filter: string) => void;
+  loading?: boolean;
 }
 
-export default function DashboardHeader({ 
-  title = "Dashboard Analytics", 
-  subtitle, 
-  onRefresh, 
+export default function DashboardHeader({
+  title = "Dashboard Analytics",
+  subtitle,
+  onRefresh,
   onFilterChange,
-  loading = false 
+  loading = false
 }: DashboardHeaderProps) {
+
   const [selectedFilter, setSelectedFilter] = useState('7days');
   const [showFilters, setShowFilters] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const filters = [
     { value: '7days', label: 'Últimos 7 dias' },
@@ -29,6 +30,7 @@ export default function DashboardHeader({
 
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
+    setShowFilters(false);
     onFilterChange?.(filter);
   };
 
@@ -36,8 +38,20 @@ export default function DashboardHeader({
     onRefresh?.();
   };
 
+  // Fecha dropdown ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowFilters(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
-    <div 
+    <div
       className={`
         relative overflow-hidden rounded-2xl p-6 mb-6
         ${purpleGlassmorphism.light.background}
@@ -47,237 +61,121 @@ export default function DashboardHeader({
         transition-all duration-500
       `}
     >
-      {/* Background gradient overlay */}
-      <div 
+      {/* Background */}
+      <div
         className="absolute inset-0 rounded-2xl opacity-20 pointer-events-none"
-        style={{
-          background: purpleGradients.background.mesh,
-        }}
+        style={{ background: purpleGradients.background.mesh }}
       />
 
-      {/* Header content */}
       <div className="relative z-10">
+
+        {/* HEADER TOP */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex-1">
-            <h1 
-              className="text-3xl font-bold tracking-tight mb-2"
-              style={{ 
-                color: colors.text.primary,
-                textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              }}
+          <div>
+            <h1
+              className="text-3xl font-bold mb-2"
+              style={{ color: colors.text.primary }}
             >
               {title}
             </h1>
+
             {subtitle && (
-              <p 
-                className="text-sm font-medium opacity-80"
-                style={{ 
-                  color: colors.text.secondary,
-                  letterSpacing: '0.025em',
-                }}
+              <p
+                className="text-sm opacity-80"
+                style={{ color: colors.text.secondary }}
               >
                 {subtitle}
               </p>
             )}
           </div>
 
-          {/* Action buttons */}
+          {/* ACTIONS */}
           <div className="flex items-center gap-3">
-            {/* Filter button */}
-            <div className="relative">
+
+            {/* FILTER */}
+            <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className={`
-                  relative px-4 py-2 rounded-lg
+                  px-4 py-2 rounded-lg flex items-center gap-2
                   ${purpleGlassmorphism.medium.background}
                   ${purpleGlassmorphism.medium.backdropFilter}
                   ${purpleGlassmorphism.medium.border}
                   ${purpleShadows.button}
-                  hover:${purpleShadows.buttonHover}
-                  transition-all duration-300
-                  flex items-center gap-2
                 `}
               >
-                <Filter 
-                  className="w-4 h-4"
-                  style={{ color: colors.text.secondary }}
-                />
-                <span 
-                  className="text-sm font-medium"
-                  style={{ color: colors.text.secondary }}
-                >
-                  {filters.find(f => f.value === selectedFilter)?.label || 'Filtrar'}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+                <span className="text-sm">
+                  {filters.find(f => f.value === selectedFilter)?.label}
                 </span>
-                
-                {/* Dropdown indicator */}
-                <div 
-                  className={`
-                    absolute right-2 top-1/2
-                    transition-transform duration-300
-                    ${showFilters ? 'rotate-180' : ''}
-                  `}
-                >
-                  <svg 
-                    className="w-4 h-4" 
-                    style={{ color: colors.text.secondary }}
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6" />
-                  </svg>
-                </div>
               </button>
 
-              {/* Filter dropdown */}
+              {/* DROPDOWN */}
               {showFilters && (
-                <div 
+                <div
                   className={`
-                    absolute top-full right-0 mt-2 w-48 rounded-xl
+                    absolute right-0 mt-2 w-48 rounded-xl z-50
                     ${purpleGlassmorphism.heavy.background}
                     ${purpleGlassmorphism.heavy.backdropFilter}
                     ${purpleGlassmorphism.heavy.border}
                     ${purpleShadows.modal}
-                    z-50
-                    animate-fade-in
                   `}
                 >
-                  <div className="py-2">
-                    {filters.map((filter) => (
-                      <button
-                        key={filter.value}
-                        onClick={() => handleFilterChange(filter.value)}
-                        className={`
-                          w-full text-left px-4 py-2 text-sm
-                          transition-all duration-200
-                          ${filter.value === selectedFilter 
-                            ? `bg-purple-600 text-white` 
-                            : `hover:bg-purple-600/20 text-white hover:bg-purple-600/10`
-                          }
-                        `}
-                      >
-                        {filter.label}
-                      </button>
-                    ))}
-                  </div>
+                  {filters.map(filter => (
+                    <button
+                      key={filter.value}
+                      onClick={() => handleFilterChange(filter.value)}
+                      className={`
+                        w-full text-left px-4 py-2 text-sm
+                        ${filter.value === selectedFilter
+                          ? 'bg-purple-600 text-white'
+                          : 'hover:bg-purple-600/20 text-white'
+                        }
+                      `}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
 
-            {/* Refresh button */}
+            {/* REFRESH */}
             <button
               onClick={handleRefresh}
               disabled={loading}
               className={`
-                relative px-4 py-2 rounded-lg
+                px-4 py-2 rounded-lg flex items-center gap-2
                 ${purpleGlassmorphism.medium.background}
                 ${purpleGlassmorphism.medium.backdropFilter}
                 ${purpleGlassmorphism.medium.border}
                 ${purpleShadows.button}
-                hover:${purpleShadows.buttonHover}
-                transition-all duration-300
-                disabled:opacity-50
-                flex items-center gap-2
-                group
               `}
             >
-              <RefreshCw 
-                className={`
-                  w-4 h-4 transition-all duration-300
-                  ${loading ? 'animate-spin' : ''}
-                  group-hover:scale-110
-                `}
-                style={{ color: colors.text.secondary }}
-              />
-              <span 
-                className="text-sm font-medium"
-                style={{ color: colors.text.secondary }}
-              >
+              <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span className="text-sm">
                 {loading ? 'Atualizando...' : 'Atualizar'}
               </span>
-              
-              {/* Glow effect on hover */}
-              <div 
-                className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: purpleGradients.primary,
-                  boxShadow: purpleGlassmorphism.glow.subtle,
-                }}
-              />
             </button>
+
           </div>
         </div>
 
-        {/* Date and time display */}
+        {/* DATE */}
         <div className="flex items-center gap-4 text-sm">
-          <div 
-            className="flex items-center gap-2"
-            style={{ color: colors.text.secondary }}
-          >
-            <Calendar className="w-4 h-4" />
-            <span>
-              {new Date().toLocaleDateString('pt-BR', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-          </div>
-          <div 
-            className="flex items-center gap-2"
-            style={{ color: colors.text.secondary }}
-          >
-            <span>
-              {new Date().toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </span>
-          </div>
-        </div>
-
-        {/* Status indicator */}
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-          <span 
-            className="text-xs font-medium"
-            style={{ color: colors.text.secondary }}
-          >
-            Sistema Online
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <span style={{ color: colors.text.secondary }}>
+            {new Date().toLocaleDateString('pt-BR')}
           </span>
         </div>
-      </div>
 
-      {/* Subtle glow effect */}
-      <div 
-        className="absolute inset-0 rounded-2xl opacity-30 pointer-events-none"
-        style={{
-          background: purpleGradients.background.mesh,
-          boxShadow: purpleGlassmorphism.glow.subtle,
-        }}
-      />
+      </div>
     </div>
   );
 }
-
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-fade-in {
-    animation: fade-in 0.3s ease-out;
-  }
-`;
-document.head.appendChild(style);

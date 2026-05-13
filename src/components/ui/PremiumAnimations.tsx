@@ -1,6 +1,6 @@
 // Premium Animation Components for Dashboard
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 export const FadeIn = ({ 
   children, 
@@ -38,12 +38,10 @@ export const FadeIn = ({
 
 export const SlideUp = ({ 
   children, 
-  delay = 0, 
-  distance = 20 
+  delay = 0
 }: { 
   children: React.ReactNode; 
-  delay?: number; 
-  distance?: number; 
+  delay?: number;
 }) => {
   const [isVisible, setIsVisible] = React.useState(false);
 

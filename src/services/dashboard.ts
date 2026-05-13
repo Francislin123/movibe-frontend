@@ -39,3 +39,6 @@ export const getEventTypeDistribution = async (): Promise<EventTypeDistributionR
   const response = await dashboardClient.get('/dashboard/events/distribution')
   return response.data
 }
+
+// Note: RSVP endpoints are not implemented in the backend yet
+// These functions are kept for future implementation

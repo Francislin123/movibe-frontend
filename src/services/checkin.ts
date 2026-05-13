@@ -64,7 +64,7 @@ export const getUserCheckIn = async (eventId: string, userId: string): Promise<E
     const response = await checkinClient.get(`/events/${eventId}/checkins/users/${userId}`)
     return response.data
   } catch (error) {
-    if (error.response?.status === 404) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
       return null
     }
     throw error

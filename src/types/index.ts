@@ -52,6 +52,34 @@ export interface EventTypeDistributionResponse {
   percentage: number;
 }
 
+export interface EventRsvpDetailResponse {
+  // Informações do Evento
+  id: string;
+  title: string;
+  image: string;
+  startsAt: string;
+  eventType: string;
+  cep: string;
+  description: string;
+  
+  // Métricas do Evento
+  confirmedCount: number;
+  checkInCount: number;
+  attendanceRate: number;
+  
+  // Lista de usuários confirmados
+  confirmedUsers: UserRsvpInfo[];
+}
+
+export interface UserRsvpInfo {
+  id: string;
+  displayName: string;
+  email: string;
+  image: string;
+  status: string;
+  confirmedAt: string;
+}
+
 // ─── Response DTOs ────────────────────────────────────────────────────────────
 
 export interface HealthResponse {

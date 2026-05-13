@@ -2,7 +2,6 @@ import type { EventUserResponse } from '../types'
 
 interface EventUserCardProps {
   eventUser: EventUserResponse
-  eventId: string
   onCheckIn?: (userId: string) => void
   onCancelCheckIn?: (userId: string) => void
   isCheckedIn?: boolean
@@ -112,7 +111,6 @@ function CheckInButton({
 
 export default function EventUserCard({ 
   eventUser, 
-  eventId, 
   onCheckIn, 
   onCancelCheckIn, 
   isCheckedIn = false, 
