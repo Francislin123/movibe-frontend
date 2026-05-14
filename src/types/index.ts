@@ -14,21 +14,21 @@ export type RsvpIntention =
 
 export interface DashboardMetricsResponse {
   totalBaladas: number;
-  baladaGrowthRate: number;      // Sincronizado com Java
+  baladaGrowthRate: number;
   totalEvents: number;
   eventGrowthRate: number;
   totalMovibers: number;
-  moviberGrowthRate: number;     // Sincronizado com Java
+  moviberGrowthRate: number;
   totalUsers: number;
   userGrowthRate: number;
   totalRsvps: number;
-  rsvpGrowthRate: number;        // Sincronizado com Java
+  rsvpGrowthRate: number;
   totalCheckIns: number;
-  checkInGrowthRate: number;     // Sincronizado com Java
+  checkInGrowthRate: number;
   totalFollowers: number;
-  followerGrowthRate: number;    // Sincronizado com Java
+  followerGrowthRate: number;
   totalActiveEvents: number;
-  activeEventGrowthRate: number; // Sincronizado com Java
+  activeEventGrowthRate: number;
   averageAttendanceRate: number;
 }
 
@@ -45,18 +45,28 @@ export interface EventRankingResponse {
 
 export interface GrowthDataResponse {
   date: string;
-  count: number; // Campo genérico para evitar erro de atribuição no Dashboard.tsx
+  count: number; // Mantido para compatibilidade genérica
   userCount: number;
   eventCount: number;
   rsvpCount: number;
   checkInCount: number;
-  followerCount: number;
+  followerCount: number; // Sincronizado com getFollowersGrowth do Java
 }
 
+/** * Interface para o novo gráfico de Rosca/Pizza
+ */
+export interface CategoryDistributionResponse {
+  category: string;
+  count: number;
+}
+
+/**
+ * Interface específica para distribuição de tipos (se usar o enum EventType)
+ */
 export interface EventTypeDistributionResponse {
   eventType: string;
   count: number;
-  percentage: number;
+  percentage?: number;
 }
 
 export interface EventRsvpDetailResponse {
@@ -116,6 +126,7 @@ export interface EventResponse {
   hostBaladaId: string | null;
   type: EventType;
   title: string;
+  category: string; // Adicionado para bater com a nova query de distribuição
   cep: string | null;
   numb: string | null;
   desc: string | null;
@@ -126,6 +137,7 @@ export interface EventResponse {
   moviberIds: string[];
 }
 
+// ... Restante dos DTOs de Moviber, User e Request permanecem iguais ...
 export interface MoviberResponse {
   id: string;
   linkedUserId: string;
@@ -250,6 +262,7 @@ export interface CreateEventRequest {
   hostBaladaId: string;
   type: EventType;
   title: string;
+  category: string; // Adicionado
   cep?: string;
   numb?: string;
   desc?: string;
@@ -262,8 +275,6 @@ export interface CreateRsvpRequest {
   eventId: string;
   intention: RsvpIntention;
 }
-
-// ─── UI helpers ───────────────────────────────────────────────────────────────
 
 export interface ApiError {
   message: string;

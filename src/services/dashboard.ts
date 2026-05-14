@@ -3,7 +3,8 @@ import type {
   DashboardMetricsResponse,
   EventRankingResponse,
   GrowthDataResponse,
-  EventTypeDistributionResponse
+  EventTypeDistributionResponse,
+  CategoryDistributionResponse // Importe o novo tipo aqui
 } from '../types'
 
 // Create separate client for dashboard endpoints (they use /api instead of /api/v1)
@@ -40,5 +41,12 @@ export const getEventTypeDistribution = async (): Promise<EventTypeDistributionR
   return response.data
 }
 
+/**
+ * ADICIONADO: Busca a distribuição por categorias para o gráfico de rosca
+ */
+export const getCategoryDistribution = async (): Promise<CategoryDistributionResponse[]> => {
+  const response = await dashboardClient.get('/dashboard/categories')
+  return response.data
+}
+
 // Note: RSVP endpoints are not implemented in the backend yet
-// These functions are kept for future implementation

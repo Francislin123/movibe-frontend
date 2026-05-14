@@ -9,7 +9,7 @@ interface PremiumEventRankingProps {
   events: Array<{
     id: string;
     title: string;
-    image: string;
+    image?: string; // Alterado para opcional
     type: string;
     confirmedCount: number;
     checkInCount: number;
@@ -32,6 +32,16 @@ export default function PremiumEventRanking({
     return { color: colors.text.secondary, text: `${index + 1}º` };
   };
 
+  // Função para formatar data com segurança
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return isNaN(date.getTime()) ? dateStr : date.toLocaleDateString('pt-BR');
+    } catch {
+      return dateStr;
+    }
+  };
+
   return (
     <div
       className={`
@@ -43,7 +53,7 @@ export default function PremiumEventRanking({
       `}
     >
       {/* Header */}
-      <div className="mb-6">
+      <div className="relative z-10 mb-6">
         <h2
           className="text-2xl font-bold tracking-tight mb-2"
           style={{ color: colors.text.primary }}
@@ -58,7 +68,7 @@ export default function PremiumEventRanking({
       </div>
 
       {/* List */}
-      <div className="space-y-4">
+      <div className="relative z-10 space-y-4">
         {events.slice(0, maxItems).map((event, index) => {
           const badge = getRankingBadge(index);
 
@@ -72,20 +82,20 @@ export default function PremiumEventRanking({
                 ${purpleGlassmorphism.medium.border}
                 ${purpleShadows.card}
                 transition-all duration-300
-                hover:scale-[1.02]
+                hover:scale-[1.01]
               `}
               style={{
                 animation: `fadeIn 0.4s ease-out ${index * 80}ms both`,
               }}
             >
-              {/* Ranking */}
-              <div className="absolute top-4 left-4 z-10">
+              {/* Ranking Badge */}
+              <div className="absolute top-4 left-4 z-20">
                 <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold"
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shadow-lg"
                   style={{
                     background: badge.color,
-                    color: badge.text === '1º' ? '#000' : '#fff',
-                    boxShadow: `0 0 20px ${badge.color}40`,
+                    color: index < 3 ? '#000' : '#fff',
+                    boxShadow: `0 0 15px ${badge.color}30`,
                   }}
                 >
                   {badge.text}
@@ -94,48 +104,54 @@ export default function PremiumEventRanking({
 
               {/* Content */}
               <div className="flex gap-4 ml-12">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-20 h-20 rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
-                  style={{ boxShadow: purpleShadows.button }}
-                />
+                <div className="relative w-20 h-20 shrink-0 overflow-hidden rounded-xl bg-surface/50 border border-surfaceBorder/30">
+                  {event.image ? (
+                    <img
+                      src={event.image}
+                      alt={event.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-2xl">
+                      🎉
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <h3
-                      className="text-lg font-semibold text-white truncate pr-2"
-                      style={{ textShadow: '0 1px 2px rgba(0,0,0,0.3)' }}
-                    >
+                  <div className="flex justify-between items-start gap-2">
+                    <h3 className="text-lg font-bold text-white truncate group-hover:text-primary transition-colors">
                       {event.title}
                     </h3>
 
                     <span
-                      className="text-xs px-2 py-1 rounded-full"
+                      className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0"
                       style={{
-                        background: purpleGlassmorphism.medium.background,
+                        background: `${colors.purple.DEFAULT}20`,
                         border: `1px solid ${colors.purple.DEFAULT}40`,
-                        color: colors.text.secondary,
+                        color: colors.purple.light || '#A78BFA',
                       }}
                     >
                       {event.type}
                     </span>
                   </div>
 
-                  <div className="flex gap-4 text-sm mt-2">
-                    <span style={{ color: colors.text.secondary }}>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm mt-1.5 font-medium">
+                    <div className="flex items-center gap-1.5" style={{ color: colors.text.secondary }}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary" />
                       {event.confirmedCount} confirmados
-                    </span>
-                    <span style={{ color: colors.text.secondary }}>
+                    </div>
+                    <div className="flex items-center gap-1.5" style={{ color: colors.text.secondary }}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
                       {event.checkInCount} check-ins
-                    </span>
+                    </div>
                   </div>
 
-                  <div
-                    className="text-xs mt-1 opacity-60"
-                    style={{ color: colors.text.secondary }}
-                  >
-                    {new Date(event.eventDate).toLocaleDateString('pt-BR')}
+                  <div className="text-xs mt-2 font-medium opacity-50 flex items-center gap-1 text-textTertiary">
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {formatDate(event.eventDate)}
                   </div>
                 </div>
               </div>
@@ -144,19 +160,16 @@ export default function PremiumEventRanking({
         })}
       </div>
 
-      {/* Glow */}
+      {/* Decorative Glow */}
       <div
-        className="absolute inset-0 rounded-2xl opacity-20 pointer-events-none"
-        style={{
-          background: purpleGradients.background.mesh,
-        }}
+        className="absolute inset-0 rounded-2xl opacity-10 pointer-events-none"
+        style={{ background: purpleGradients.background.mesh }}
       />
 
-      {/* Animations globais seguras */}
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateX(-10px); }
+          to { opacity: 1; transform: translateX(0); }
         }
       `}</style>
     </div>

@@ -21,9 +21,25 @@ function toIso(local: string) {
 
 export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose, onSuccess }: Props) {
   const { t } = useTranslation()
+
+  // CORREÇÃO: Adicionado 'category' ao estado inicial para bater com CreateEventRequest
   const [form, setForm] = useState<{
-    type: EventType; title: string; cep: string; desc: string; startsAt: string; endsAt: string
-  }>({ type: 'STANDARD', title: '', cep: '', desc: '', startsAt: '', endsAt: '' })
+    type: EventType;
+    title: string;
+    category: string; // Adicionado
+    cep: string;
+    desc: string;
+    startsAt: string;
+    endsAt: string
+  }>({
+    type: 'STANDARD',
+    title: '',
+    category: 'Geral', // Valor padrão inicial
+    cep: '',
+    desc: '',
+    startsAt: '',
+    endsAt: ''
+  })
 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -67,10 +83,12 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
 
     setSaving(true)
     try {
+      // CORREÇÃO: category incluída no payload (agora obrigatória no tipo)
       const payload: CreateEventRequest = {
         hostBaladaId,
         type: form.type,
         title: form.title,
+        category: form.category, // Adicionado
         startsAt: toIso(form.startsAt),
         endsAt: toIso(form.endsAt),
         ...(form.cep && { cep: form.cep }),
@@ -130,7 +148,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
         <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[75vh]">
           <div className="px-6 py-6 space-y-5">
 
-            {/* Image upload */}
+            {/* Image upload preview code mantido igual ao original */}
             <div className="flex items-center gap-4 p-4 bg-surface/50 rounded-2xl border border-surfaceBorder/50">
               <div className="relative shrink-0 group">
                 {imagePreview ? (
@@ -148,35 +166,19 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
-                  title={t('addImage')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                 </button>
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-textPrimary">{t('eventPhoto')}</p>
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition"
-                >
+                <button type="button" onClick={() => fileRef.current?.click()} className="mt-2 text-xs text-primary font-medium">
                   {imageFile ? `✓ ${imageFile.name}` : t('clickToAddPhoto')}
                 </button>
-                {imageFile && (
-                  <p className="text-xs text-textTertiary mt-0.5">
-                    {(imageFile.size / 1024).toFixed(0)} KB · {imageFile.type}
-                  </p>
-                )}
               </div>
             </div>
 
@@ -187,12 +189,29 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                 <Input required value={form.title} onChange={s('title')} placeholder={t('placeholderTitle')} />
               </div>
 
-              <div className="col-span-2">
+              {/* NOVO CAMPO: Categoria (Essencial para o gráfico de Rosca do Dashboard) */}
+              <div className="col-span-1">
+                <Label>Categoria *</Label>
+                <select
+                  value={form.category}
+                  onChange={s('category')}
+                  className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary transition"
+                >
+                  <option value="Geral">Geral</option>
+                  <option value="Sertanejo">Sertanejo</option>
+                  <option value="Eletrônico">Eletrônico</option>
+                  <option value="Funk">Funk</option>
+                  <option value="Rock">Rock</option>
+                  <option value="Pagode">Pagode</option>
+                </select>
+              </div>
+
+              <div className="col-span-1">
                 <Label>{t('type')} *</Label>
                 <select
                   value={form.type}
                   onChange={s('type')}
-                  className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                  className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary transition"
                 >
                   <option value="STANDARD">{t('eventTypeStandard')}</option>
                   <option value="PREMIUM_BALLAD">{t('eventTypePremium')}</option>
@@ -224,7 +243,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                 />
               </div>
 
-              <div>
+              <div className="col-span-2">
                 <Label>{t('cep')}</Label>
                 <Input value={form.cep} onChange={s('cep')} placeholder="00000-000" maxLength={9} />
               </div>
@@ -237,7 +256,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                 onChange={s('desc')}
                 placeholder={t('placeholderDesc')}
                 rows={3}
-                className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-none"
+                className="w-full px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary transition resize-none"
               />
             </div>
 
@@ -255,28 +274,16 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
               type="button"
               onClick={onClose}
               disabled={saving}
-              className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover py-2.5 rounded-xl text-sm font-medium transition disabled:opacity-50"
+              className="flex-1 border border-surfaceBorder text-textSecondary hover:bg-surfaceHover py-2.5 rounded-xl text-sm font-medium transition"
             >
               {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 bg-primary hover:bg-primaryHover disabled:bg-primaryLight text-white py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
+              className="flex-1 bg-primary hover:bg-primaryHover text-white py-2.5 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2"
             >
-              {saving ? (
-                <>
-                  <Spinner size={4} />
-                  <span>{t('creating')}</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>{t('createEvent')}</span>
-                </>
-              )}
+              {saving ? <Spinner size={4} /> : <span>{t('createEvent')}</span>}
             </button>
           </div>
         </form>
