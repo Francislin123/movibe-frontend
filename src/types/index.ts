@@ -14,15 +14,21 @@ export type RsvpIntention =
 
 export interface DashboardMetricsResponse {
   totalBaladas: number;
+  baladaGrowthRate: number;      // Sincronizado com Java
   totalEvents: number;
-  totalMovibers: number;
-  totalUsers: number;
-  totalRsvps: number;
-  totalCheckIns: number;
-  totalFollowers: number;
-  totalActiveEvents: number;
-  userGrowthRate: number;
   eventGrowthRate: number;
+  totalMovibers: number;
+  moviberGrowthRate: number;     // Sincronizado com Java
+  totalUsers: number;
+  userGrowthRate: number;
+  totalRsvps: number;
+  rsvpGrowthRate: number;        // Sincronizado com Java
+  totalCheckIns: number;
+  checkInGrowthRate: number;     // Sincronizado com Java
+  totalFollowers: number;
+  followerGrowthRate: number;    // Sincronizado com Java
+  totalActiveEvents: number;
+  activeEventGrowthRate: number; // Sincronizado com Java
   averageAttendanceRate: number;
 }
 
@@ -39,6 +45,7 @@ export interface EventRankingResponse {
 
 export interface GrowthDataResponse {
   date: string;
+  count: number; // Campo genérico para evitar erro de atribuição no Dashboard.tsx
   userCount: number;
   eventCount: number;
   rsvpCount: number;
@@ -53,7 +60,6 @@ export interface EventTypeDistributionResponse {
 }
 
 export interface EventRsvpDetailResponse {
-  // Informações do Evento
   id: string;
   title: string;
   image: string;
@@ -61,13 +67,9 @@ export interface EventRsvpDetailResponse {
   eventType: string;
   cep: string;
   description: string;
-  
-  // Métricas do Evento
   confirmedCount: number;
   checkInCount: number;
   attendanceRate: number;
-  
-  // Lista de usuários confirmados
   confirmedUsers: UserRsvpInfo[];
 }
 
@@ -233,7 +235,6 @@ export interface UpdateMoviberRequest {
 }
 
 export interface CreateBaladaRequest {
-  /** @deprecated O backend define automaticamente baseado no usuário autenticado */
   ownerUserId?: string;
   tradeName: string;
   cnpj?: string;

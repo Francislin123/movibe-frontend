@@ -9,23 +9,27 @@ import { ErrorAlert } from '../components/ui'
 import PremiumMetricCard from '../components/dashboard/PremiumMetricCard'
 import GrowthChart from '../components/dashboard/GrowthChart'
 import PremiumEventRanking from '../components/dashboard/PremiumEventRanking'
-import type { 
-  DashboardMetricsResponse, 
-  EventRankingResponse, 
-  GrowthDataResponse 
+
+// Importamos os tipos oficiais do seu projeto para evitar conflitos de "Type Redefinition"
+import type {
+  DashboardMetricsResponse,
+  EventRankingResponse,
+  GrowthDataResponse
 } from '../types'
 
 export default function Dashboard() {
   const { t } = useTranslation()
   const [metrics, setMetrics] = useState<DashboardMetricsResponse | null>(null)
   const [topEvents, setTopEvents] = useState<EventRankingResponse[]>([])
+
+  // Usamos o tipo importado que contém userCount, eventCount, etc.
   const [growthData, setGrowthData] = useState<GrowthDataResponse[]>([])
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     loadData()
-    // Set up auto-refresh every 30 seconds
     const interval = setInterval(loadData, 30000)
     return () => clearInterval(interval)
   }, [])
@@ -37,10 +41,13 @@ export default function Dashboard() {
         getTopConfirmedEvents(5),
         getGrowthData(30)
       ])
-      
+
       setMetrics(metricsData)
       setTopEvents(eventsData)
-      setGrowthData(growthDataResult)
+
+      // O growthDataResult vindo do service deve bater com a interface global
+      setGrowthData(growthDataResult as GrowthDataResponse[])
+
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -77,8 +84,8 @@ export default function Dashboard() {
             title="Baladas"
             value={metrics.totalBaladas.toLocaleString()}
             icon="🏠"
-            growth={0}
-            trend="up"
+            growth={metrics.baladaGrowthRate}
+            trend={metrics.baladaGrowthRate >= 0 ? "up" : "down"}
             color="purple"
           />
           <PremiumMetricCard
@@ -86,15 +93,15 @@ export default function Dashboard() {
             value={metrics.totalEvents.toLocaleString()}
             icon="🎉"
             growth={metrics.eventGrowthRate}
-            trend="up"
+            trend={metrics.eventGrowthRate >= 0 ? "up" : "down"}
             color="green"
           />
           <PremiumMetricCard
             title="Movibers"
             value={metrics.totalMovibers.toLocaleString()}
             icon="🎧"
-            growth={0}
-            trend="up"
+            growth={metrics.moviberGrowthRate}
+            trend={metrics.moviberGrowthRate >= 0 ? "up" : "down"}
             color="blue"
           />
           <PremiumMetricCard
@@ -102,39 +109,39 @@ export default function Dashboard() {
             value={metrics.totalUsers.toLocaleString()}
             icon="👥"
             growth={metrics.userGrowthRate}
-            trend="up"
+            trend={metrics.userGrowthRate >= 0 ? "up" : "down"}
             color="purple"
           />
           <PremiumMetricCard
             title="RSVPs"
             value={metrics.totalRsvps.toLocaleString()}
             icon="✅"
-            growth={0}
-            trend="up"
+            growth={metrics.rsvpGrowthRate}
+            trend={metrics.rsvpGrowthRate >= 0 ? "up" : "down"}
             color="orange"
           />
           <PremiumMetricCard
             title="Check-ins"
             value={metrics.totalCheckIns.toLocaleString()}
             icon="📍"
-            growth={0}
-            trend="up"
+            growth={metrics.checkInGrowthRate}
+            trend={metrics.checkInGrowthRate >= 0 ? "up" : "down"}
             color="green"
           />
           <PremiumMetricCard
             title="Seguidores"
             value={metrics.totalFollowers.toLocaleString()}
             icon="❤️"
-            growth={0}
-            trend="up"
+            growth={metrics.followerGrowthRate}
+            trend={metrics.followerGrowthRate >= 0 ? "up" : "down"}
             color="pink"
           />
           <PremiumMetricCard
             title="Eventos Ativos"
             value={metrics.totalActiveEvents.toLocaleString()}
             icon="⚡"
-            growth={0}
-            trend="up"
+            growth={metrics.activeEventGrowthRate}
+            trend={metrics.activeEventGrowthRate >= 0 ? "up" : "down"}
             color="blue"
           />
         </div>
@@ -142,7 +149,9 @@ export default function Dashboard() {
 
       {/* Charts and Rankings */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Agora o growthData possui as propriedades exigidas pelo GrowthChart */}
         <GrowthChart data={growthData} loading={loading} />
+
         <PremiumEventRanking
           events={topEvents.map(event => ({
             id: event.id,
