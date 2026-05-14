@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
+import type { AxiosResponse } from "axios";
 import type { 
-  ApiError,
   BaladaResponse,
   CreateBaladaRequest,
   CreateEventRequest,
@@ -10,6 +10,7 @@ import type {
   UpdateUserRequest,
   UpdateMoviberRequest,
   EventResponse,
+  EventRsvpDetailResponse,
   EventUserResponse,
   HealthResponse,
   MoviberResponse,
@@ -19,6 +20,11 @@ import type {
 
 export const client = axios.create({
   baseURL: "/api/v1",
+  headers: { "Content-Type": "application/json" },
+});
+
+export const rsvpClient = axios.create({
+  baseURL: "/api",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -169,8 +175,11 @@ export const updateAvatar = (id: string, file: File) => {
 
 // ─── RSVPs ────────────────────────────────────────────────────────────────────
 
-// Note: RSVP endpoints are not implemented in the backend yet
-// These functions are kept for future implementation
+export const getEventRsvps = () =>
+  unwrap<EventRsvpDetailResponse[]>(rsvpClient.get("/dashboard/rsvps"));
+
+export const getEventRsvpDetails = (eventId: string) =>
+  unwrap<EventRsvpDetailResponse>(rsvpClient.get(`/dashboard/rsvps/event/${eventId}`));
 
 export const createRsvp = (body: CreateRsvpRequest) =>
   unwrap<RsvpGoingResponse>(client.post("/event-rsvps", body));
@@ -207,47 +216,8 @@ export const getEventUsers = async (eventId: string): Promise<EventUserResponse[
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-async function unwrap<T>(promise: Promise<{ data: T }>): Promise<T> {
-  try {
-    const { data } = await promise;
-    return data;
-  } catch (err) {
-    throw normalise(err);
-  }
-}
-
-function normalise(err: unknown): ApiError {
-  if (err instanceof AxiosError) {
-    const status = err.response?.status ?? 0;
-    const payload = err.response?.data;
-
-    if (status === 0 || !err.response)
-      return {
-        status: 0,
-        message:
-          "Não foi possível conectar ao servidor. Verifique se o backend está rodando na porta 8080.",
-      };
-    if (status === 404)
-      return { status: 404, message: "Recurso não encontrado (404)." };
-    if (status === 400)
-      return {
-        status: 400,
-        message:
-          payload?.error ?? payload?.message ?? "Requisição inválida (400).",
-      };
-    if (status === 503)
-      return {
-        status: 503,
-        message: payload?.message ?? "Cloudinary não configurado no servidor.",
-      };
-    if (status === 413)
-      return { status: 413, message: "Arquivo muito grande (413)." };
-
-    return {
-      status,
-      message:
-        payload?.error ?? payload?.message ?? `Erro inesperado (${status}).`,
-    };
-  }
-  return { status: 0, message: String(err) };
-}
+const unwrap = <T>(promise: Promise<AxiosResponse<T>>): Promise<T> =>
+  promise.then((response) => response.data).catch((e: AxiosError) => {
+    const message = (e.response?.data as any)?.message ?? e.message;
+    throw new Error(message);
+  });

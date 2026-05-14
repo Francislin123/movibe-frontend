@@ -8,10 +8,11 @@ import Users from "./pages/Users";
 import Movibers from "./pages/Movibers";
 import Baladas from "./pages/Baladas";
 import Events from "./pages/Events";
+import Rsvps from "./pages/Rsvps";
 
 // ─── Nav config ───────────────────────────────────────────────────────
 
-type Page = "dashboard" | "users" | "movibers" | "baladas" | "events";
+type Page = "dashboard" | "users" | "movibers" | "baladas" | "events" | "rsvps";
 
 const NAV: { id: Page; emoji: string; color: string; label?: string }[] = [
   { id: "dashboard", emoji: "📊", color: "text-textSecondary", label: "dashboard" },
@@ -19,6 +20,7 @@ const NAV: { id: Page; emoji: string; color: string; label?: string }[] = [
   { id: "movibers", emoji: "🎧", color: "text-primary" },
   { id: "baladas", emoji: "🏠", color: "text-blue-600" },
   { id: "events", emoji: "🎉", color: "text-amber-600" },
+  { id: "rsvps", emoji: "✅", color: "text-purple-600", label: "usersEvents" },
 ];
 
 const PAGE_MAP: Record<Page, React.ReactNode> = {
@@ -27,6 +29,7 @@ const PAGE_MAP: Record<Page, React.ReactNode> = {
   movibers: <Movibers />,
   baladas: <Baladas />,
   events: <Events />,
+  rsvps: <Rsvps />,
 };
 
 // ─── App ──────────────────────────────────────────────────────────────
@@ -71,11 +74,6 @@ export default function App() {
           {/* Logo */}
           <div
             className="relative flex items-center gap-3 px-6 py-5"
-            style={{
-              background: 'linear-gradient(135deg, var(--color-surface) 0%, var(--color-backgroundSecondary) 100%)',
-              borderBottom: '1px solid var(--color-surfaceBorder)',
-              boxShadow: 'inset 0 0 0 1px rgba(124,58,237,0.08)',
-            }}
           >
             <div className="relative shrink-0">
               <img
@@ -96,9 +94,8 @@ export default function App() {
             </div>
             <div>
               <p className="text-base font-bold text-textPrimary leading-tight tracking-tight">
-                UP
+                Movibe
               </p>
-              <p className="text-xs text-textTertiary mt-0.5">Status</p>
             </div>
           </div>
 
