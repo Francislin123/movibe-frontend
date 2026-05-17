@@ -11,6 +11,9 @@ import PremiumMetricCard from '../components/dashboard/PremiumMetricCard'
 import GrowthChart from '../components/dashboard/GrowthChart'
 import PremiumEventRanking from '../components/dashboard/PremiumEventRanking'
 import CategoryChart from '../components/dashboard/CategoryChart'
+import EngagementFunnel from '../components/dashboard/EngagementFunnel'
+// 1. Importação do novo componente
+import PerformanceRanking from '../components/dashboard/PerformanceRanking'
 
 import type {
   DashboardMetricsResponse,
@@ -54,6 +57,20 @@ export default function Dashboard() {
       setLoading(false)
     }
   }
+
+  // Lógica para o Funil
+  const funnelData = metrics ? [
+    { step: 'Eventos Ativos', count: metrics.totalActiveEvents },
+    { step: 'RSVPs', count: metrics.totalRsvps },
+    { step: 'Check-ins', count: metrics.totalCheckIns },
+  ] : [];
+
+  // 2. Lógica para o Ranking de Performance (Mapeia o Top 5 eventos)
+  const performanceData = topEvents.map(event => ({
+    name: event.title.length > 15 ? event.title.substring(0, 15) + '...' : event.title,
+    rsvps: event.confirmedCount,
+    checkins: event.checkInCount
+  }));
 
   if (loading) {
     return (
@@ -151,6 +168,15 @@ export default function Dashboard() {
         </div>
         <div className="lg:col-span-1">
           <CategoryChart data={categoryData} loading={loading} />
+        </div>
+
+        <div className="lg:col-span-3">
+          <EngagementFunnel data={funnelData} loading={loading} />
+        </div>
+
+        {/* 3. Inclusão do Ranking de Performance ocupando toda a largura */}
+        <div className="lg:col-span-3">
+          <PerformanceRanking data={performanceData} loading={loading} />
         </div>
       </div>
 
