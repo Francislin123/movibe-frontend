@@ -235,6 +235,29 @@
     "confirmedUsers": "Usuários Confirmados",
     "eventConfirmedUsers": "Usuários Confirmados no Evento",
     "noConfirmedUsers": "Nenhum usuário confirmado neste evento.",
+    "baladas": {
+      "total": "Total de Baladas",
+      "verified": "Baladas Verificadas",
+      "events": "Eventos Vinculados"
+    },
+    "userStatus": {
+      "present": "Presente",
+      "confirmed": "Confirmado"
+    },
+    "rsvps": {
+      "title": "Confirmados",
+      "subtitle": "Gestão de RSVP e fluxo de entrada em tempo real.",
+      "confirmed_short": "Vão",
+      "checkins_short": "Entraram",
+      "rate_short": "Taxa"
+    },
+    "modal": {
+      "manage_guests": "Gerenciamento de entrada de convidados",
+      "description": "Descrição",
+      "confirmed_users": "Lista de Presença",
+      "no_users": "Nenhum usuário confirmado para este evento."
+    },
+    "checkIns": "Check-ins",
     "checkIn": {
       "perform": "Realizar check-in",
       "cancel": "Cancelar check-in",
@@ -252,6 +275,9 @@
         "checkedIn": "Usuário já confirmado no evento",
         "notCheckedIn": "Clique para confirmar presença do usuário"
       }
+    },
+    "event": {
+      "view_on_map": "Ver no mapa"
     }
   }
 }

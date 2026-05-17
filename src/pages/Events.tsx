@@ -32,6 +32,50 @@ function fmtDate(value: string) {
   return `${day}/${month}/${year} ${hour}:${minute}`
 }
 
+function getGoogleMapsUrl(balada: any): string {
+  if (!balada) return '#'
+  
+  // Try to use structured address fields first
+  const logradouro = balada.logradouro || balada.local || ''
+  const numero = balada.numero || balada.numb || ''
+  const bairro = balada.bairro || ''
+  const localidade = balada.localidade || balada.city || ''
+  const uf = balada.uf || balada.state || ''
+  
+  // Build address string
+  const addressParts = []
+  if (logradouro) addressParts.push(logradouro)
+  if (numero) addressParts.push(numero)
+  if (bairro) addressParts.push(bairro)
+  if (localidade) addressParts.push(localidade)
+  if (uf) addressParts.push(uf)
+  
+  const address = addressParts.join(', ')
+  
+  if (!address) return '#'
+  
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+}
+
+function formatBaladaLocation(balada: any): string {
+  if (!balada) return ''
+  
+  // Try to use structured address fields first
+  const localidade = balada.localidade || balada.city || ''
+  const uf = balada.uf || balada.state || ''
+  
+  if (localidade && uf) {
+    return `${localidade} - ${uf}`
+  }
+  
+  // Fallback to old local field
+  if (balada.local) {
+    return balada.local
+  }
+  
+  return ''
+}
+
 export default function Events() {
   const { t } = useTranslation()
   const [events, setEvents] = useState<EventResponse[]>([])
@@ -253,7 +297,7 @@ export default function Events() {
       }))
       loadStats(eventId)
     } catch (err) {
-      alert((err as ApiError).message || 'Erro ao cancelar check-in')
+      alert((err as ApiError).message || t('checkIn.cancelError'))
       setCheckInStatusCache(prev => ({
         ...prev,
         [eventId]: {
@@ -279,7 +323,6 @@ export default function Events() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-textPrimary tracking-tight">{t('nav.events')}</h1>
-            <p className="text-xs sm:text-sm text-textSecondary mt-0.5">{t('searchByEvent')}</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -291,9 +334,9 @@ export default function Events() {
             </div>
             <div className="h-8 w-px bg-surfaceBorder/60 hidden sm:block" />
             <div className="flex flex-col sm:items-end">
-              <span className="text-xs text-textTertiary font-medium uppercase tracking-wider">Usuários</span>
+              <span className="text-xs text-textTertiary font-medium uppercase tracking-wider">{t('nav.users')}</span>
               <span className="text-lg font-bold text-amber-500">
-                {totalGlobalUsers} <span className="text-xs font-normal text-textSecondary">vinculados</span>
+                {totalGlobalUsers} <span className="text-xs font-normal text-textSecondary">{t('confirmedUsers')}</span>
               </span>
             </div>
           </div>
@@ -304,7 +347,7 @@ export default function Events() {
           <SearchInput
             onSearch={handleSearch}
             loading={loading}
-            placeholder={t('searchByEvent')}
+            placeholder={t('search')}
           />
         </Card>
 
@@ -370,10 +413,43 @@ export default function Events() {
                         <span className="text-xs font-mono text-textSecondary truncate">{eventAny.cep || '—'}</span>
                       </div>
                       <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-medium text-textTertiary uppercase tracking-wider">Balada</span>
-                        <span className="text-xs font-semibold text-primary truncate" title={eventAny.hostBalada?.tradeName || eventAny.hostBaladaName || ''}>
-                          {eventAny.hostBalada?.tradeName || eventAny.hostBaladaName || '—'}
-                        </span>
+                        <span className="text-[11px] font-medium text-textTertiary uppercase tracking-wider">{t('balada')}</span>
+                        {eventAny.hostBalada ? (
+                          <>
+                            <a
+                              href={getGoogleMapsUrl(eventAny.hostBalada)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-semibold text-primary truncate hover:text-purple-300 transition-all duration-300 cursor-pointer flex items-center gap-1"
+                              title={`${eventAny.hostBalada.tradeName} • ${formatBaladaLocation(eventAny.hostBalada)} - ${t('event.view_on_map')}`}
+                            >
+                              <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                              <span className="truncate">{eventAny.hostBalada.tradeName}</span>
+                            </a>
+                            {formatBaladaLocation(eventAny.hostBalada) && (
+                              <a
+                                href={getGoogleMapsUrl(eventAny.hostBalada)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-purple-400 hover:text-purple-300 transition-all duration-300 cursor-pointer truncate flex items-center gap-1"
+                                title={`${formatBaladaLocation(eventAny.hostBalada)} - ${t('event.view_on_map')}`}
+                              >
+                                <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="truncate">{formatBaladaLocation(eventAny.hostBalada)}</span>
+                              </a>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-xs font-semibold text-primary truncate">
+                            {eventAny.hostBaladaName || '—'}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -433,13 +509,13 @@ export default function Events() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <p className="text-[11px] font-semibold text-textTertiary uppercase tracking-wider">
-                          Usuários Vinculados ao Evento
+                          {t('eventConfirmedUsers')}
                         </p>
                         {statsCache[e.id]?.loading ? (
                           <Spinner size={3} />
                         ) : (
                           <span className="text-[11px] font-bold bg-green-500/10 text-green-500 px-2 py-0.5 rounded-md">
-                            {statsCache[e.id]?.totalCheckIns ?? 0} Check-ins
+                            {statsCache[e.id]?.totalCheckIns ?? 0} {t('checkIns')}
                           </span>
                         )}
                       </div>
@@ -459,7 +535,7 @@ export default function Events() {
                       <SearchInput
                         onSearch={(query) => handleEventUserSearch(e.id, query)}
                         loading={false}
-                        placeholder="Filtrar usuários por nome ou email..."
+                        placeholder={t('searchBy')}
                       />
                     </div>
 
@@ -483,7 +559,7 @@ export default function Events() {
                       if (searchQuery && searchQuery.trim() && filteredUsers.length === 0) {
                         return (
                           <p className="text-xs text-textTertiary text-center py-6">
-                            Nenhum usuário encontrado para "{searchQuery}"
+                            {t('noEntity', { entity: t('nav.users') })}
                           </p>
                         )
                       }

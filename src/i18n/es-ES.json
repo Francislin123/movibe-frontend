@@ -190,6 +190,32 @@
     },
     "confirmedUsers": "Usuarios Confirmados",
     "eventConfirmedUsers": "Usuarios Confirmados en el Evento",
-    "noConfirmedUsers": "No hay usuarios confirmados en este evento."
+    "noConfirmedUsers": "No hay usuarios confirmados en este evento.",
+    "baladas": {
+      "total": "Total de Baladas",
+      "verified": "Baladas Verificadas",
+      "events": "Eventos Vinculados"
+    },
+    "userStatus": {
+      "present": "Presente",
+      "confirmed": "Confirmado"
+    },
+    "rsvps": {
+      "title": "Confirmados",
+      "subtitle": "Gestión de RSVP y flujo de entrada en tiempo real.",
+      "confirmed_short": "Van",
+      "checkins_short": "Entraron",
+      "rate_short": "Tasa"
+    },
+    "modal": {
+      "manage_guests": "Gestión de entrada de invitados",
+      "description": "Descripción",
+      "confirmed_users": "Lista de Asistencia",
+      "no_users": "No hay usuarios confirmados en este evento."
+    },
+    "checkIns": "Check-ins"
+  },
+  "event": {
+    "view_on_map": "Ver en el mapa"
   }
 }

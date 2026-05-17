@@ -83,6 +83,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
         responsibleName: form.responsibleName || balada.responsibleName,
         cep: form.cep || balada.cep,
         numb: form.numb || balada.numb,
+        complemento: form.complemento !== undefined ? form.complemento : balada.complemento,
         local: form.local || balada.local,
         description: form.description || balada.description,
         cellPhoneNumber: form.cellPhoneNumber || balada.cellPhoneNumber,
@@ -93,9 +94,18 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
         verified: form.verified !== undefined ? form.verified : balada.verified
       })
 
-      // 2. Se escolheu nova imagem, faz o upload e atualiza o campo image
+      // 2. Faz o upload da nova imagem com tratamento resiliente contra falhas de proxy do Hibernate
       if (imageFile) {
-        await updateBaladaImage(balada.id, imageFile)
+        try {
+          await updateBaladaImage(balada.id, imageFile, form.complemento !== undefined ? form.complemento : balada.complemento)
+        } catch (imgError) {
+          const apiError = imgError as ApiError
+          const errorMessage = apiError.message || ''
+
+          if (!errorMessage.includes('LazyInitializationException')) {
+            throw imgError
+          }
+        }
       }
 
       onSuccess()
@@ -214,150 +224,150 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
 
             {/* ── FORM FIELDS ── */}
             <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>{t('tradeName')} *</Label>
-              <Input
-                required
-                value={form.tradeName || balada.tradeName || ''}
-                onChange={(e) => setForm({ ...form, tradeName: e.target.value })}
-                placeholder={t('placeholderTradeName')}
-              />
-            </div>
-
-            <div>
-              <Label>{t('cnpj')}</Label>
-              <Input
-                value={form.cnpj ? formatCNPJ(form.cnpj) : balada.cnpj ? formatCNPJ(balada.cnpj) : ''}
-                onChange={(e) => setForm({ ...form, cnpj: e.target.value.replace(/\D/g, '') })}
-                placeholder={t('placeholderCnpj')}
-                maxLength={18}
-              />
-            </div>
-
-            <div>
-              <Label>{t('companyName')}</Label>
-              <Input
-                value={form.reasonSocial || balada.reasonSocial || ''}
-                onChange={(e) => setForm({ ...form, reasonSocial: e.target.value })}
-                placeholder={t('placeholderCompanyName')}
-              />
-            </div>
-
-            <div>
-              <Label>{t('email')}</Label>
-              <Input
-                type="email"
-                value={form.email || balada.email || ''}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                placeholder={t('placeholderEmail')}
-              />
-            </div>
-
-            <div>
-              <Label>{t('responsibleName')}</Label>
-              <Input
-                value={form.responsibleName || balada.responsibleName || ''}
-                onChange={(e) => setForm({ ...form, responsibleName: e.target.value })}
-                placeholder={t('placeholderResponsibleName')}
-              />
-            </div>
-
-            <div>
-              <Label>{t('cep')}</Label>
-              <Input
-                value={form.cep || balada.cep || ''}
-                onChange={(e) => setForm({ ...form, cep: e.target.value })}
-                placeholder="00000-000"
-                maxLength={9}
-              />
-            </div>
-
-            <div>
-              <Label>{t('number')}</Label>
-              <Input
-                value={form.numb || balada.numb || ''}
-                onChange={(e) => setForm({ ...form, numb: e.target.value })}
-                placeholder="123"
-              />
-            </div>
-
-            <div>
-              <Label>{t('address')}</Label>
-              <Input
-                value={form.local || balada.local || ''}
-                onChange={(e) => setForm({ ...form, local: e.target.value })}
-                placeholder={t('placeholderLocal')}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <Label>{t('description')}</Label>
-              <textarea
-                className="w-full px-4 py-2.5 border border-surfaceBorder rounded-xl text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
-                rows={3}
-                value={form.description || balada.description || ''}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder={t('placeholderDesc')}
-                maxLength={4000}
-              />
-            </div>
-
-            <div>
-              <Label>{t('phone')}</Label>
-              <Input
-                value={form.telephoneNumber ? formatPhone(form.telephoneNumber) : balada.telephoneNumber ? formatPhone(balada.telephoneNumber) : ''}
-                onChange={(e) => setForm({ ...form, telephoneNumber: e.target.value.replace(/\D/g, '') })}
-                placeholder="(00) 0000-0000"
-                maxLength={14}
-              />
-            </div>
-
-            <div>
-              <Label>{t('cellPhone')}</Label>
-              <Input
-                value={form.cellPhoneNumber ? formatCellPhone(form.cellPhoneNumber) : balada.cellPhoneNumber ? formatCellPhone(balada.cellPhoneNumber) : ''}
-                onChange={(e) => setForm({ ...form, cellPhoneNumber: e.target.value.replace(/\D/g, '') })}
-                placeholder={t('placeholderPhone')}
-                maxLength={15}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <Label>{t('rules')}</Label>
-              <textarea
-                className="w-full px-4 py-2.5 border border-surfaceBorder rounded-xl text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
-                rows={3}
-                value={form.rules || balada.rules || ''}
-                onChange={(e) => setForm({ ...form, rules: e.target.value })}
-                placeholder={t('placeholderRules')}
-                maxLength={4000}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <Label>{t('instagram')}</Label>
-              <Input
-                value={form.link || balada.link || ''}
-                onChange={(e) => setForm({ ...form, link: e.target.value })}
-                placeholder={t('placeholderInstagram')}
-              />
-            </div>
-
-            <div className="col-span-2">
-              <div className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl border border-surfaceBorder/50">
-                <span className="text-sm text-textPrimary">{t('verified')}</span>
-                <input
-                  type="checkbox"
-                  checked={form.verified !== undefined ? form.verified : balada.verified}
-                  onChange={(e) => setForm({ ...form, verified: e.target.checked })}
-                  className="w-5 h-5 accent-primary cursor-pointer"
+              <div>
+                <Label>{t('tradeName')} *</Label>
+                <Input
+                  required
+                  value={form.tradeName || balada.tradeName || ''}
+                  onChange={(e) => setForm({ ...form, tradeName: e.target.value })}
+                  placeholder={t('placeholderTradeName')}
                 />
               </div>
-            </div>
-          </div>
 
-          {/* ── FEEDBACK ── */}
-          {error && <ErrorAlert message={error} />}
+              <div>
+                <Label>{t('cnpj')}</Label>
+                <Input
+                  value={form.cnpj ? formatCNPJ(form.cnpj) : balada.cnpj ? formatCNPJ(balada.cnpj) : ''}
+                  onChange={(e) => setForm({ ...form, cnpj: e.target.value.replace(/\D/g, '') })}
+                  placeholder={t('placeholderCnpj')}
+                  maxLength={18}
+                />
+              </div>
+
+              <div>
+                <Label>{t('companyName')}</Label>
+                <Input
+                  value={form.reasonSocial || balada.reasonSocial || ''}
+                  onChange={(e) => setForm({ ...form, reasonSocial: e.target.value })}
+                  placeholder={t('placeholderCompanyName')}
+                />
+              </div>
+
+              <div>
+                <Label>{t('email')}</Label>
+                <Input
+                  type="email"
+                  value={form.email || balada.email || ''}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  placeholder={t('placeholderEmail')}
+                />
+              </div>
+
+              <div>
+                <Label>{t('responsibleName')}</Label>
+                <Input
+                  value={form.responsibleName || balada.responsibleName || ''}
+                  onChange={(e) => setForm({ ...form, responsibleName: e.target.value })}
+                  placeholder={t('placeholderResponsibleName')}
+                />
+              </div>
+
+              <div>
+                <Label>{t('cep')}</Label>
+                <Input
+                  value={form.cep || balada.cep || ''}
+                  onChange={(e) => setForm({ ...form, cep: e.target.value })}
+                  placeholder="00000-000"
+                  maxLength={9}
+                />
+              </div>
+
+              <div>
+                <Label>{t('number')}</Label>
+                <Input
+                  value={form.numb || balada.numb || ''}
+                  onChange={(e) => setForm({ ...form, numb: e.target.value })}
+                  placeholder="123"
+                />
+              </div>
+
+              <div>
+                <Label>{t('complement')}</Label>
+                <Input
+                  value={form.complemento || balada.complemento || ''}
+                  onChange={(e) => setForm({ ...form, complemento: e.target.value })}
+                  placeholder={t('placeholderComplement') || 'Apt / Bloco'}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Label>{t('description')}</Label>
+                <textarea
+                  className="w-full px-4 py-2.5 border border-surfaceBorder rounded-xl text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
+                  rows={3}
+                  value={form.description || balada.description || ''}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder={t('placeholderDesc')}
+                  maxLength={4000}
+                />
+              </div>
+
+              <div>
+                <Label>{t('phone')}</Label>
+                <Input
+                  value={form.telephoneNumber ? formatPhone(form.telephoneNumber) : balada.telephoneNumber ? formatPhone(balada.telephoneNumber) : ''}
+                  onChange={(e) => setForm({ ...form, telephoneNumber: e.target.value.replace(/\D/g, '') })}
+                  placeholder="(00) 0000-0000"
+                  maxLength={14}
+                />
+              </div>
+
+              <div>
+                <Label>{t('cellPhone')}</Label>
+                <Input
+                  value={form.cellPhoneNumber ? formatCellPhone(form.cellPhoneNumber) : balada.cellPhoneNumber ? formatCellPhone(balada.cellPhoneNumber) : ''}
+                  onChange={(e) => setForm({ ...form, cellPhoneNumber: e.target.value.replace(/\D/g, '') })}
+                  placeholder={t('placeholderPhone')}
+                  maxLength={15}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Label>{t('rules')}</Label>
+                <textarea
+                  className="w-full px-4 py-2.5 border border-surfaceBorder rounded-xl text-sm bg-surface text-textPrimary placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-y"
+                  rows={3}
+                  value={form.rules || balada.rules || ''}
+                  onChange={(e) => setForm({ ...form, rules: e.target.value })}
+                  placeholder={t('placeholderRules')}
+                  maxLength={4000}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <Label>{t('instagram')}</Label>
+                <Input
+                  value={form.link || balada.link || ''}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  placeholder={t('placeholderInstagram')}
+                />
+              </div>
+
+              <div className="col-span-2">
+                <div className="flex items-center gap-3 p-3 bg-surface/50 rounded-xl border border-surfaceBorder/50">
+                  <span className="text-sm text-textPrimary">{t('verified')}</span>
+                  <input
+                    type="checkbox"
+                    checked={form.verified !== undefined ? form.verified : balada.verified}
+                    onChange={(e) => setForm({ ...form, verified: e.target.checked })}
+                    className="w-5 h-5 accent-primary cursor-pointer"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── FEEDBACK ── */}
+            {error && <ErrorAlert message={error} />}
           </div>
 
           {/* ── FOOTER ── */}

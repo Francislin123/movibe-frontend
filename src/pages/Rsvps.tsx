@@ -20,7 +20,7 @@ function UserStatusBadge({ isCheckedIn }: { isCheckedIn?: boolean }) {
         <div className={`w-2 h-2 rounded-full bg-white ${isCheckedIn ? 'animate-pulse' : ''}`} />
         {isCheckedIn && <div className="absolute inset-0 w-2 h-2 rounded-full bg-white/50 animate-ping" />}
       </div>
-      {isCheckedIn ? t('status.present', 'Presente') : t('status.confirmed', 'Confirmado')}
+      {isCheckedIn ? t('userStatus.present', 'Presente') : t('userStatus.confirmed', 'Confirmado')}
     </span>
   );
 }
@@ -77,13 +77,13 @@ function UserCard({ user, onCheckIn, onCancelCheckIn, isCheckedIn, isLoading }: 
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-500 border ${
+      className={`flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl transition-all duration-500 border ${
         isCheckedIn
           ? 'bg-emerald-500/5 border-emerald-500/20 shadow-[0_4px_20px_rgba(16,185,129,0.05)]'
           : 'bg-purple-500/5 border-purple-500/10'
       }`}
     >
-      <div className="shrink-0">
+      <div className="shrink-0 w-full sm:w-auto flex items-center gap-3">
         {user.image ? (
           <img src={user.image} alt="" className="w-11 h-11 rounded-xl object-cover ring-2 ring-purple-500/20" />
         ) : (
@@ -93,12 +93,12 @@ function UserCard({ user, onCheckIn, onCancelCheckIn, isCheckedIn, isLoading }: 
         )}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 w-full">
         <p className="text-sm font-bold text-white truncate">{user.displayName}</p>
         <p className="text-[10px] bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent uppercase font-semibold tracking-wider">{user.email}</p>
       </div>
 
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-start pt-2 sm:pt-0 border-t border-white/5 sm:border-none">
         <UserStatusBadge isCheckedIn={isCheckedIn} />
         <CheckInButton
           isCheckedIn={isCheckedIn}
@@ -256,9 +256,9 @@ export default function Rsvps() {
 
         {/* Modal de Detalhes do Evento Selecionado */}
         {selectedEvent && (
-          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 pl-64 animate-fadeIn">
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fadeIn">
             <div
-              className="max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-3xl"
+              className="max-w-4xl w-full max-h-[92vh] overflow-y-auto rounded-3xl"
               style={{
                 background: 'rgba(10, 10, 10, 0.95)',
                 backdropFilter: 'blur(20px)',
@@ -316,7 +316,7 @@ export default function Rsvps() {
                   </h3>
 
                   {selectedEvent.confirmedUsers && selectedEvent.confirmedUsers.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-3">
                       {selectedEvent.confirmedUsers.map((user) => (
                         <UserCard
                           key={user.id}

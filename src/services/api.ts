@@ -1,7 +1,9 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosResponse } from "axios";
 import type { 
+  AddressResponse,
   BaladaResponse,
+  CreateAddressRequest,
   CreateBaladaRequest,
   CreateEventRequest,
   CreateMoviberRequest,
@@ -71,9 +73,17 @@ export async function updateBalada(id: string, data: Partial<BaladaResponse>): P
   return res.data
 }
 
-export const updateBaladaImage = (id: string, file: File) => {
+export async function updateBaladaAddress(baladaId: string, addressId: string, data: CreateAddressRequest): Promise<AddressResponse> {
+  const res = await client.put(`/baladas/${baladaId}/addresses/${addressId}`, data)
+  return res.data
+}
+
+export const updateBaladaImage = (id: string, file: File, complemento?: string) => {
   const form = new FormData();
   form.append("file", file);
+  if (complemento !== undefined && complemento !== null) {
+    form.append("complemento", complemento);
+  }
   return unwrap<BaladaResponse>(
     client.patch(`/baladas/${id}/image`, form, {
       headers: { "Content-Type": "multipart/form-data" },

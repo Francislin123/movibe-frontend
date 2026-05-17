@@ -157,7 +157,7 @@ function EditButton({ onClick, label }: { onClick: () => void; label: string }) 
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-surfaceBorder hover:border-violet-500/30 text-textSecondary hover:text-violet-500 text-xs font-medium transition-all duration-150 w-full md:w-auto active:scale-95"
+      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-surfaceBorder hover:border-violet-500/30 text-textSecondary hover:text-violet-500 text-xs font-medium transition-all duration-150 w-full md:w-auto active:scale shadow-sm"
       title={label}
     >
       <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,13 +320,43 @@ export default function Baladas() {
   const set = (k: keyof CreateBaladaRequest) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value || undefined }))
 
+  const totalBaladas = baladas.length
+  const verifiedBaladas = baladas.filter(b => b.verified).length
+  const totalEvents = baladas.reduce((acc, b) => acc + (b.hostedEventIds?.length || 0), 0)
+
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 px-2 sm:px-4 lg:px-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-textPrimary tracking-tight">{t('nav.baladas')}</h1>
-          <p className="text-xs sm:text-sm text-textSecondary mt-0.5">{t('searchByBalada')}</p>
+        </div>
+      </div>
+
+      {/* Count Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 p-5">
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-textTertiary uppercase tracking-wider mb-1">{t('baladas.total', 'Total de Baladas')}</p>
+            <p className="text-3xl font-black text-primary">{totalBaladas}</p>
+          </div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-8 -mt-8" />
+        </div>
+
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 p-5">
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-textTertiary uppercase tracking-wider mb-1">{t('baladas.verified', 'Baladas Verificadas')}</p>
+            <p className="text-3xl font-black text-emerald-500">{verifiedBaladas}</p>
+          </div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -mr-8 -mt-8" />
+        </div>
+
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 border border-amber-500/20 p-5">
+          <div className="relative z-10">
+            <p className="text-xs font-bold text-textTertiary uppercase tracking-wider mb-1">{t('baladas.events', 'Eventos Vinculados')}</p>
+            <p className="text-3xl font-black text-amber-500">{totalEvents}</p>
+          </div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl -mr-8 -mt-8" />
         </div>
       </div>
 
@@ -416,7 +446,7 @@ export default function Baladas() {
                   />
                 </div>
                 <div>
-                  <Label>{t('email')}</Label>
+                  <Label>{t('email')} *</Label>
                   <InputIcon
                     id={`${formId}-email`}
                     icon={
@@ -428,10 +458,11 @@ export default function Baladas() {
                     value={form.email ?? ''}
                     onChange={set('email')}
                     placeholder={t('placeholderEmail')}
+                    required
                   />
                 </div>
                 <div>
-                  <Label>{t('cnpj')}</Label>
+                  <Label>{t('cnpj')} *</Label>
                   <Input
                     id={`${formId}-cnpj`}
                     value={formatCNPJ(form.cnpj)}
@@ -441,10 +472,11 @@ export default function Baladas() {
                     }}
                     placeholder={t('placeholderCnpj')}
                     maxLength={18}
+                    required
                   />
                 </div>
                 <div>
-                  <Label>{t('phone')}</Label>
+                  <Label>{t('phone')} *</Label>
                   <Input
                     id={`${formId}-phone`}
                     value={formatPhone(form.telephoneNumber)}
@@ -454,10 +486,11 @@ export default function Baladas() {
                     }}
                     placeholder="(11) 0000-0000"
                     maxLength={14}
+                    required
                   />
                 </div>
                 <div>
-                  <Label>{t('cellPhone')}</Label>
+                  <Label>{t('cellPhone')} *</Label>
                   <InputIcon
                     id={`${formId}-cellphone`}
                     icon={
@@ -472,18 +505,19 @@ export default function Baladas() {
                     }}
                     placeholder={t('placeholderPhone')}
                     maxLength={15}
+                    required
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <Label>{t('address')}</Label>
-                  <Input id={`${formId}-address`} value={form.local ?? ''} onChange={set('local')} placeholder={t('placeholderLocal')} />
+                  <Label>{t('address')} *</Label>
+                  <Input id={`${formId}-address`} value={form.local ?? ''} onChange={set('local')} placeholder={t('placeholderLocal')} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <Label>{t('description')}</Label>
-                  <Input id={`${formId}-desc`} value={form.description ?? ''} onChange={set('description')} placeholder={t('placeholderDesc')} />
+                  <Label>{t('description')} *</Label>
+                  <Input id={`${formId}-desc`} value={form.description ?? ''} onChange={set('description')} placeholder={t('placeholderDesc')} required />
                 </div>
                 <div className="sm:col-span-2">
-                  <Label>{t('instagram')}</Label>
+                  <Label>{t('instagram')} *</Label>
                   <InputIcon
                     id={`${formId}-instagram`}
                     icon={
@@ -547,11 +581,11 @@ export default function Baladas() {
         <SearchInput
           onSearch={handleSearch}
           loading={loading}
-          placeholder={t('searchByBalada')}
+          placeholder={t('search')}
         />
       </Card>
 
-      {/* Grid de Baladas - Alinhada na mesma proporção (Largura Total / space-y-4) */}
+      {/* Grid de Baladas */}
       <div className="space-y-4">
         {loading && (
           <div className="flex justify-center py-12">
@@ -571,10 +605,8 @@ export default function Baladas() {
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2), inset 0 0 0 1px rgba(254, 254, 254, 0.02)'
             }}
           >
-            {/* Grid Responsiva Interna: 1 coluna no mobile, 12 colunas no Navegador Desktop */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
-
-              {/* Bloco de Identificação (Avatar + Título) */}
+              {/* Bloco de Identificação */}
               <div className="md:col-span-4 flex flex-row items-start gap-3 sm:gap-4 min-w-0">
                 <EntityImage
                   image={b.image}
@@ -599,7 +631,7 @@ export default function Baladas() {
                 </div>
               </div>
 
-              {/* Bloco das Informações Gerais Dinâmicas (CNPJ, Email, Redes) */}
+              {/* Bloco das Informações Gerais Dinâmicas */}
               <div className="md:col-span-8 p-3 rounded-xl border border-surfaceBorder/60 bg-surface/40 w-full">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center">
                   <div className="flex flex-col gap-1 md:border-r border-surfaceBorder/30 md:pr-2">
@@ -622,7 +654,6 @@ export default function Baladas() {
               </div>
             </div>
 
-            {/* Descrição renderizada inteira sem o line-clamp */}
             {b.description && (
               <div className="mt-4 p-3 rounded-xl bg-primary/5 border-l-2 border-primary w-full">
                 <p className="text-xs font-semibold text-primary uppercase tracking-wider mb-1">{t('description')}</p>
@@ -630,7 +661,7 @@ export default function Baladas() {
               </div>
             )}
 
-            {/* Rodapé de Ações do Card */}
+            {/* Rodapé de Ações */}
             <div className="flex flex-wrap md:flex-row items-center justify-end mt-4 gap-2 pt-2 border-t border-surfaceBorder/40 w-full">
               <button
                 type="button"
@@ -675,13 +706,13 @@ export default function Baladas() {
               <div className="mt-4 border-t border-surfaceBorder/60 pt-3 space-y-3 w-full">
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] font-semibold text-textTertiary uppercase tracking-wider">
-                    {t('baladaEvents')}
+                    {t('baladaEvents', 'Eventos da Balada')}
                   </p>
                   <button
                     type="button"
                     onClick={() => refreshBaladaEvents(b.id)}
                     className="p-1 rounded-lg hover:bg-surfaceHover text-textTertiary transition"
-                    title={t('refreshList')}
+                    title={t('refreshList', 'Atualizar Lista')}
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -693,7 +724,7 @@ export default function Baladas() {
                   <SearchInput
                     onSearch={(query) => handleBaladaEventSearch(b.id, query)}
                     loading={false}
-                    placeholder="Filtrar eventos..."
+                    placeholder={t('filterEvents', 'Filtrar eventos...')}
                   />
                 </div>
 
@@ -715,7 +746,7 @@ export default function Baladas() {
                   if (searchQuery && searchQuery.trim() && filteredEvents.length === 0) {
                     return (
                       <p className="text-xs text-textTertiary text-center py-4">
-                        Nenhum resultado para "{searchQuery}"
+                        {t('noResultsFor', 'Nenhum resultado para')} "{searchQuery}"
                       </p>
                     )
                   }

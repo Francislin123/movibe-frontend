@@ -214,6 +214,32 @@
     },
     "confirmedUsers": "Confirmed Users",
     "eventConfirmedUsers": "Confirmed Users in Event",
-    "noConfirmedUsers": "No confirmed users for this event."
+    "noConfirmedUsers": "No confirmed users for this event.",
+    "baladas": {
+      "total": "Total Ballads",
+      "verified": "Verified Ballads",
+      "events": "Linked Events"
+    },
+    "userStatus": {
+      "present": "Present",
+      "confirmed": "Confirmed"
+    },
+    "rsvps": {
+      "title": "Confirmed",
+      "subtitle": "RSVP management and real-time entry flow.",
+      "confirmed_short": "Going",
+      "checkins_short": "Entered",
+      "rate_short": "Rate"
+    },
+    "modal": {
+      "manage_guests": "Guest entry management",
+      "description": "Description",
+      "confirmed_users": "Attendance List",
+      "no_users": "No confirmed users for this event."
+    },
+    "checkIns": "Check-ins"
+  },
+  "event": {
+    "view_on_map": "View on map"
   }
 }

@@ -109,7 +109,13 @@ export interface BaladaResponse {
   responsibleName: string | null;
   cep: string | null;
   numb: string | null;
+  complemento: string | null;
   local: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  bairro: string | null;
+  localidade: string | null;
+  uf: string | null;
   description: string | null;
   cellPhoneNumber: string | null;
   telephoneNumber: string | null;
@@ -124,6 +130,8 @@ export interface BaladaResponse {
 export interface EventResponse {
   id: string;
   hostBaladaId: string | null;
+  hostBalada?: BaladaResponse;
+  hostBaladaName?: string;
   type: EventType;
   title: string;
   category: string; // Adicionado para bater com a nova query de distribuição
@@ -274,6 +282,29 @@ export interface CreateRsvpRequest {
   userId: string;
   eventId: string;
   intention: RsvpIntention;
+}
+
+export interface CreateAddressRequest {
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento?: string;
+  bairro: string;
+  localidade: string;
+  uf: string;
+}
+
+export interface AddressResponse {
+  id: string;
+  baladaId: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string | null;
+  bairro: string;
+  localidade: string;
+  uf: string;
+  createdAt: string;
 }
 
 export interface ApiError {
