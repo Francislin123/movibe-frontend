@@ -55,18 +55,15 @@ export default function App() {
         {/* ── Sidebar ── */}
         <aside
           className={`
-            fixed top-0 left-0 h-full w-64 z-50
-            flex flex-col transition-transform duration-300 ease-in-out
+            fixed top-0 left-0 h-screen w-16 hover:w-64 z-50
+            flex flex-col transition-all duration-300 ease-in-out group overflow-hidden
             ${sideOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+            bg-zinc-950 border-r border-purple-900/30 text-zinc-400
+            shadow-[4px_0_24px_rgba(0,0,0,0.8)] hover:shadow-[8px_0_32px_rgba(147,51,234,0.15)]
           `}
-          style={{
-            background: 'linear-gradient(180deg, var(--color-backgroundSecondary) 0%, var(--color-background) 100%)',
-            borderRight: '1px solid var(--color-surfaceBorder)',
-            boxShadow: '4px 0 32px rgba(0,0,0,0.5)',
-          }}
         >
           {/* Logo Section */}
-          <div className="relative flex items-center gap-3 px-6 py-5 shrink-0">
+          <div className="relative flex items-center gap-3 px-4 py-5 shrink-0">
             <div className="relative shrink-0">
               <img
                 src="/logoMovibe.png"
@@ -75,7 +72,7 @@ export default function App() {
               />
               <div className="absolute inset-0 rounded-2xl bg-purple-600/30 blur-lg" />
             </div>
-            <p className="text-base font-bold text-textPrimary tracking-tight">Movibe</p>
+            <p className="text-base font-bold text-textPrimary tracking-tight opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">Movibe</p>
           </div>
 
           {/* Nav - Scrollable */}
@@ -86,15 +83,15 @@ export default function App() {
                 <button
                   key={n.id}
                   onClick={() => { setPage(n.id); setSideOpen(false); }}
-                  className="group relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+                  className="relative w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
                   style={isActive ? {
                     background: 'linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%)',
                     color: '#ffffff',
                     boxShadow: '0 4px 15px rgba(124,58,237,0.3)',
                   } : { color: 'var(--color-textSecondary)' }}
                 >
-                  <span className="text-lg">{n.emoji}</span>
-                  <span className="truncate">{t('nav.' + (n.label || n.id))}</span>
+                  <span className="text-lg shrink-0">{n.emoji}</span>
+                  <span className="truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">{t('nav.' + (n.label || n.id))}</span>
                   {isActive && <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />}
                 </button>
               );
@@ -102,7 +99,7 @@ export default function App() {
           </nav>
 
           {/* Footer - Static */}
-          <div className="p-4 border-t border-surfaceBorder bg-backgroundSecondary/50">
+          <div className="p-4 border-t border-purple-900/30 bg-zinc-950/50">
             <div className="space-y-2">
               <ThemeSelector />
               <LanguageSelector />
@@ -111,8 +108,7 @@ export default function App() {
         </aside>
 
         {/* ── Main Content Container ── */}
-        {/* Alterado de ml-64 para pl-64 e adicionado overflow-y-auto */}
-        <div className="flex-1 flex flex-col min-w-0 lg:pl-64 h-full relative">
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-16 h-full relative">
 
           {/* Topbar (mobile) */}
           <header className="lg:hidden flex items-center gap-4 bg-surface/80 backdrop-blur-md border-b border-surfaceBorder px-4 py-3 sticky top-0 z-30">

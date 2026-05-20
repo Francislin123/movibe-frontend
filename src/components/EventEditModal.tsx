@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { updateEvent, updateEventImage } from '../services/api'
-import { Label, Input, SubmitButton, ErrorAlert } from '../components/ui'
 import type { EventResponse, ApiError, EventType } from '../types'
 
 interface EventEditModalProps {
@@ -117,61 +116,66 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
-        className="bg-surface rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-surfaceBorder animate-in zoom-in-95 slide-in-from-bottom-4 duration-300"
+        className="w-full max-w-2xl max-h-[90vh] overflow-hidden rounded-3xl shadow-2xl"
         style={{
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(124, 58, 237, 0.1)'
+          background: 'linear-gradient(135deg, #0B0B0F 0%, #15151D 100%)',
+          border: '1px solid rgba(123, 47, 255, 0.2)',
+          boxShadow: '0 0 60px rgba(123, 47, 255, 0.3), inset 0 0 60px rgba(123, 47, 255, 0.05)'
         }}
       >
         {/* ── HEADER ── */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-surfaceBorder bg-gradient-to-r from-surface to-surface/95">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        <div className="relative px-8 py-6 border-b border-[#7B2FFF]/20">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#7B2FFF]/10 to-transparent" />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#7B2FFF] to-[#A855F7] flex items-center justify-center shadow-lg shadow-[#7B2FFF]/50">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">{t('editEntity', { entity: t('nav.events') })}</h2>
+                <p className="text-sm text-[#B3B3C3] mt-0.5">{t('updateInfo')}</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              disabled={saving}
+              className="w-10 h-10 rounded-xl bg-[#15151D] hover:bg-[#1F1F2D] text-[#B3B3C3] hover:text-white transition-all duration-200 disabled:opacity-50 flex items-center justify-center"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-textPrimary">{t('editEntity', { entity: t('nav.events') })}</h2>
-              <p className="text-xs text-textTertiary">{t('updateInfo')}</p>
-            </div>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            disabled={saving}
-            className="p-2 rounded-xl hover:bg-surfaceHover text-textSecondary hover:text-textPrimary transition-all duration-200 disabled:opacity-50"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
         </div>
 
         {/* ── BODY ── */}
-        <form onSubmit={handleSave} className="overflow-y-auto flex-1">
-          <div className="px-6 py-6 space-y-6">
+        <form onSubmit={handleSave} id="edit-event-form" className="overflow-y-auto max-h-[calc(90vh-180px)]">
+          <div className="px-8 py-6 space-y-6">
 
             {/* ── AVATAR SECTION ── */}
-            <div className="flex items-center gap-4 p-4 bg-surface/50 rounded-2xl border border-surfaceBorder/50">
+            <div className="flex items-center gap-4 p-4 bg-[#15151D]/50 rounded-2xl border border-[#7B2FFF]/20">
               <div className="relative shrink-0 group">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
                     alt={displayTitle}
-                    className="w-24 h-24 rounded-2xl object-cover ring-2 ring-primary shadow-lg transition-transform duration-300 group-hover:scale-105"
+                    className="w-24 h-24 rounded-2xl object-cover ring-2 ring-[#7B2FFF] shadow-lg transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg transition-transform duration-300 group-hover:scale-105">
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#7B2FFF] to-[#A855F7] flex items-center justify-center text-white text-3xl font-bold shadow-lg transition-transform duration-300 group-hover:scale-105">
                     {initials}
                   </div>
                 )}
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-primary hover:bg-primaryHover text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
+                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-[#7B2FFF] hover:bg-[#A855F7] text-white flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110"
                   title={t('changeImage')}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,16 +193,16 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-textPrimary truncate">{displayTitle}</p>
+                <p className="text-sm font-semibold text-white truncate">{displayTitle}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="mt-2 text-xs text-primary hover:text-primaryHover font-medium transition"
+                  className="mt-2 text-xs text-[#7B2FFF] hover:text-[#A855F7] font-medium transition"
                 >
                   {imageFile ? `✓ ${imageFile.name}` : t('clickToChangePhoto')}
                 </button>
                 {imageFile && (
-                  <p className="text-xs text-textTertiary mt-0.5">
+                  <p className="text-xs text-[#B3B3C3] mt-0.5">
                     {(imageFile.size / 1024).toFixed(0)} KB · {imageFile.type}
                   </p>
                 )}
@@ -208,12 +212,12 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
             {/* ── FORM FIELDS ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>{t('type')} *</Label>
+                <label className="block text-sm font-medium text-[#B3B3C3] mb-2">{t('type')} *</label>
                 <select
                   required
                   value={form.type || event.type || 'STANDARD'}
                   onChange={(e) => setForm({ ...form, type: e.target.value as EventType })}
-                  className="w-full mt-1 px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                  className="w-full px-4 py-3 rounded-xl bg-[#15151D] border border-[#7B2FFF]/20 text-white focus:outline-none focus:border-[#7B2FFF]"
                 >
                   <option value="STANDARD">{t('eventTypeStandard')}</option>
                   <option value="PREMIUM_BALLAD">{t('eventTypePremium')}</option>
@@ -223,11 +227,11 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div>
-                <Label>Categoria</Label>
+                <label className="block text-sm font-medium text-[#B3B3C3] mb-2">Categoria</label>
                 <select
                   value={form.category || event.category || 'Geral'}
                   onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full mt-1 px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                  className="w-full px-4 py-3 rounded-xl bg-[#15151D] border border-[#7B2FFF]/20 text-white focus:outline-none focus:border-[#7B2FFF]"
                 >
                   <option value="Geral">Geral</option>
                   <option value="Sertanejo">Sertanejo</option>
@@ -240,19 +244,21 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div>
-                <Label>{t('eventTitle')} *</Label>
-                <Input
+                <label className="block text-sm font-medium text-[#B3B3C3] mb-2">{t('eventTitle')} *</label>
+                <input
+                  type="text"
                   required
                   value={form.title || event.title || ''}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder={t('placeholderTitle')}
+                  className="w-full px-4 py-3 rounded-xl bg-[#15151D] border border-[#7B2FFF]/20 text-white focus:outline-none focus:border-[#7B2FFF]"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <Label>{t('description')}</Label>
+                <label className="block text-sm font-medium text-[#B3B3C3] mb-2">{t('description')}</label>
                 <textarea
-                  className="w-full mt-1 px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm placeholder-textTertiary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition resize-none"
+                  className="w-full px-4 py-3 rounded-xl bg-[#15151D] border border-[#7B2FFF]/20 text-white placeholder-[#B3B3C3]/50 focus:outline-none focus:border-[#7B2FFF] resize-none"
                   rows={3}
                   value={form.desc || event.desc || ''}
                   onChange={(e) => setForm({ ...form, desc: e.target.value })}
@@ -262,50 +268,59 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div>
-                <Label>{t('startDate')} *</Label>
-                <Input
+                <label className="block text-sm font-medium text-[#B3B3C3] mb-2">{t('startDate')} *</label>
+                <input
                   type="datetime-local"
                   required
                   step="60"
                   value={form.startsAt ? formatDateTimeLocal(form.startsAt) : formatDateTimeLocal(event.startsAt)}
                   onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-[#15151D] border border-[#7B2FFF]/20 text-white focus:outline-none focus:border-[#7B2FFF]"
                 />
               </div>
 
               <div>
-                <Label>{t('endDate')} *</Label>
-                <Input
+                <label className="block text-sm font-medium text-[#B3B3C3] mb-2">{t('endDate')} *</label>
+                <input
                   type="datetime-local"
                   required
                   step="60"
                   value={form.endsAt ? formatDateTimeLocal(form.endsAt) : formatDateTimeLocal(event.endsAt)}
                   onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl bg-[#15151D] border border-[#7B2FFF]/20 text-white focus:outline-none focus:border-[#7B2FFF]"
                 />
               </div>
             </div>
 
-            {error && <ErrorAlert message={error} />}
+            {error && <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{error}</div>}
             {success && (
-              <div className="text-xs text-center bg-success/10 border border-success/20 text-success rounded-xl px-4 py-3">
+              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
                 {t('eventUpdated')}
               </div>
             )}
 
             </div>
-
-          {/* ── FOOTER ── */}
-          <div className="px-6 py-4 border-t border-surfaceBorder bg-surface/30 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              className="px-4 py-2 text-sm font-medium text-textSecondary hover:text-textPrimary hover:bg-surfaceHover rounded-xl transition-all duration-200 disabled:opacity-50"
-            >
-              {t('cancel')}
-            </button>
-            <SubmitButton loading={saving}>{t('saveChanges')}</SubmitButton>
-          </div>
         </form>
+
+        {/* ── FOOTER ── */}
+        <div className="px-8 py-6 border-t border-[#7B2FFF]/20 bg-[#0B0B0F]/50 flex gap-4">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="flex-1 px-6 py-3 rounded-xl border border-[#7B2FFF]/30 text-[#B3B3C3] hover:text-white transition-all font-medium disabled:opacity-50"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            type="submit"
+            form="edit-event-form"
+            disabled={saving}
+            className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#7B2FFF] to-[#A855F7] text-white font-semibold shadow-lg hover:scale-[1.01] transition-all disabled:opacity-50"
+          >
+            {saving ? 'Salvando...' : t('saveChanges')}
+          </button>
+        </div>
       </div>
     </div>
   )

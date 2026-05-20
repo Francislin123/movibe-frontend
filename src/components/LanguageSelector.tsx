@@ -5,14 +5,14 @@ import { useTranslation } from 'react-i18next';
 
 type Lang = 'pt-BR' | 'en-US' | 'es-ES';
 
-const LANGS: { code: Lang; flag: string; labelKey: string }[] = [
-  { code: 'pt-BR', flag: '🇧🇷', labelKey: 'language.pt' },
-  { code: 'en-US', flag: '🇺🇸', labelKey: 'language.en' },
-  { code: 'es-ES', flag: '🇪🇸', labelKey: 'language.es' },
+const LANGS: { code: Lang; label: string }[] = [
+  { code: 'pt-BR', label: 'Português' },
+  { code: 'en-US', label: 'English' },
+  { code: 'es-ES', label: 'Español' },
 ];
 
 export function LanguageSelector() {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -34,62 +34,39 @@ export function LanguageSelector() {
     setIsOpen(false);
   };
 
-  const active = LANGS.find((l) => l.code === currentLang) ?? LANGS[0];
-
   return (
     <div className="relative" ref={panelRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="group flex items-center gap-2 px-3 py-2.5 rounded-xl border border-surfaceBorder bg-surface hover:bg-surfaceHover transition-all duration-200 w-full"
-        title={t('language.label')}
+        className="flex items-center gap-2 px-2 py-2 bg-zinc-900/60 border border-zinc-800/80 rounded-xl text-zinc-400 hover:text-purple-400 hover:border-purple-500/40 hover:bg-purple-500/5 transition-all shadow-md active:scale-95 w-full"
+        title="Language"
       >
-        <span className="text-base">{active.flag}</span>
-        <span className="text-sm font-semibold text-textSecondary group-hover:text-textPrimary transition-colors flex-1 text-left">
-          {t(active.labelKey)}
-        </span>
-        <svg
-          className={`w-4 h-4 text-textTertiary transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
         </svg>
+        <span className="text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+          {LANGS.find(l => l.code === currentLang)?.label || 'Language'}
+        </span>
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 bg-surface border border-surfaceBorder rounded-2xl shadow-premium-xl z-30 backdrop-blur-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <div className="p-2 space-y-1">
-            <p className="text-[10px] font-bold text-textTertiary uppercase tracking-widest px-2 mb-1">
-              {t('language.label')}
-            </p>
-            {LANGS.map((lang) => {
-              const isActive = lang.code === currentLang;
-              return (
-                <button
-                  key={lang.code}
-                  onClick={() => handleChange(lang.code)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 ${
-                    isActive
-                      ? 'bg-primary/10 border border-primary/30'
-                      : 'hover:bg-surfaceHover border border-transparent'
-                  }`}
-                >
-                  <span className="text-xl">{lang.flag}</span>
-                  <span className={`text-sm font-semibold flex-1 ${isActive ? 'text-primary' : 'text-textPrimary'}`}>
-                    {t(lang.labelKey)}
-                  </span>
-                  {isActive && (
-                    <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shrink-0">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        <div className="absolute right-0 bottom-full mb-2 w-32 bg-zinc-950 border border-zinc-800/80 rounded-xl p-1.5 shadow-2xl z-50">
+          {LANGS.map((lang) => {
+            const isActive = lang.code === currentLang;
+            return (
+              <button
+                key={lang.code}
+                onClick={() => handleChange(lang.code)}
+                className={`w-full text-left px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  isActive
+                    ? 'bg-purple-500/20 text-purple-400'
+                    : 'text-zinc-400 hover:bg-purple-500/10 hover:text-white'
+                }`}
+              >
+                {lang.label}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
