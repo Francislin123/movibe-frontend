@@ -236,8 +236,8 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
                 </svg>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white">Editar Balada</h2>
-                <p className="text-sm text-[#B3B3C3] mt-0.5">Atualize as informações da balada</p>
+                <h2 className="text-2xl font-bold text-white">Editar Estabelecimento</h2>
+                <p className="text-sm text-[#B3B3C3] mt-0.5">Atualize as informações do estabelecimento</p>
               </div>
             </div>
             <button
@@ -257,7 +257,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
           <div className="space-y-8">
             {/* Imagem (Mapeada com visualização circular compacta igual à do Usuário) */}
             <div>
-              <label className="block text-sm font-semibold text-white mb-3">Imagem da Balada</label>
+              <label className="block text-sm font-semibold text-white mb-3">Imagem do Estabelecimento</label>
               <AnimatePresence mode="wait">
                 {imagePreview ? (
                   <motion.div key="preview" className="relative group w-fit flex items-center">
@@ -347,7 +347,7 @@ export default function BaladaEditModal({ balada, onClose, onSuccess }: BaladaEd
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <div className="w-8 h-8 rounded-lg bg-[#7B2FFF]/20 flex items-center justify-center"><span className="text-[#7B2FFF]">2</span></div>
-                Endereço da Balada
+                Endereço do estabelecimento
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

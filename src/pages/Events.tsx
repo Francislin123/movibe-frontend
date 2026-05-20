@@ -353,6 +353,11 @@ export default function Events() {
                       <p className="font-bold text-textPrimary text-base sm:text-lg truncate">{e.title}</p>
                       <div className="flex flex-wrap gap-1.5 mt-1.5">
                         <EventTypeBadge type={e.type} />
+                        {(eventAny.category) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20">
+                            {eventAny.category.replace('_', ' ')}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

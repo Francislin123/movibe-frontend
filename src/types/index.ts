@@ -211,6 +211,7 @@ export interface CreateUserRequest {
   cep?: string;
   link?: string;
   birthDate?: string;
+  eventIds?: string[];
   address?: CreateAddressRequest;
 }
 

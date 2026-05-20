@@ -89,8 +89,7 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
       await updateEvent(event.id, {
         type: form.type || event.type,
         title: form.title || event.title,
-        cep: form.cep || event.cep,
-        numb: form.numb || event.numb,
+        category: form.category || event.category,
         desc: form.desc || event.desc,
         image: form.image || event.image,
         startsAt: form.startsAt || event.startsAt,
@@ -224,31 +223,29 @@ export default function EventEditModal({ event, onClose, onSuccess }: EventEditM
               </div>
 
               <div>
+                <Label>Categoria</Label>
+                <select
+                  value={form.category || event.category || 'Geral'}
+                  onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  className="w-full mt-1 px-4 py-2.5 bg-surface border border-surfaceBorder rounded-xl text-textPrimary text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                >
+                  <option value="Geral">Geral</option>
+                  <option value="Sertanejo">Sertanejo</option>
+                  <option value="Eletrônico">Eletrônico</option>
+                  <option value="Funk">Funk</option>
+                  <option value="Rock">Rock</option>
+                  <option value="Pagode">Pagode</option>
+                  <option value="HIP_HOP">Hip Hop</option>
+                </select>
+              </div>
+
+              <div>
                 <Label>{t('eventTitle')} *</Label>
                 <Input
                   required
                   value={form.title || event.title || ''}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder={t('placeholderTitle')}
-                />
-              </div>
-
-              <div>
-                <Label>{t('cep')}</Label>
-                <Input
-                  value={form.cep || event.cep || ''}
-                  onChange={(e) => setForm({ ...form, cep: e.target.value })}
-                  placeholder="00000-000"
-                  maxLength={9}
-                />
-              </div>
-
-              <div>
-                <Label>{t('number')}</Label>
-                <Input
-                  value={form.numb || event.numb || ''}
-                  onChange={(e) => setForm({ ...form, numb: e.target.value })}
-                  placeholder="123"
                 />
               </div>
 

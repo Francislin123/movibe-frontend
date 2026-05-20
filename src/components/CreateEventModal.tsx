@@ -27,7 +27,6 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
     type: EventType;
     title: string;
     category: string; // Adicionado
-    cep: string;
     desc: string;
     startsAt: string;
     endsAt: string
@@ -35,7 +34,6 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
     type: 'STANDARD',
     title: '',
     category: 'Geral', // Valor padrão inicial
-    cep: '',
     desc: '',
     startsAt: '',
     endsAt: ''
@@ -91,7 +89,6 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
         category: form.category, // Adicionado
         startsAt: toIso(form.startsAt),
         endsAt: toIso(form.endsAt),
-        ...(form.cep && { cep: form.cep }),
         ...(form.desc && { desc: form.desc }),
       }
       const created = await createEvent(payload)
@@ -107,7 +104,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
         detail: { baladaId: hostBaladaId, eventId: created.id } 
       }))
       
-      setTimeout(() => onSuccess(), 1500)
+      onSuccess()
     } catch (err) {
       setError((err as ApiError).message)
     } finally {
@@ -209,6 +206,7 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                   <option value="Funk">Funk</option>
                   <option value="Rock">Rock</option>
                   <option value="Pagode">Pagode</option>
+                  <option value="HIP_HOP">Hip Hop</option>
                 </select>
               </div>
 
@@ -247,11 +245,6 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
                   onChange={s('endsAt')}
                   className={form.endsAt && !isValidDateTimeLocal(form.endsAt) ? 'border-red-500' : ''}
                 />
-              </div>
-
-              <div className="col-span-2">
-                <Label>{t('cep')}</Label>
-                <Input value={form.cep} onChange={s('cep')} placeholder="00000-000" maxLength={9} />
               </div>
             </div>
 

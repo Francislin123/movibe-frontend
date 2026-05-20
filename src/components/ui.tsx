@@ -73,9 +73,9 @@ export function Field({ label, value }: { label: string; value: ReactNode }) {
 // ─── Badges ───────────────────────────────────────────────────────────────────
 
 const STATUS_COLOR: Record<UserStatus, string> = {
-  ACTIVE:    'bg-success-20 text-success border border-success-30',
-  INACTIVE:  'bg-warning-20 text-warning border border-warning-30',
-  SUSPENDED: 'bg-error-20 text-error border border-error-30',
+  ACTIVE:    'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.1)]',
+  INACTIVE:  'bg-zinc-800/80 border-zinc-700 text-zinc-400',
+  SUSPENDED: 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.1)]',
 }
 
 const STATUS_LABEL: Record<UserStatus, string> = {
@@ -230,11 +230,11 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   )
 }
 
-export function ReadOnlyField({ label, value }: { label: string; value: ReactNode }) {
+export function ReadOnlyField({ label, value, className }: { label: string; value: ReactNode; className?: string }) {
   return (
     <div>
       <span className="text-xs font-semibold text-textSecondary mb-1.5 uppercase tracking-wide block">{label}</span>
-      <div className="w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary transition">
+      <div className={`w-full border border-surfaceBorder rounded-xl px-4 py-2.5 text-sm bg-surface text-textPrimary focus:outline-none focus:ring-2 focus:ring-primary transition${className ? ` ${className}` : ''}`}>
         {value}
       </div>
     </div>

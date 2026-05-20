@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useTranslation } from 'react-i18next';
-import { getUsers, searchUsers, createUser, updateAvatar } from "../services/api";
+import { getUsers, searchUsers, createUser, updateAvatar, getEvents } from "../services/api";
 import {
   Card,
   EmptyState,
@@ -218,10 +218,10 @@ function UserRowStatusBadge({
   selected?: boolean;
 }) {
   const { t } = useTranslation();
-  const statusConfig: Record<string, { label: string }> = {
-    ACTIVE: { label: t('active') },
-    INACTIVE: { label: t('inactive') },
-    SUSPENDED: { label: t('suspended') },
+  const statusConfig: Record<string, { label: string; classes: string }> = {
+    ACTIVE: { label: t('active'), classes: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.1)]' },
+    INACTIVE: { label: t('inactive'), classes: 'bg-zinc-800/80 border-zinc-700 text-zinc-400' },
+    SUSPENDED: { label: t('suspended'), classes: 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.1)]' },
   };
 
   // fallback seguro
@@ -231,7 +231,7 @@ function UserRowStatusBadge({
 
   return (
     <span
-      className={`text-xs font-semibold ${selected ? "text-white" : "text-textSecondary"}`}
+      className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${selected ? "text-white" : config?.classes ?? "text-textSecondary"}`}
     >
       {config?.label ?? t('unknown')}
     </span>
@@ -264,7 +264,7 @@ function UserRow({
         <p
           className={`text-sm font-semibold truncate leading-tight ${selected ? "text-white" : "text-textPrimary hover:text-primary"}`}
         >
-          {user.displayName || "Usuário sem nome"}
+          {user.displayName || "Cliente sem nome"}
         </p>
         <p className={`text-xs truncate mt-0.5 ${selected ? "text-white font-medium" : "text-textTertiary hover:text-textPrimary"}`}>
           {user.email ?? user.cellPhoneNumber ?? "—"}
@@ -352,18 +352,34 @@ function UserDetail({
 
       {/* Campos padronizados com bordas roxas */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+        <ReadOnlyField label={t('email')} value={<EmailLink email={user.email} />} />
         <ReadOnlyField
           label={t('status')}
-          value={statusLabels[user.status as UserStatus] ?? t('unknown')}
+          value={
+            <span className={`px-2 py-0.5 rounded-full border text-xs font-semibold ${
+              user.status === 'ACTIVE' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.1)]' :
+              user.status === 'INACTIVE' ? 'bg-zinc-800/80 border-zinc-700 text-zinc-400' :
+              user.status === 'SUSPENDED' ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.1)]' :
+              'text-textSecondary'
+            }`}>
+              {statusLabels[user.status as UserStatus] ?? t('unknown')}
+            </span>
+          }
         />
-        <ReadOnlyField label={t('email')} value={<EmailLink email={user.email} />} />
-        <ReadOnlyField label={t('cep')} value={user.cep || "—"} />
         <ReadOnlyField label={t('cellPhone')} value={<WhatsAppLink phone={user.cellPhoneNumber} />} />
 
         {user.birthDate && (
-          <ReadOnlyField 
-            label={t('birthDate')} 
-            value={fmtBirthDate(user.birthDate)} 
+          <ReadOnlyField
+            label={t('birthDate')}
+            value={
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                </svg>
+                <span className="text-purple-400 font-bold">{fmtBirthDate(user.birthDate)}</span>
+              </div>
+            }
+            className="bg-gradient-to-r from-purple-950/40 via-zinc-900/50 to-zinc-950/20 border border-purple-500/20"
           />
         )}
 
@@ -415,7 +431,7 @@ function DetailPlaceholder() {
 
 // ─── Create form (colapsável no topo) ────────────────────────────────────────
 
-function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
+function CreateForm({ onCreated, events }: { onCreated: (u: UserResponse) => void; events: any[] }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<CreateUserRequest>({
@@ -425,6 +441,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
     birthDate: "",
     address: undefined,
   });
+  const [selectedEventIds, setSelectedEventIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -462,7 +479,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
     setSuccess(null);
     try {
       // 1. Cria o usuário
-      let created = await createUser(form);
+      let created = await createUser({ ...form, eventIds: selectedEventIds });
       
       // 2. Se escolheu imagem, faz o upload e captura o usuário atualizado
       if (imageFile) {
@@ -471,6 +488,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
       
       setSuccess(`${t('nav.users')} "${created.displayName}" ${t('created')}!`);
       setForm({ displayName: "", status: "ACTIVE", link: "", birthDate: "", address: undefined });
+      setSelectedEventIds([]);
       setImageFile(null);
       setImagePreview(null);
       onCreated(created);
@@ -483,6 +501,14 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
     } finally {
       setSaving(false);
     }
+  }
+
+  function handleToggleEvent(eventId: string) {
+    setSelectedEventIds(prev =>
+      prev.includes(eventId)
+        ? prev.filter(id => id !== eventId)
+        : [...prev, eventId]
+    );
   }
 
   return (
@@ -509,7 +535,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
             </svg>
           </span>
           <span className="text-sm font-semibold text-textPrimary">
-            {t('newEntity', { entity: t('nav.users') })}
+            {t('newEntity', { entity: t('nav.user') })}
           </span>
         </div>
         <svg
@@ -658,32 +684,6 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                 />
               </div>
               <div>
-                <Label>{t('cep')}</Label>
-                <Input
-                  value={form.cep ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      cep: e.target.value || undefined,
-                    }))
-                  }
-                  placeholder="00000-000"
-                />
-              </div>
-              <div>
-                <Label>{t('complement')}</Label>
-                <Input
-                  value={form.address?.complemento ?? ""}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      address: f.address ? { ...f.address, complemento: e.target.value } : { cep: '', logradouro: '', numero: '', complemento: e.target.value, bairro: '', localidade: '', uf: '' }
-                    }))
-                  }
-                  placeholder={t('placeholderComplement') || 'Apt / Bloco'}
-                />
-              </div>
-              <div>
                 <Label>{t('birthDate')}</Label>
                 <Input
                   type="date"
@@ -696,9 +696,41 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                   }
                 />
               </div>
-              <div>
-                <SubmitButton loading={saving}>{t('createEntity', { entity: t('nav.users') })}</SubmitButton>
-              </div>
+            </div>
+
+            {/* Event selection (optional) */}
+            <div className="mt-4">
+              <Label>Eventos (Opcional)</Label>
+              {events.length === 0 ? (
+                <p className="text-xs text-zinc-500 italic mt-1">
+                  Nenhum evento disponível.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[160px] overflow-y-auto p-2 mt-2 bg-zinc-950/40 border border-zinc-800/80 rounded-xl">
+                  {events.map((evt) => {
+                    const isChecked = selectedEventIds.includes(evt.id);
+                    return (
+                      <div
+                        key={evt.id}
+                        onClick={() => handleToggleEvent(evt.id)}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-xl border text-xs cursor-pointer transition-all duration-150 ${
+                          isChecked
+                            ? "bg-purple-500/10 border-purple-500 text-white font-semibold shadow-md"
+                            : "bg-zinc-900/40 border-zinc-800/60 text-zinc-400 hover:border-zinc-700"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          readOnly
+                          className="accent-purple-500 pointer-events-none"
+                        />
+                        <span className="truncate">{evt.name || evt.title}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="mt-4">
@@ -726,6 +758,10 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                 ✓ {success}
               </div>
             )}
+
+            <div className="mt-4">
+              <SubmitButton loading={saving}>Criar Cliente</SubmitButton>
+            </div>
           </form>
         </div>
       )}
@@ -821,6 +857,7 @@ function SearchInput({
 export default function Users() {
   const { t } = useTranslation();
   const [users, setUsers] = useState<UserResponse[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<UserResponse | null>(null);
@@ -829,19 +866,19 @@ export default function Users() {
   function load(query?: string) {
     setLoading(true);
     
-    const promise = query && query.trim() 
-      ? searchUsers(query.trim()) 
-      : getUsers();
-    
-    promise
-      .then((list) => {
-        setUsers(list);
+    Promise.all([
+      query && query.trim() ? searchUsers(query.trim()) : getUsers(),
+      getEvents()
+    ])
+      .then(([usersList, eventsList]) => {
+        setUsers(usersList);
+        setEvents(eventsList);
         // Mantém o usuário selecionado atualizado após reload
         setSelected(
           (prev) =>
             prev
-              ? (list.find((u) => u.id === prev.id) ?? null) // mantém selecionado após reload
-              : (list[0] ?? null), // seleciona o primeiro na carga inicial
+              ? (usersList.find((u) => u.id === prev.id) ?? null) // mantém selecionado após reload
+              : (usersList[0] ?? null), // seleciona o primeiro na carga inicial
         );
       })
       .catch((e: ApiError) => setError(e.message))
@@ -884,7 +921,7 @@ export default function Users() {
       </div>
 
       {/* ── Create form (primeiro, antes da pesquisa) ── */}
-      <CreateForm onCreated={handleCreated} />
+      <CreateForm onCreated={handleCreated} events={events} />
 
       {/* ── Search input (depois do create form) ── */}
       <Card className="p-4">

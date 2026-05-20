@@ -95,13 +95,16 @@ export const updateBaladaImage = (id: string, file: File, complemento?: string) 
 
 export const getEvents = () => unwrap<EventResponse[]>(client.get("/events"));
 
+// ADICIONADO CIRURGICAMENTE: Nova chamada para obter apenas os eventos ativos e futuros do Owner
+export const getEventsActive = () => unwrap<EventResponse[]>(client.get("/events/active"));
+
 export const getEventsByBalada = async (baladaId: string): Promise<EventResponse[]> => {
   const events = await getEvents()
   const filtered = events.filter(e => e.hostBaladaId === baladaId)
   return filtered.filter((ev, idx, self) => idx === self.findIndex(e => e.id === ev.id))
 };
 
-export const searchEvents = (query?: string) => 
+export const searchEvents = (query?: string) =>
   unwrap<EventResponse[]>(client.get("/events/search", { params: { q: query } }));
 
 export const createEvent = (body: CreateEventRequest) =>
@@ -136,7 +139,7 @@ export async function updateEvent(id: string, data: Partial<EventResponse>): Pro
 export const getMovibers = () =>
   unwrap<MoviberResponse[]>(client.get("/movibers"));
 
-export const searchMovibers = (query?: string) => 
+export const searchMovibers = (query?: string) =>
   unwrap<MoviberResponse[]>(client.get("/movibers/search", { params: { q: query } }));
 
 export const createMoviber = (body: CreateMoviberRequest) =>
@@ -170,7 +173,7 @@ export const getAvailableUsersForMoviber = () =>
 export const getUsersByBalada = (baladaId: string) =>
   unwrap<UserResponse[]>(client.get(`/users/by-balada/${baladaId}`));
 
-export const searchUsers = (query?: string) => 
+export const searchUsers = (query?: string) =>
   unwrap<UserResponse[]>(client.get("/users/search", { params: { q: query } }));
 
 export const createUser = (body: CreateUserRequest) =>
@@ -206,17 +209,17 @@ export const getEventUsers = async (eventId: string): Promise<EventUserResponse[
   // Buscar todos os eventos para encontrar o evento específico e obter os userIds
   const events = await getEvents();
   const event = events.find(e => e.id === eventId);
-  
+
   if (!event || !event.userIds || event.userIds.length === 0) {
     return [];
   }
-  
+
   // Buscar todos os usuários (poderia ser otimizado com cache no futuro)
   const allUsers = await getUsers();
-  
+
   // Filtrar usuários que estão confirmados no evento
   const confirmedUsers = allUsers.filter(user => event.userIds.includes(user.id));
-  
+
   // Criar EventUserResponse para cada usuário confirmado
   const eventUsers: EventUserResponse[] = confirmedUsers.map((user) => ({
     id: `${eventId}-user-${user.id}`,
@@ -225,7 +228,7 @@ export const getEventUsers = async (eventId: string): Promise<EventUserResponse[
     confirmedAt: new Date().toISOString(), // Data atual como placeholder
     user: user
   }));
-  
+
   // Retornar usuários ordenados alfabeticamente
   return eventUsers.sort((a, b) => a.user.displayName.localeCompare(b.user.displayName));
 };

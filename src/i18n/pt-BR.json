@@ -51,7 +51,7 @@
     "healthStatus": "Status do sistema",
     "dashboard": {
       "metrics": {
-        "baladas": "Baladas",
+        "baladas": "Estabelecimentos",
         "events": "Eventos",
         "movibers": "Movibers",
         "users": "Usuários",
@@ -71,7 +71,7 @@
     },
     "maxSize": "Máx. 5MB",
     "clickToAddPhoto": "Clique para adicionar foto",
-    "clickToChangePhoto": "Clique para trocar a foto de perfil",
+    "clickToChangePhoto": "Clique para trocar a foto",
     "photoAdded": "Foto adicionada",
     "dropImageHere": "Solte a imagem aqui",
     "supportedFormats": "JPG, PNG",
@@ -172,7 +172,7 @@
     "selectUser": "Selecione um usuário...",
     "linkedUser": "Usuário vinculado",
     "createMoviber": "Criar Moviber",
-    "createBalada": "Criar Balada",
+    "createBalada": "Criar Estabelecimento",
     "cancelar": "Cancelar",
     "salvarAlteracoes": "Salvar alterações",
     "excluirMovibe": "Excluir Movibe?",
@@ -195,7 +195,7 @@
     "eventTypeNetwork": "Network",
     "eventTypeOpen": "Open",
     "eventPhoto": "Foto do Evento",
-    "balada": "Balada",
+    "balada": "Estabelecimento",
     "placeholderTitle": "Ex: Pool Party SP",
     "datesRequired": "Datas de início e fim são obrigatórias",
     "invalidDateTimeFormat": "Formato de data/hora inválido",
@@ -205,18 +205,19 @@
     "changesSaved": "Alterações salvas com sucesso!",
     "nav": {
       "dashboard": "Dashboard",
-      "users": "Usuários",
+      "users": "Clientes",
+      "user": "Cliente",
       "movibers": "Movibers",
-      "baladas": "Baladas",
+      "baladas": "Estabelecimentos",
       "events": "Eventos",
       "rsvps": "RSVPs",
       "usersEvents": "Pessoas Eventos"
     },
     "stats": {
-      "baladas": "Baladas",
+      "baladas": "Estabelecimentos",
       "events": "Eventos",
       "movibers": "Movibers",
-      "users": "Usuários",
+      "users": "Clientes",
       "rsvps": "RSVPs"
     },
     "theme": {
@@ -236,8 +237,8 @@
     "eventConfirmedUsers": "Usuários Confirmados no Evento",
     "noConfirmedUsers": "Nenhum usuário confirmado neste evento.",
     "baladas": {
-      "total": "Total de Baladas",
-      "verified": "Baladas Verificadas",
+      "total": "Total de Estabelecimentos",
+      "verified": "Estabelecimentos Verificados",
       "events": "Eventos Vinculados"
     },
     "userStatus": {

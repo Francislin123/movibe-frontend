@@ -64,11 +64,11 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
         email:           form.email           || undefined,
         cellPhoneNumber: form.cellPhoneNumber  || undefined,
         telephoneNumber: form.telephoneNumber  || undefined,
-        cep:             form.cep              || undefined,
-        complemento:     form.complemento      || undefined,
         description:     form.description      || undefined,
         link:            form.link             || undefined,
         image:           form.image            || undefined,
+        cep:             undefined,
+        complemento:     undefined,
       })
 
       // 2. Se escolheu nova foto, faz o upload e atualiza o campo image
@@ -107,7 +107,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-surfaceBorder">
-          <h2 className="text-base font-bold text-textPrimary">{t('editEntity', { entity: t('nav.users') })}</h2>
+          <h2 className="text-base font-bold text-textPrimary">{t('editEntity', { entity: t('nav.user') })}</h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg hover:bg-surfaceHover text-textSecondary hover:text-textPrimary transition"
@@ -211,23 +211,6 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               <div>
                 <Label>{t('phone')}</Label>
                 <Input value={form.telephoneNumber} onChange={f('telephoneNumber')} placeholder="(11) 3000-0000" />
-              </div>
-
-              <div>
-                <Label>{t('cep')}</Label>
-                <Input value={form.cep} onChange={f('cep')} placeholder="00000-000" />
-              </div>
-
-              <div>
-                <Label>{t('complement')}</Label>
-                <Input
-                  value={form.address?.complemento || user.complemento || ''}
-                  onChange={(e) => setForm(prev => ({
-                    ...prev,
-                    address: prev.address ? { ...prev.address, complemento: e.target.value } : { cep: '', logradouro: '', numero: '', complemento: e.target.value, bairro: '', localidade: '', uf: '' }
-                  }))}
-                  placeholder={t('placeholderComplement') || 'Apt / Bloco'}
-                />
               </div>
 
               <div>

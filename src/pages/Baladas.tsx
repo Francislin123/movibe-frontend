@@ -326,10 +326,10 @@ export default function Baladas() {
             </div>
             <div className="text-left">
               <span className="text-base font-bold text-textPrimary block">
-                {t('newEntity', { entity: t('nav.baladas') })}
+                Novo estabelecimento
               </span>
               <span className="text-xs text-textTertiary mt-0.5 block">
-                Cadastre uma nova balada com formulário premium
+                Cadastre um novo estabelecimento com formulário premium
               </span>
             </div>
           </div>
