@@ -24,56 +24,15 @@ function EditButton({ onClick, label }: { onClick: () => void; label: string }) 
   )
 }
 
-function fmtDate(value: string) {
-  if (!value) return ''
-  const [datePart, timePart] = value.split('T')
+function formatPremiumDate(dateString: string): { date: string; time: string } {
+  if (!dateString) return { date: '', time: '' }
+  const [datePart, timePart] = dateString.split('T')
   const [year, month, day] = datePart.split('-')
   const [hour, minute] = timePart.split(':')
-  return `${day}/${month}/${year} ${hour}:${minute}`
-}
-
-function getGoogleMapsUrl(balada: any): string {
-  if (!balada) return '#'
-  
-  // Try to use structured address fields first
-  const logradouro = balada.logradouro || balada.local || ''
-  const numero = balada.numero || balada.numb || ''
-  const bairro = balada.bairro || ''
-  const localidade = balada.localidade || balada.city || ''
-  const uf = balada.uf || balada.state || ''
-  
-  // Build address string
-  const addressParts = []
-  if (logradouro) addressParts.push(logradouro)
-  if (numero) addressParts.push(numero)
-  if (bairro) addressParts.push(bairro)
-  if (localidade) addressParts.push(localidade)
-  if (uf) addressParts.push(uf)
-  
-  const address = addressParts.join(', ')
-  
-  if (!address) return '#'
-  
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
-}
-
-function formatBaladaLocation(balada: any): string {
-  if (!balada) return ''
-  
-  // Try to use structured address fields first
-  const localidade = balada.localidade || balada.city || ''
-  const uf = balada.uf || balada.state || ''
-  
-  if (localidade && uf) {
-    return `${localidade} - ${uf}`
+  return {
+    date: `${day}/${month}/${year}`,
+    time: `${hour}:${minute}`
   }
-  
-  // Fallback to old local field
-  if (balada.local) {
-    return balada.local
-  }
-  
-  return ''
 }
 
 export default function Events() {
@@ -89,7 +48,6 @@ export default function Events() {
   const [checkInStatusCache, setCheckInStatusCache] = useState<Record<string, Record<string, { isCheckedIn: boolean; loading: boolean }>>>({})
   const [statsCache, setStatsCache] = useState<Record<string, { totalCheckIns: number; loading: boolean }>>({})
 
-  // Calcula o total de usuários ÚNICOS combinando todos os eventos sem repetições
   const totalGlobalUsers = Object.values(eventUsersCache).reduce((uniqueIds, curr) => {
     if (curr?.users) {
       curr.users.forEach(eu => {
@@ -114,7 +72,6 @@ export default function Events() {
     load()
   }, [])
 
-  // useEffect para buscar a contagem total de usuários em segundo plano assim que a lista de eventos carregar
   useEffect(() => {
     if (events.length === 0) return
 
@@ -368,6 +325,9 @@ export default function Events() {
             const cachedUsersCount = eventUsersCache[e.id]?.users?.length;
             const usersCountString = cachedUsersCount !== undefined ? `${cachedUsersCount}` : '0';
 
+            const startDate = formatPremiumDate(e.startsAt);
+            const endDate = formatPremiumDate(e.endsAt);
+
             return (
               <Card
                 key={e.id}
@@ -397,60 +357,64 @@ export default function Events() {
                     </div>
                   </div>
 
-                  {/* Bloco das Informações Gerais */}
-                  <div className="md:col-span-8 p-3 rounded-xl border border-surfaceBorder/60 bg-surface/40 w-full">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center">
-                      <div className="flex flex-col gap-0.5 md:border-r border-surfaceBorder/30 md:pr-2">
-                        <span className="text-[11px] font-medium text-textTertiary uppercase tracking-wider">{t('startsAt')}</span>
-                        <span className="text-xs font-semibold text-textPrimary truncate">{fmtDate(e.startsAt)}</span>
+                  {/* Bloco das Informações Gerais Premium */}
+                  <div className="md:col-span-8 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+
+                      {/* Starts At Box */}
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#7B2FFF]/10 to-[#A855F7]/5 border border-[#7B2FFF]/20 p-3">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-[#7B2FFF]/5 rounded-full blur-xl -mr-4 -mt-4" />
+                        <div className="relative z-10 flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-[#7B2FFF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-[10px] font-semibold text-[#B3B3C3] uppercase tracking-wider">{t('startsAt')}</span>
+                        </div>
+                        <div className="relative z-10">
+                          <p className="text-sm font-bold text-white">{startDate.time}</p>
+                          <p className="text-[11px] text-[#B3B3C3]">{startDate.date}</p>
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-0.5 md:border-r border-surfaceBorder/30 md:pr-2">
-                        <span className="text-[11px] font-medium text-textTertiary uppercase tracking-wider">{t('endsAt')}</span>
-                        <span className="text-xs font-semibold text-textPrimary truncate">{fmtDate(e.endsAt)}</span>
+
+                      {/* Ends At Box */}
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#A855F7]/10 to-[#7B2FFF]/5 border border-[#A855F7]/20 p-3">
+                        <div className="absolute top-0 right-0 w-16 h-16 bg-[#A855F7]/5 rounded-full blur-xl -mr-4 -mt-4" />
+                        <div className="relative z-10 flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-[#A855F7]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-[10px] font-semibold text-[#B3B3C3] uppercase tracking-wider">{t('endsAt')}</span>
+                        </div>
+                        <div className="relative z-10">
+                          <p className="text-sm font-bold text-white">{endDate.time}</p>
+                          <p className="text-[11px] text-[#B3B3C3]">{endDate.date}</p>
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-0.5 md:border-r border-surfaceBorder/30 md:pr-2">
-                        <span className="text-[11px] font-medium text-textTertiary uppercase tracking-wider">{t('cep')}</span>
-                        <span className="text-xs font-mono text-textSecondary truncate">{eventAny.cep || '—'}</span>
-                      </div>
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[11px] font-medium text-textTertiary uppercase tracking-wider">{t('balada')}</span>
-                        {eventAny.hostBalada ? (
-                          <>
-                            <a
-                              href={getGoogleMapsUrl(eventAny.hostBalada)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-xs font-semibold text-primary truncate hover:text-purple-300 transition-all duration-300 cursor-pointer flex items-center gap-1"
-                              title={`${eventAny.hostBalada.tradeName} • ${formatBaladaLocation(eventAny.hostBalada)} - ${t('event.view_on_map')}`}
-                            >
-                              <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              <span className="truncate">{eventAny.hostBalada.tradeName}</span>
-                            </a>
-                            {formatBaladaLocation(eventAny.hostBalada) && (
-                              <a
-                                href={getGoogleMapsUrl(eventAny.hostBalada)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-[10px] text-purple-400 hover:text-purple-300 transition-all duration-300 cursor-pointer truncate flex items-center gap-1"
-                                title={`${formatBaladaLocation(eventAny.hostBalada)} - ${t('event.view_on_map')}`}
-                              >
-                                <svg className="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                                <span className="truncate">{formatBaladaLocation(eventAny.hostBalada)}</span>
-                              </a>
-                            )}
-                          </>
+
+                      {/* Location Box (Clicável com redirecionamento para o Google Maps) */}
+                      <div className="relative overflow-hidden rounded-xl bg-[#0B0B0F]/40 border border-[#7B2FFF]/15 p-3 flex flex-col justify-between h-full">
+                        <div className="flex items-center gap-2 mb-1">
+                          <svg className="w-4 h-4 text-[#7B2FFF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span className="text-[10px] font-semibold text-[#7B2FFF] uppercase tracking-wider">{t('Localização')}</span>
+                        </div>
+                        {eventAny.location ? (
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventAny.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-[#B3B3C3] truncate hover:text-purple-400 cursor-pointer transition-colors duration-200 underline decoration-[#7B2FFF]/30 underline-offset-4"
+                            title="Clique para abrir no Google Maps"
+                          >
+                            {eventAny.location}
+                          </a>
                         ) : (
-                          <span className="text-xs font-semibold text-primary truncate">
-                            {eventAny.hostBaladaName || '—'}
-                          </span>
+                          <p className="text-xs font-bold text-[#B3B3C3]">—</p>
                         )}
                       </div>
+
                     </div>
                   </div>
                 </div>
@@ -463,7 +427,7 @@ export default function Events() {
                   </div>
                 )}
 
-                {/* Endereço */}
+                {/* Endereço Secundário */}
                 {(eventAny.local || eventAny.formattedAddress) && (
                   <div className="mt-2 p-3 rounded-xl bg-surfaceHover/40 border-l-2 border-textTertiary w-full">
                     <p className="text-xs font-semibold text-textTertiary uppercase tracking-wider mb-1">{t('address')}</p>
@@ -473,8 +437,6 @@ export default function Events() {
 
                 {/* Rodapé de Ações do Card */}
                 <div className="flex flex-wrap md:flex-row items-center justify-end mt-4 gap-2 pt-2 border-t border-surfaceBorder/40 w-full">
-
-                  {/* Botão atualizado para exibir "Lista" */}
                   <button
                     type="button"
                     onClick={() => toggleEventUsers(e.id)}

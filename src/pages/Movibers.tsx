@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from 'react-i18next';
-import { getMovibers, searchMovibers, createMoviber, updateMoviberImage, getUsers } from "../services/api";
+import { getMovibers, searchMovibers, createMoviber, updateMoviberImage, getUsersByBalada, getAvailableUsersForMoviber } from "../services/api";
 import {
   Card,
   EmptyState,
@@ -387,7 +387,11 @@ function DetailPlaceholder() {
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function Movibers() {
+interface MovibersProps {
+  baladaId?: string;
+}
+
+export default function Movibers({ baladaId }: MovibersProps) {
   const { t } = useTranslation();
   const [movibers, setMovibers] = useState<MoviberResponse[]>([]);
   const [users, setUsers] = useState<UserResponse[]>([]);
@@ -431,7 +435,11 @@ export default function Movibers() {
       ? searchMovibers(query.trim())
       : getMovibers();
 
-    Promise.all([movibersPromise, getUsers()])
+    const usersPromise = baladaId
+      ? getUsersByBalada(baladaId)
+      : getAvailableUsersForMoviber();
+
+    Promise.all([movibersPromise, usersPromise])
       .then(([rawMovibers, u]) => {
         // Normaliza a resposta da API: corrige casos em que a URL de upload
         // foi gravada no campo `email` em vez de `image`.

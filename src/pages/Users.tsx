@@ -423,6 +423,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
     status: "ACTIVE",
     link: "",
     birthDate: "",
+    address: undefined,
   });
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -469,7 +470,7 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
       }
       
       setSuccess(`${t('nav.users')} "${created.displayName}" ${t('created')}!`);
-      setForm({ displayName: "", status: "ACTIVE", link: "", birthDate: "" });
+      setForm({ displayName: "", status: "ACTIVE", link: "", birthDate: "", address: undefined });
       setImageFile(null);
       setImagePreview(null);
       onCreated(created);
@@ -654,6 +655,32 @@ function CreateForm({ onCreated }: { onCreated: (u: UserResponse) => void }) {
                     }))
                   }
                   placeholder={t('placeholderInstagram')}
+                />
+              </div>
+              <div>
+                <Label>{t('cep')}</Label>
+                <Input
+                  value={form.cep ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      cep: e.target.value || undefined,
+                    }))
+                  }
+                  placeholder="00000-000"
+                />
+              </div>
+              <div>
+                <Label>{t('complement')}</Label>
+                <Input
+                  value={form.address?.complemento ?? ""}
+                  onChange={(e) =>
+                    setForm((f) => ({
+                      ...f,
+                      address: f.address ? { ...f.address, complemento: e.target.value } : { cep: '', logradouro: '', numero: '', complemento: e.target.value, bairro: '', localidade: '', uf: '' }
+                    }))
+                  }
+                  placeholder={t('placeholderComplement') || 'Apt / Bloco'}
                 />
               </div>
               <div>

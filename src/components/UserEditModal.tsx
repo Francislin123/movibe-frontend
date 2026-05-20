@@ -20,6 +20,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
     cellPhoneNumber:user.cellPhoneNumber ?? '',
     telephoneNumber:user.telephoneNumber ?? '',
     cep:            user.cep            ?? '',
+    complemento:    user.complemento    ?? '',
     description:    user.description    ?? '',
     link:           user.link           ?? '',
     image:          user.image          ?? '',
@@ -64,6 +65,7 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
         cellPhoneNumber: form.cellPhoneNumber  || undefined,
         telephoneNumber: form.telephoneNumber  || undefined,
         cep:             form.cep              || undefined,
+        complemento:     form.complemento      || undefined,
         description:     form.description      || undefined,
         link:            form.link             || undefined,
         image:           form.image            || undefined,
@@ -214,6 +216,18 @@ export default function UserEditModal({ user, onClose, onSaved }: Props) {
               <div>
                 <Label>{t('cep')}</Label>
                 <Input value={form.cep} onChange={f('cep')} placeholder="00000-000" />
+              </div>
+
+              <div>
+                <Label>{t('complement')}</Label>
+                <Input
+                  value={form.address?.complemento || user.complemento || ''}
+                  onChange={(e) => setForm(prev => ({
+                    ...prev,
+                    address: prev.address ? { ...prev.address, complemento: e.target.value } : { cep: '', logradouro: '', numero: '', complemento: e.target.value, bairro: '', localidade: '', uf: '' }
+                  }))}
+                  placeholder={t('placeholderComplement') || 'Apt / Bloco'}
+                />
               </div>
 
               <div>

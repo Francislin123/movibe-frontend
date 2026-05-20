@@ -1,0 +1,11 @@
+node_modules/
+target/
+build/
+.gradle/
+.idea/
+.git/
+*.jar
+*.war
+dist/
+.next/
+out/

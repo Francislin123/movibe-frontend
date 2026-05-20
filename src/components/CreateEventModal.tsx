@@ -101,6 +101,12 @@ export default function CreateEventModal({ hostBaladaId, hostBaladaName, onClose
       }
 
       setSuccess(t('eventCreated', { title: created.title }))
+      
+      // Dispatch custom event for surgical event count update
+      window.dispatchEvent(new CustomEvent('event-created', { 
+        detail: { baladaId: hostBaladaId, eventId: created.id } 
+      }))
+      
       setTimeout(() => onSuccess(), 1500)
     } catch (err) {
       setError((err as ApiError).message)

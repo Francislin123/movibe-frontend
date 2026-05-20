@@ -125,6 +125,7 @@ export interface BaladaResponse {
   verified: boolean;
   hostedEventIds: string[];
   userIds: string[];
+  addressResponse?: AddressResponse;
 }
 
 export interface EventResponse {
@@ -143,6 +144,7 @@ export interface EventResponse {
   endsAt: string;
   userIds: string[];
   moviberIds: string[];
+  location?: string;
 }
 
 // ... Restante dos DTOs de Moviber, User e Request permanecem iguais ...
@@ -170,6 +172,7 @@ export interface UserResponse {
   email: string | null;
   responsibleName: string | null;
   cep: string | null;
+  complemento: string | null;
   description: string | null;
   cellPhoneNumber: string | null;
   telephoneNumber: string | null;
@@ -208,6 +211,7 @@ export interface CreateUserRequest {
   cep?: string;
   link?: string;
   birthDate?: string;
+  address?: CreateAddressRequest;
 }
 
 export interface UpdateUserRequest {
@@ -218,6 +222,7 @@ export interface UpdateUserRequest {
   email?: string;
   responsibleName?: string;
   cep?: string;
+  complemento?: string;
   description?: string;
   cellPhoneNumber?: string;
   telephoneNumber?: string;
@@ -225,6 +230,7 @@ export interface UpdateUserRequest {
   image?: string;
   link?: string;
   birthDate?: string;
+  address?: CreateAddressRequest;
 }
 
 export interface CreateMoviberRequest {
@@ -255,15 +261,20 @@ export interface UpdateMoviberRequest {
 }
 
 export interface CreateBaladaRequest {
-  ownerUserId?: string;
   tradeName: string;
-  cnpj?: string;
-  email?: string;
-  description?: string;
-  cellPhoneNumber?: string;
-  telephoneNumber?: string;
-  local?: string;
-  link?: string;
+  cnpj: string;
+  reasonSocial: string;
+  email: string;
+  responsibleName: string;
+  cep: string;
+  numb: string;
+  local?: string; // Opcional - preenchido automaticamente pelo backend via ViaCEP
+  description: string;
+  cellPhoneNumber: string;
+  telephoneNumber: string;
+  rules?: string;
+  link: string;
+  address: CreateAddressRequest;
 }
 
 export interface CreateEventRequest {
@@ -286,12 +297,8 @@ export interface CreateRsvpRequest {
 
 export interface CreateAddressRequest {
   cep: string;
-  logradouro: string;
   numero: string;
-  complemento?: string;
-  bairro: string;
-  localidade: string;
-  uf: string;
+  complemento: string;
 }
 
 export interface AddressResponse {

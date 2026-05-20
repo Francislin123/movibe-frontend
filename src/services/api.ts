@@ -164,6 +164,12 @@ export const deleteMoviber = (id: string) =>
 
 export const getUsers = () => unwrap<UserResponse[]>(client.get("/users"));
 
+export const getAvailableUsersForMoviber = () =>
+  unwrap<UserResponse[]>(client.get("/users/available-as-moviber"));
+
+export const getUsersByBalada = (baladaId: string) =>
+  unwrap<UserResponse[]>(client.get(`/users/by-balada/${baladaId}`));
+
 export const searchUsers = (query?: string) => 
   unwrap<UserResponse[]>(client.get("/users/search", { params: { q: query } }));
 
